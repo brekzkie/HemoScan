@@ -1,0 +1,219 @@
+Number,Hgb,Gender,Age,Note,Country,image_path,Unnamed: 5,Unnamed: 6,Unnamed: 7,Unnamed: 8,file_exists
+1,12.2,M,29,,India,India_1.png,,,,,True
+2,8.0,F,36,,India,India_2.png,,,,,True
+3,10.7,F,30,,India,India_3.png,,,,,True
+4,8.3,F,39,,India,India_4.png,,,,,True
+5,7.8,F,29,,India,India_5.png,,,,,True
+6,11.8,F,55,,India,India_6.png,,,,,True
+7,9.2,F,27,,India,India_7.png,,,,,True
+8,13.0,M,32,,India,India_8.png,,,,,True
+9,11.5,M,32,,India,India_9.png,,,,,True
+10,11.3,F,35,,India,India_10.png,,,,,True
+11,13.2,M,38,,India,India_11.png,,,,,True
+12,10.6,M,75,,India,India_12.png,,,,,True
+13,10.6,F,71,,India,India_13.png,,,,,True
+14,9.1,F,29,,India,India_14.png,,,,,True
+15,10.9,F,30,,India,India_15.png,,,,,True
+16,8.9,F,37,,India,India_16.png,,,,,True
+17,11.5,M,57,,India,India_17.png,,,,,True
+18,10.1,M,32,,India,India_18.png,,,,,True
+19,12.6,M,21,,India,India_19.png,,,,,True
+20,11.9,M,21,,India,India_20.png,,,,,True
+21,14.8,M,21,,India,India_21.png,,,,,True
+22,10.7,M,21,,India,India_22.png,,,,,True
+23,9.8,F,21,,India,India_23.png,,,,,True
+24,13.4,F,23,,India,India_24.png,,,,,True
+25,9.2,F,30,,India,India_25.png,,,,,True
+26,7.6,F,39,,India,India_26.png,,,,,True
+27,12.2,F,48,,India,India_27.png,,,,,True
+28,11.2,M,20,,India,India_28.png,,,,,True
+29,12.4,M,21,,India,India_29.png,,,,,True
+30,11.2,M,21,,India,India_30.png,,,,,True
+31,12.6,M,20,,India,India_31.png,,,,,True
+32,11.3,M,21,,India,India_32.png,,,,,True
+33,11.3,M,21,,India,India_33.png,,,,,True
+34,11.4,F,20,,India,India_34.png,,,,,True
+35,8.7,F,21,,India,India_35.png,,,,,True
+36,9.7,F,20,,India,India_36.png,,,,,True
+37,12.7,M,22,,India,India_37.png,,,,,True
+38,11.1,M,21,,India,India_38.png,,,,,True
+39,15.2,M,32,,India,India_39.png,,,,,True
+40,8.2,F,29,,India,India_40.png,,,,,True
+41,11.7,M,50,,India,India_41.png,,,,,True
+42,8.1,F,19,,India,India_42.png,,,,,True
+43,12.6,M,32,,India,India_43.png,,,,,True
+44,9.6,M,62,,India,India_44.png,,,,,True
+45,10.0,F,27,,India,India_45.png,,,,,True
+46,10.0,F,49,,India,India_46.png,,,,,True
+47,14.3,M,29,,India,India_47.png,,,,,True
+48,13.6,M,39,,India,India_48.png,,,,,True
+49,9.7,F,41,,India,India_49.png,,,,,True
+50,8.1,F,33,,India,India_50.png,,,,,True
+51,12.9,M,34,,India,India_51.png,,,,,True
+52,13.4,M,42,,India,India_52.png,,,,,True
+53,13.8,M,32,,India,India_53.png,,,,,True
+54,15.5,M,45,,India,India_54.png,,,,,True
+55,10.5,M,65,,India,India_55.png,,,,,True
+56,8.8,F,55,,India,India_56.png,,,,,True
+57,10.3,F,33,,India,India_57.png,,,,,True
+58,12.5,M,36,,India,India_58.png,,,,,True
+59,10.6,F,31,,India,India_59.png,,,,,True
+60,12.2,M,33,,India,India_60.png,,,,,True
+61,10.8,F,32,,India,India_61.png,,,,,True
+62,11.3,M,27,,India,India_62.png,,,,,True
+63,9.9,F,27,,India,India_63.png,,,,,True
+64,9.2,F,62,,India,India_64.png,,,,,True
+65,13.8,M,32,,India,India_65.png,,,,,True
+66,13.8,M,21,,India,India_66.png,,,,,True
+67,14.0,M,20,,India,India_67.png,,,,,True
+68,12.0,M,21,,India,India_68.png,,,,,True
+69,17.1,M,21,,India,India_69.png,,,,,True
+70,10.6,F,21,,India,India_70.png,,,,,True
+71,15.0,M,20,,India,India_71.png,,,,,True
+72,12.7,M,39,,India,India_72.png,,,,,True
+73,12.3,F,50,,India,India_73.png,,,,,True
+74,9.1,F,37,,India,India_74.png,,,,,True
+75,12.2,F,37,,India,India_75.png,,,,,True
+76,9.3,F,30,,India,India_76.png,,,,,True
+77,8.5,F,48,,India,India_77.png,,,,,True
+78,10.3,F,40,,India,India_78.png,,,,,True
+79,16.4,M,29,,India,India_79.png,,,,,True
+80,10.5,F,50,,India,India_80.png,,,,,True
+81,11.0,F,25,,India,India_81.png,,,,,True
+82,10.9,F,47,,India,India_82.png,,,,,True
+83,13.7,M,21,,India,India_83.png,,,,,True
+84,9.5,F,32,,India,India_84.png,,,,,True
+85,14.5,M,63,,India,India_85.png,,,,,True
+86,8.5,F,30,,India,India_86.png,,,,,True
+87,13.7,M,24,,India,India_87.png,,,,,True
+88,14.2,M,23,,India,India_88.png,,,,,True
+89,13.7,M,23,,India,India_89.png,,,,,True
+90,11.9,M,23,,India,India_90.png,,,,,True
+91,13.4,M,21,,India,India_91.png,,,,,True
+92,13.7,F,55,,India,India_92.png,,,,,True
+93,12.7,M,29,,India,India_93.png,,,,,True
+94,11.1,F,53,,India,India_94.png,,,,,True
+95,12.4,F,32,,India,India_95.png,,,,,True
+1,9.3,F,82,Forniceal conjunctiva not visible,Italy,Italy_1.png,,,,,True
+2,10.2,F,77,da segmentare la forniceale ,Italy,Italy_2.png,,,,Segmentato da Michele,True
+3,10.7,F,52,da segmentare la forniceale ,Italy,Italy_3.png,,,,Segmentato da Michele,True
+4,11.7,F,73,da segmentare la forniceale ,Italy,Italy_4.png,,,,Segmentato da Michele,True
+5,11.6,F,74,da segmentare la forniceale ,Italy,Italy_5.png,,,,Segmentato da Michele,True
+6,15,F,77,da segmentare la forniceale ,Italy,Italy_6.png,,,,Segmentato da Michele,True
+7,12,F,72,da segmentare la forniceale ,Italy,Italy_7.png,,,,Segmentato da Michele,True
+8,14.3,M,84,da segmentare la forniceale ,Italy,Italy_8.png,,,,Segmentato da Michele,True
+9,9.8,M,61,da segmentare la forniceale ,Italy,Italy_9.png,,,,Segmentato da Michele,True
+10,12.2,M,70,da segmentare la forniceale ,Italy,Italy_10.png,,,,Segmentato da Michele,True
+11,12,F,81,da segmentare la forniceale ,Italy,Italy_11.png,,,,Segmentato da Michele,True
+12,10,F,88,da segmentare la forniceale ,Italy,Italy_12.png,,,,Segmentato da Michele,True
+13,10.5,F,82,da segmentare la forniceale ,Italy,Italy_13.png,,,,Segmentato da Michele,True
+14,11.4,F,65,da segmentare la forniceale ,Italy,Italy_14.png,,,,Segmentato da Michele,True
+15,13.3,F,86,da segmentare la forniceale ,Italy,Italy_15.png,,,,Segmentato da Michele,True
+16,13.5,M,55,da segmentare la forniceale ,Italy,Italy_16.png,,,,Segmentato da Michele,True
+17,11,M,78,da segmentare la forniceale ,Italy,Italy_17.png,,,,Segmentato da Michele,True
+18,11.75,F,77,da segmentare la forniceale ,Italy,Italy_18.png,,,,Segmentato da Michele,True
+19,11,F,65,da segmentare la forniceale ,Italy,Italy_19.png,,,,Segmentato da Michele,True
+20,13.62,M,30,da segmentare la forniceale ,Italy,Italy_20.png,,,,Segmentato da Michele,True
+21,9.82,F,46,da segmentare la forniceale ,Italy,Italy_21.png,,,,Segmentato da Michele,True
+22,12.6,M,65,da segmentare la forniceale ,Italy,Italy_22.png,,,,Segmentato da Michele,True
+23,9.6,M,57,da segmentare la forniceale ,Italy,Italy_23.png,,,,Segmentato da Michele,True
+24,9.2,M,56,da segmentare la forniceale ,Italy,Italy_24.png,,,,Segmentato da Michele,True
+25,8.7,M,53,da segmentare la forniceale ,Italy,Italy_25.png,,,,Segmentato da Michele,True
+26,8.6,M,60,da segmentare la forniceale ,Italy,Italy_26.png,,,,Segmentato da Michele,True
+27,9.35,M,59,da segmentare la forniceale ,Italy,Italy_27.png,,,,Segmentato da Michele,True
+28,15.45,M,22,da segmentare la forniceale ,Italy,Italy_28.png,,,,Segmentato da Michele,True
+29,10.93,F,76,da segmentare la forniceale ,Italy,Italy_29.png,,,,Segmentato da Michele,True
+30,12.68,F,70,da segmentare la forniceale ,Italy,Italy_30.png,,,,Segmentato da Michele,True
+31,14.77,F,54,da segmentare la forniceale ,Italy,Italy_31.png,,,,Segmentato da Michele,True
+32,14.1,F,40,,Italy,Italy_32.png,,,,,True
+33,13.9,F,34,,Italy,Italy_33.png,,,,,True
+34,14.1,M,53,,Italy,Italy_34.png,,,,,True
+35,15.7,M,36,Forniceal conjunctiva not visible,Italy,Italy_35.png,,,,,True
+36,13.9,M,51,,Italy,Italy_36.png,,,,,True
+37,13.6,F,51,,Italy,Italy_37.png,,,,,True
+38,15.4,M,56,,Italy,Italy_38.png,,,,,True
+39,13.7,M,47,,Italy,Italy_39.png,,,,,True
+40,13.3,F,46,,Italy,Italy_40.png,,,,,True
+41,13.9,F,36,,Italy,Italy_41.png,,,,,True
+42,15,M,49,,Italy,Italy_42.png,,,,,True
+43,14.7,M,59,,Italy,Italy_43.png,,,,,True
+44,15.4,M,26,,Italy,Italy_44.png,,,,,True
+45,14.9,M,50,,Italy,Italy_45.png,,,,,True
+46,14.1,M,58,,Italy,Italy_46.png,,,,,True
+47,14.1,M,20,,Italy,Italy_47.png,,,,,True
+48,16.1,M,29,,Italy,Italy_48.png,,,,,True
+49,15.1,M,33,,Italy,Italy_49.png,,,,,True
+50,15.3,F,40,,Italy,Italy_50.png,,,,,True
+51,13.9,M,54,,Italy,Italy_51.png,,,,,True
+52,14.4,F,24,,Italy,Italy_52.png,,,,,True
+53,"15,1",M,43,,Italy,Italy_53.png,,,,,True
+54,15.3,M,42,Forniceal conjunctiva not visible,Italy,Italy_54.png,,,,,True
+55,16.9,M,34,,Italy,Italy_55.png,,,,,True
+56,13.2,F,24,,Italy,Italy_56.png,,,,,True
+57,13.5,F,51,,Italy,Italy_57.png,,,,,True
+58,15,M,56,Forniceal conjunctiva not visible,Italy,Italy_58.png,,,,,True
+59,"15,5",M,62,,Italy,Italy_59.png,,,,,True
+60,"15,6",M,41,,Italy,Italy_60.png,,,,,True
+61,15,M,50,,Italy,Italy_61.png,,,,,True
+62,13,F,40,,Italy,Italy_62.png,,,,,True
+63,14.9,M,54,,Italy,Italy_63.png,,,,,True
+64,17.4,M,52,,Italy,Italy_64.png,,,,,True
+65,13.8,M,63,,Italy,Italy_65.png,,,,,True
+66,15.9,M,55,,Italy,Italy_66.png,,,,,True
+67,16.2,M,48,,Italy,Italy_67.png,,,,,True
+68,15.5,M,55,,Italy,Italy_68.png,,,,,True
+69,"14,1",M,51,,Italy,Italy_69.png,,,,,True
+70,"15,3",M,37,,Italy,Italy_70.png,,,,,True
+71,"13,7",M,20,,Italy,Italy_71.png,,,,,True
+72,"15,4",M,48,,Italy,Italy_72.png,,,,,True
+73,"12,3",F,56,,Italy,Italy_73.png,,,,,True
+74,"12,9",M,48,,Italy,Italy_74.png,,,,,True
+75,"13,5",F,48,Forniceal conjunctiva not visible,Italy,Italy_75.png,,,,,True
+76,"13,7",F,48,,Italy,Italy_76.png,,,,,True
+77,"16,8",M,60,,Italy,Italy_77.png,,,,,True
+78,"15,4",M,25,,Italy,Italy_78.png,,,,,True
+79,"14,7",M,31,,Italy,Italy_79.png,,,,,True
+80,"13,5",F,40,,Italy,Italy_80.png,,,,,True
+81,15.6,M,64,,Italy,Italy_81.png,,,,,True
+82,14.8,M,24,,Italy,Italy_82.png,,,,,True
+83,14.8,M,25,,Italy,Italy_83.png,,,,,True
+84,14.9,M,46,,Italy,Italy_84.png,,,,,True
+85,12.4,F,42,,Italy,Italy_85.png,,,,,True
+86,16.9,M,48,,Italy,Italy_86.png,,,,,True
+87,15.6,M,51,,Italy,Italy_87.png,,,,,True
+88,13.7,F,38,,Italy,Italy_88.png,,,,,True
+89,15.4,M,44,,Italy,Italy_89.png,,, ,,True
+90,13,F,21,,Italy,Italy_90.png,,,,,True
+91,15.4,M,41,,Italy,Italy_91.png,,,,,True
+92,12.3,F,52,,Italy,Italy_92.png,,,,,True
+93,_,M,53,Hgb not available,Italy,Italy_93.png,,ELIMINATO,,,True
+94,15.2,M,34,,Italy,Italy_94.png,,,,,True
+95,13.8,M,31,,Italy,Italy_95.png,,,,,True
+96,14.7,M,45,,Italy,Italy_96.png,,,,,True
+97,15.1,M,49,,Italy,Italy_97.png,,,,,True
+98,15.2,M,54,,Italy,Italy_98.png,,,,,True
+99,15.5,M,44,,Italy,Italy_99.png,,,,,True
+100,14.5,F,63,,Italy,Italy_100.png,,,,,True
+101,14,M,28,,Italy,Italy_101.png,,,,,True
+102,15.8,M,40,,Italy,Italy_102.png,,,,,True
+103,14.1,M,59,,Italy,Italy_103.png,,,,,True
+104,16.5,M,45,,Italy,Italy_104.png,,,,,True
+105,7,F,26,,Italy,Italy_105.png,,,,,True
+106,15.5,M,68,,Italy,Italy_106.png,,,,,True
+107,13,F,40,,Italy,Italy_107.png,,,,,True
+108,13.5,M,21,,Italy,Italy_108.png,,,,,True
+109,15.7,M,59,Forniceal conjunctiva not visible,Italy,Italy_109.png,,,,,True
+110,15.8,M,45,,Italy,Italy_110.png,,,,,True
+111,13.1,M,37,,Italy,Italy_111.png,,,,,True
+112,15.4,M,57,,Italy,Italy_112.png,,,,,True
+113,14,M,58,,Italy,Italy_113.png,,,,,True
+114,15.1,M,39,,Italy,Italy_114.png,,,,,True
+115,15.4,M,43,,Italy,Italy_115.png,,,,,True
+116,13.7,M,28,,Italy,Italy_116.png,,,,,True
+117,15.1,M,47,,Italy,Italy_117.png,,,,,True
+118,15.2,M,48,,Italy,Italy_118.png,,,,,True
+119,16.7,M,41,,Italy,Italy_119.png,,,,,True
+120,15.4,M,22,,Italy,Italy_120.png,,,,,True
+121,12.8,F,40,,Italy,Italy_121.png,,,,,True
+122,15.7,M,33,,Italy,Italy_122.png,,,,,True
+123,15.6,M,48,,Italy,Italy_123.png,,,,,True

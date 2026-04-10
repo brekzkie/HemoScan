@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HEMOSCAN - AI Anemia Detection</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#952528",
+                        "primary-container": "#b63e3e",
+                        "secondary": "#48626e",
+                        "surface-container-low": "#f2f4f5",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#191c1d",
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-morphism { background: rgba(225, 227, 228, 0.4); backdrop-filter: blur(20px); }
+        .primary-gradient { background: linear-gradient(135deg, #952528 0%, #b63e3e 100%); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-[#f8fafb] text-[#191c1d] font-body">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const API_URL = "http://localhost:8000";
+
+        function App() {
+            const [page, setPage] = useState('home'); // home, identity, scan, result, history
+            const [patient, setPatient] = useState({ name: '', age: '', gender: 'M', symptoms: [] });
+            const [capturedImage, setCapturedImage] = useState(null);
+            const [prediction, setPrediction] = useState(null);
+            const [history, setHistory] = useState([]);
+            const [loading, setLoading] = useState(false);
+
+            useEffect(() => {
+                fetchHistory();
+            }, []);
+
+            const fetchHistory = async () => {
+                try {
+                    const res = await fetch(`${API_URL}/api/history`);
+                    const data = await res.json();
+                    setHistory(data);
+                } catch (e) { console.error("History fetch failed", e); }
+            };
+
+            const handleNewScan = () => {
+                setPatient({ name: '', age: '', gender: 'M', symptoms: [] });
+                setCapturedImage(null);
+                setPrediction(null);
+                setPage('identity');
+            };
+
+            const startScan = () => setPage('scan');
+
+            const processPrediction = async (blob) => {
+                setLoading(true);
+                const formData = new FormData();
+                formData.append('file', blob, 'scan.png');
+                formData.append('name', patient.name);
+                formData.append('age', patient.age);
+                formData.append('gender', patient.gender);
+                formData.append('symptoms', patient.symptoms.join(','));
+
+                try {
+                    const res = await fetch(`${API_URL}/api/predict`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await res.json();
+                    setPrediction(data);
+                    setPage('result');
+                    fetchHistory();
+                } catch (e) {
+                    alert("Prediction failed. Make sure server.py is running.");
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const Navbar = () => (
+                <nav className="w-full top-0 sticky bg-[#f8fafb] z-50 border-b border-[#f2f4f5]">
+                    <div className="flex justify-between items-center px-8 py-4 max-w-full mx-auto">
+                        <div className="font-manrope text-xl font-extrabold tracking-widest text-primary cursor-pointer" onClick={() => setPage('home')}>HEMOSCAN</div>
+                        <div className="hidden md:flex items-center space-x-12">
+                            <button className={`font-manrope font-bold tracking-tight ${page === 'home' ? 'text-primary border-b-2 border-primary pb-1' : 'text-secondary'}`} onClick={() => setPage('home')}>HOME</button>
+                            <button className={`font-manrope font-bold tracking-tight ${page === 'history' ? 'text-primary border-b-2 border-primary pb-1' : 'text-secondary'}`} onClick={() => setPage('history')}>HISTORY</button>
+                            <button className="font-manrope font-bold tracking-tight text-secondary">HELP</button>
+                        </div>
+                        <button onClick={handleNewScan} className="primary-gradient text-white font-bold px-6 py-2.5 rounded-full text-sm scale-95 hover:scale-100 transition-all">New Scan</button>
+                    </div>
+                </nav>
+            );
+
+            const Footer = () => (
+                <footer className="w-full py-12 px-8 bg-[#f2f4f5] mt-auto">
+                    <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+                        <div>
+                            <div className="font-manrope font-semibold text-primary">HEMOSCAN CLINICAL LABS</div>
+                            <div className="text-xs text-secondary">© 2024 Hemoscan Clinical Labs. All rights reserved.</div>
+                        </div>
+                        <div className="flex flex-wrap gap-x-8 gap-y-2 text-xs text-secondary">
+                            <a href="#">Privacy Policy</a>
+                            <a href="#">Terms of Service</a>
+                            <a href="#">Clinical Guidelines</a>
+                            <a href="#">HIPAA Compliance</a>
+                        </div>
+                    </div>
+                </footer>
+            );
+
+            const HomeScreen = () => (
+                <main className="flex-grow flex flex-col items-center justify-center p-8 relative overflow-hidden">
+                    <div className="absolute top-1/4 -left-20 w-96 h-96 bg-primary opacity-5 rounded-full blur-3xl"></div>
+                    <div className="text-center z-10 max-w-2xl mb-16">
+                        <h1 className="font-headline text-on-surface font-extrabold tracking-tight text-5xl mb-6">Ready for your clinical<br/>blood assessment?</h1>
+                        <p className="text-secondary text-lg mb-12">Ensure your testing environment is well-lit and your test strip is ready for high-precision optical scanning.</p>
+                        <div className="flex flex-col items-center group">
+                            <button onClick={handleNewScan} className="primary-gradient w-32 h-32 rounded-full flex items-center justify-center text-white shadow-2xl transition-transform hover:scale-105 active:scale-95 mb-4">
+                                <span className="material-symbols-outlined text-5xl">add_circle</span>
+                            </button>
+                            <span className="font-headline font-bold text-primary tracking-widest text-sm uppercase">NEW SCAN</span>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl">
+                        <div className="bg-white p-8 rounded-xl border-l-4 border-primary shadow-sm">
+                            <h3 className="font-headline text-xl font-bold mb-3">What is Hemoscan?</h3>
+                            <p className="text-sm text-secondary">AI-powered medical web application for non-invasive anemia detection via conjunctiva analysis.</p>
+                        </div>
+                        <div className="glass-morphism p-8 rounded-xl border-l-4 border-secondary shadow-sm">
+                            <h3 className="font-headline text-xl font-bold mb-3">Technical Infrastructure</h3>
+                            <p className="text-sm text-secondary">Leverages MobileNetV2 architecture with quantized INT8/FP16 models for edge-optimized inference.</p>
+                        </div>
+                    </div>
+                </main>
+            );
+
+            const IdentityScreen = () => {
+                const symptomsList = ["Pucat", "Lemas", "Mata Berkunang", "Sesak Napas"];
+                return (
+                    <main className="flex-grow p-8 max-w-4xl mx-auto w-full">
+                        <div className="flex items-center justify-center space-x-12 mb-12">
+                            <div className="flex flex-col items-center pb-2 border-b-2 border-primary text-primary">
+                                <span className="text-xs font-bold font-headline mb-1">01</span>
+                                <span className="text-sm font-semibold font-headline">Identity</span>
+                            </div>
+                            <div className="flex flex-col items-center pb-2 text-secondary opacity-40">
+                                <span className="text-xs font-bold font-headline mb-1">02</span>
+                                <span className="text-sm font-semibold font-headline">Scan</span>
+                            </div>
+                            <div className="flex flex-col items-center pb-2 text-secondary opacity-40">
+                                <span className="text-xs font-bold font-headline mb-1">03</span>
+                                <span className="text-sm font-semibold font-headline">Result</span>
+                            </div>
+                        </div>
+                        <div className="bg-white rounded-xl p-10 shadow-sm border-l-4 border-primary">
+                            <h2 className="font-headline text-2xl font-bold mb-8">Identitas Pasien</h2>
+                            <div className="space-y-8">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-secondary">Nama Lengkap</label>
+                                    <input value={patient.name} onChange={e => setPatient({...patient, name: e.target.value})} className="w-full bg-[#f2f4f5] border-none rounded-lg p-4 outline-none focus:ring-2 focus:ring-primary/10" placeholder="Masukkan nama" />
+                                </div>
+                                <div className="grid grid-cols-2 gap-8">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold text-secondary">Usia</label>
+                                        <input type="number" value={patient.age} onChange={e => setPatient({...patient, age: e.target.value})} className="w-full bg-[#f2f4f5] border-none rounded-lg p-4 outline-none focus:ring-2 focus:ring-primary/10" placeholder="Contoh: 25" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold text-secondary">Jenis Kelamin</label>
+                                        <select value={patient.gender} onChange={e => setPatient({...patient, gender: e.target.value})} className="w-full bg-[#f2f4f5] border-none rounded-lg p-4 outline-none">
+                                            <option value="M">Pria</option>
+                                            <option value="F">Wanita</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="space-y-4">
+                                    <label className="text-sm font-semibold text-secondary">Gejala Klinis</label>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {symptomsList.map(s => (
+                                            <label key={s} className="flex items-center space-x-3 p-4 bg-[#f2f4f5] rounded-lg cursor-pointer">
+                                                <input type="checkbox" checked={patient.symptoms.includes(s)} onChange={e => {
+                                                    const newSymp = e.target.checked ? [...patient.symptoms, s] : patient.symptoms.filter(x => x !== s);
+                                                    setPatient({...patient, symptoms: newSymp});
+                                                }} className="text-primary rounded focus:ring-primary" />
+                                                <span className="text-sm font-medium">{s}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="flex justify-end pt-4">
+                                    <button disabled={!patient.name || !patient.age} onClick={() => setPage('scan')} className="primary-gradient text-white px-10 py-4 rounded-full font-bold shadow-lg disabled:opacity-50 flex items-center gap-2">
+                                        Lanjutkan <span className="material-symbols-outlined">arrow_forward</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                );
+            };
+
+            const ScanScreen = () => {
+                const videoRef = useRef(null);
+                const [streaming, setStreaming] = useState(false);
+
+                useEffect(() => {
+                    let stream = null;
+                    async function setupCamera() {
+                        try {
+                            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                            if (videoRef.current) {
+                                videoRef.current.srcObject = stream;
+                                setStreaming(true);
+                            }
+                        } catch (err) { alert("Camera error: " + err.message); }
+                    }
+                    setupCamera();
+                    return () => { if (stream) stream.getTracks().forEach(t => t.stop()); };
+                }, []);
+
+                const capture = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = videoRef.current.videoWidth;
+                    canvas.height = videoRef.current.videoHeight;
+                    canvas.getContext('2d').drawImage(videoRef.current, 0, 0);
+                    canvas.toBlob(blob => {
+                        processPrediction(blob);
+                    }, 'image/png');
+                };
+
+                return (
+                    <main className="max-w-7xl mx-auto px-8 py-12 flex flex-col items-center">
+                        <div className="flex items-center justify-center mb-16 space-x-4">
+                            <div className="flex items-center space-x-2 text-secondary opacity-50"><div className="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center text-xs font-bold">01</div><span className="text-xs font-bold">PREPARATION</span></div>
+                            <div className="w-16 h-[2px] bg-secondary opacity-20"></div>
+                            <div className="flex items-center space-x-2 text-primary font-bold"><div className="w-10 h-10 rounded-full primary-gradient text-white flex items-center justify-center text-sm font-extrabold shadow-lg">02</div><span className="text-sm tracking-widest">SCAN</span></div>
+                            <div className="w-16 h-[2px] bg-secondary opacity-20"></div>
+                            <div className="flex items-center space-x-2 text-secondary opacity-50"><div className="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center text-xs font-bold">03</div><span className="text-xs font-bold">RESULTS</span></div>
+                        </div>
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full">
+                            <div className="lg:col-span-5 space-y-8">
+                                <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary text-xs font-bold rounded-full tracking-wider">GUIDED CAPTURE</span>
+                                <h1 className="font-headline text-5xl font-bold tracking-tight">Capturing the <span className="text-primary">Conjunctiva</span></h1>
+                                <p className="text-secondary text-lg">Gently pull down your lower eyelid to expose the inner pale pink conjunctiva tissue.</p>
+                                <div className="space-y-4">
+                                    {[ "Position eyes directly into camera", "Pull lower eyelid down", "Align within red frame" ].map((t, i) => (
+                                        <div key={i} className="flex items-center gap-4">
+                                            <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">{i+1}</div>
+                                            <span className="font-semibold text-secondary">{t}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="lg:col-span-7 flex flex-col items-center">
+                                <div className="w-full aspect-video bg-black rounded-3xl overflow-hidden relative shadow-2xl">
+                                    <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover mirror" />
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                        <div className="w-48 h-32 border-2 border-primary/50 rounded-xl relative">
+                                            <div className="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-primary -translate-x-1 -translate-y-1"></div>
+                                            <div className="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-primary translate-x-1 -translate-y-1"></div>
+                                            <div className="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-primary -translate-x-1 translate-y-1"></div>
+                                            <div className="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-primary translate-x-1 translate-y-1"></div>
+                                            <div className="absolute top-1/2 left-0 w-full h-[1px] bg-primary/40 shadow-[0_0_10px_#952528]"></div>
+                                        </div>
+                                        <div className="mt-8 glass-morphism px-6 py-2 rounded-full border border-white/20">
+                                            <p className="text-on-surface text-sm font-bold tracking-tight">KEEP EYE STEADY</p>
+                                        </div>
+                                    </div>
+                                    {loading && (
+                                        <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white z-20">
+                                            <div className="w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin mb-4"></div>
+                                            <p className="font-bold">Analyzing Specimen...</p>
+                                        </div>
+                                    )}
+                                </div>
+                                <button onClick={capture} disabled={!streaming || loading} className="mt-12 primary-gradient text-white px-12 py-6 rounded-3xl shadow-xl flex items-center space-x-6 hover:scale-105 transition-all">
+                                    <span className="font-manrope text-2xl font-extrabold tracking-tight">Check Anemia</span>
+                                    <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                                        <span className="material-symbols-outlined text-3xl">arrow_forward</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </main>
+                );
+            };
+
+            const ResultScreen = () => {
+                if (!prediction) return null;
+                const isAnemia = prediction.prediksi === 'Anemia';
+                const confidence = Math.round(prediction.probabilitas * 100);
+                
+                return (
+                    <main className="max-w-7xl mx-auto px-8 py-8 flex flex-col gap-8">
+                        <div className="w-full flex items-center justify-center gap-4 py-4 opacity-50">
+                            <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-full bg-primary-container text-white flex items-center justify-center font-bold text-xs">01</div><span className="text-xs font-bold tracking-wider">PREPARATION</span></div>
+                            <div className="w-12 h-[2px] bg-[#eceeef]"></div>
+                            <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-full bg-primary-container text-white flex items-center justify-center font-bold text-xs">02</div><span className="text-xs font-bold tracking-wider">SCANNING</span></div>
+                            <div className="w-12 h-[2px] bg-[#eceeef]"></div>
+                            <div className="flex items-center gap-3 opacity-100"><div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shadow-lg">03</div><span className="text-xs font-bold text-primary tracking-wider">RESULT</span></div>
+                        </div>
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                            <div className="lg:col-span-8 flex flex-col gap-8">
+                                <section className={`bg-white rounded-xl border-l-4 ${isAnemia ? 'border-primary' : 'border-green-500'} shadow-sm p-8`}>
+                                    <div className="flex justify-between items-start mb-6">
+                                        <div>
+                                            <h1 className="font-headline font-bold text-secondary mb-1">Diagnosis Result</h1>
+                                            <div className="flex items-center gap-3">
+                                                <span className={`font-headline font-extrabold text-4xl ${isAnemia ? 'text-primary' : 'text-green-600'}`}>
+                                                    {prediction.prediksi.toUpperCase()}
+                                                </span>
+                                                <span className={`px-3 py-1 rounded-md text-[0.65rem] font-bold tracking-widest uppercase ${isAnemia ? 'bg-red-100 text-primary' : 'bg-green-100 text-green-700'}`}>
+                                                    {isAnemia ? 'Clinical Focus Required' : 'Physiological Stable'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="relative w-24 h-24 flex items-center justify-center">
+                                            <svg className="w-full h-full -rotate-90">
+                                                <circle cx="48" cy="48" r="40" fill="transparent" stroke="#eceeef" strokeWidth="8" />
+                                                <circle cx="48" cy="48" r="40" fill="transparent" stroke={isAnemia ? "#952528" : "#22c55e"} strokeWidth="8" strokeDasharray="251.2" strokeDashoffset={251.2 * (1 - confidence/100)} strokeLinecap="round" />
+                                            </svg>
+                                            <div className="absolute flex flex-col items-center">
+                                                <span className="text-xl font-extrabold">{confidence}%</span>
+                                                <span className="text-[0.6rem] font-bold text-secondary">Confidence</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="bg-[#f2f4f5] p-6 rounded-xl flex items-center gap-8">
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-xs font-bold text-secondary">PROBABILITY</span>
+                                            <div className="text-3xl font-extrabold">{prediction.probabilitas}</div>
+                                        </div>
+                                        <div className="w-[2px] h-12 bg-[#eceeef]"></div>
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-xs font-bold text-secondary">RISK LEVEL</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-3xl font-extrabold capitalize">{prediction.risk_level}</span>
+                                                <div className={`w-3 h-3 rounded-full ${prediction.risk_level === 'high' ? 'bg-red-600' : prediction.risk_level === 'medium' ? 'bg-amber-400' : 'bg-green-500'}`}></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p className="mt-6 text-secondary italic text-sm">{prediction.keterangan}</p>
+                                </section>
+                                <section className="flex flex-col gap-4">
+                                    <h2 className="font-headline font-bold text-xl text-secondary">Spectral Capture</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="bg-white rounded-xl p-4 shadow-sm">
+                                            <img src={`${API_URL}${prediction.image_url}`} className="w-full aspect-video object-cover rounded-lg mb-4" />
+                                            <span className="text-xs font-bold uppercase text-secondary">Captured Specimen</span>
+                                        </div>
+                                        <div className="bg-white rounded-xl p-4 shadow-sm opacity-60">
+                                            <div className="w-full aspect-video bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
+                                                <span className="material-symbols-outlined text-4xl text-gray-400">biotech</span>
+                                            </div>
+                                            <span className="text-xs font-bold uppercase text-secondary">Reference Data</span>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                            <aside className="lg:col-span-4 flex flex-col gap-6">
+                                <div className="bg-white p-8 rounded-xl shadow-sm">
+                                    <h2 className="font-headline font-bold text-xl text-secondary mb-6">Next Steps</h2>
+                                    <div className="flex flex-col gap-4">
+                                        {[
+                                            { icon: "medical_services", title: "Consult Specialist", desc: "Schedule for clinical validation.", color: "bg-red-100 text-red-600" },
+                                            { icon: "restaurant", title: "Dietary Adjustment", desc: "Increase iron-rich foods.", color: "bg-amber-100 text-amber-600" },
+                                            { icon: "water_drop", title: "Hydration Focus", desc: "Maintain plasma stability.", color: "bg-blue-100 text-blue-600" }
+                                        ].map((step, idx) => (
+                                            <div key={idx} className="flex items-center gap-4 p-4 border border-[#f2f4f5] rounded-xl">
+                                                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${step.color}`}>
+                                                    <span className="material-symbols-outlined">{step.icon}</span>
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-bold text-sm">{step.title}</h3>
+                                                    <p className="text-[0.7rem] text-secondary">{step.desc}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="mt-8 flex flex-col gap-3">
+                                        <button onClick={() => setPage('home')} className="w-full primary-gradient text-white py-4 rounded-xl font-bold text-sm shadow-lg flex items-center justify-center gap-2">
+                                            <span className="material-symbols-outlined text-sm">home</span> Save & Back Home
+                                        </button>
+                                        <button className="w-full bg-[#f2f4f5] text-secondary py-4 rounded-xl font-bold text-sm hover:bg-gray-200 flex items-center justify-center gap-2">
+                                            <span className="material-symbols-outlined text-sm">picture_as_pdf</span> Download PDF
+                                        </button>
+                                    </div>
+                                </div>
+                            </aside>
+                        </div>
+                    </main>
+                );
+            };
+
+            const HistoryScreen = () => (
+                <main className="flex-grow p-8 max-w-7xl mx-auto w-full">
+                    <header className="mb-10">
+                        <h1 className="font-manrope text-3xl font-bold text-on-surface mb-2">History Dashboard</h1>
+                        <p className="text-secondary text-sm">Review clinical diagnostic history and AI performance metrics.</p>
+                    </header>
+                    <div className="bg-white rounded-xl shadow-sm overflow-hidden p-6">
+                        <div className="overflow-x-auto no-scrollbar">
+                            <table className="w-full text-left border-separate border-spacing-y-4">
+                                <thead>
+                                    <tr className="text-secondary text-xs font-bold tracking-widest uppercase">
+                                        <th className="pb-2 pl-4">ID</th>
+                                        <th className="pb-2">Eye Image</th>
+                                        <th className="pb-2">Patient Name</th>
+                                        <th className="pb-2">Age</th>
+                                        <th className="pb-2">AI Prediction</th>
+                                        <th className="pb-2">Confidence</th>
+                                        <th className="pb-2">Date/Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {history.map((h, i) => (
+                                        <tr key={i} className="bg-[#f2f4f5] hover:bg-white transition-colors cursor-pointer" onClick={() => { setPrediction(h); setPage('result'); }}>
+                                            <td className="py-4 pl-4 rounded-l-xl font-bold text-secondary text-sm">{h.id}</td>
+                                            <td className="py-4">
+                                                <div className="w-12 h-12 rounded-lg overflow-hidden border">
+                                                    <img src={`${API_URL}${h.image_url}`} className="w-full h-full object-cover" />
+                                                </div>
+                                            </td>
+                                            <td className="py-4 font-bold">{h.nama}</td>
+                                            <td className="py-4 text-secondary text-sm">{h.umur} y.o</td>
+                                            <td className="py-4">
+                                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${h.prediksi === 'Anemia' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
+                                                    {h.prediksi}
+                                                </span>
+                                            </td>
+                                            <td className="py-4 w-48">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-full bg-white h-2 rounded-full overflow-hidden">
+                                                        <div className={`h-full rounded-full ${h.prediksi === 'Anemia' ? 'bg-primary' : 'bg-green-500'}`} style={{width: `${h.probabilitas * 100}%`}}></div>
+                                                    </div>
+                                                    <span className="text-xs font-bold">{Math.round(h.probabilitas * 100)}%</span>
+                                                </div>
+                                            </td>
+                                            <td className="py-4 pr-4 rounded-r-xl text-secondary text-xs">{h.timestamp}</td>
+                                        </tr>
+                                    ))}
+                                    {history.length === 0 && <tr><td colSpan="7" className="text-center py-12 text-secondary">No scan history available yet.</td></tr>}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </main>
+            );
+
+            return (
+                <div className="min-h-screen flex flex-col">
+                    <Navbar />
+                    {page === 'home' && <HomeScreen />}
+                    {page === 'identity' && <IdentityScreen />}
+                    {page === 'scan' && <ScanScreen />}
+                    {page === 'result' && <ResultScreen />}
+                    {page === 'history' && <HistoryScreen />}
+                    <Footer />
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

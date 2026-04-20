@@ -1,5 +1,39 @@
 [
     {
+        "id": "#SCN-9768",
+        "timestamp": "Apr 20, 2026 \u2022 16:50",
+        "image_url": "/uploads/20f2e597-6322-469d-b4f9-52cac764da1b.png",
+        "symptoms": [
+            "Pucat"
+        ],
+        "nama": "Brek",
+        "umur": 21,
+        "gender": "Laki-laki",
+        "age_group": "Anak-anak dan Remaja",
+        "prediksi": "Non-Anemia",
+        "probabilitas": 0.2777,
+        "threshold": 0.7499999999999998,
+        "keterangan": "Berdasarkan analisis gambar konjungtiva dan data pasien, Brek tidak terindikasi anemia (probabilitas anemia 27.8%). Tetap jaga pola makan bergizi seimbang dan lakukan pemeriksaan rutin jika ada keluhan.",
+        "risk_level": "low"
+    },
+    {
+        "id": "#SCN-CDB0",
+        "timestamp": "Apr 20, 2026 \u2022 16:49",
+        "image_url": "/uploads/888e99cf-da0b-4808-bb1a-10a3a7046617.png",
+        "symptoms": [
+            "Lemas"
+        ],
+        "nama": "nklhnl",
+        "umur": 23,
+        "gender": "Laki-laki",
+        "age_group": "Anak-anak dan Remaja",
+        "prediksi": "Non-Anemia",
+        "probabilitas": 0.58,
+        "threshold": 0.7499999999999998,
+        "keterangan": "Berdasarkan analisis gambar konjungtiva dan data pasien, nklhnl tidak terindikasi anemia (probabilitas anemia 58.0%). Tetap jaga pola makan bergizi seimbang dan lakukan pemeriksaan rutin jika ada keluhan.",
+        "risk_level": "low"
+    },
+    {
         "id": "#SCN-A086",
         "timestamp": "Apr 10, 2026 \u2022 15:31",
         "image_url": "/uploads/3adbe64c-a6cb-429b-821c-bf4c31dc8209.png",

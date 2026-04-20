@@ -6,12 +6,16 @@ import datetime
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 from PIL import Image
 import io
-# import pandas as pd  <-- Dihapus karena tidak digunakan di server.py
 
 # Import logic from inference.py
 from inference import load_model_components, predict_from_pil
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
 
 app = FastAPI(title="HemoScan API")
 
@@ -45,6 +49,13 @@ def save_to_history(data: dict):
     history.insert(0, data)  # Add to top
     with open(HISTORY_FILE, "w") as f:
         json.dump(history, f, indent=4)
+
+@app.post("/api/login")
+async def login(req: LoginRequest):
+    # Hardcoded credentials for simplicity
+    if req.email == "admin@hemoscan.com" and req.password == "admin123":
+        return {"status": "success", "message": "Login successful"}
+    raise HTTPException(status_code=401, detail="Email atau password salah")
 
 @app.post("/api/predict")
 async def predict(
@@ -105,6 +116,14 @@ async def read_index():
 
 # Serve uploaded files
 app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
+
+@app.get("/logo.png")
+async def get_logo():
+    return FileResponse("logo 1.png")
+
+@app.get("/favicon.ico")
+async def get_favicon():
+    return FileResponse("logo 2.png")
 
 if __name__ == "__main__":
     import uvicorn

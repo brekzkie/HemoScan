@@ -73,12 +73,12 @@ print(f'   XGBoost version    : {xgb.__version__}')
 # CELL 2 — KONFIGURASI PATH
 # ================================================================
 
-BASE_INPUT   = r"C:\Users\bryant\OneDrive\Dokumen\coolyeah\semester 6\proyek  sains data\projecthemoscan\dataset anemia"
+BASE_INPUT   = r"c:\NANDA\TUGAS\SEMESTER 6\Proyek Sains Data\HemoScan\dataset anemia"
 FILE_INDIA   = os.path.join(BASE_INPUT, 'India', 'India.xlsx')
 FILE_ITALY   = os.path.join(BASE_INPUT, 'Italy', 'Italy.xlsx')
-FOLDER_IMG   = r"C:\Users\bryant\OneDrive\Dokumen\coolyeah\semester 6\proyek  sains data\projecthemoscan\hasil_ekstrak"
-OUTPUT_CSV   = r"C:\Users\bryant\OneDrive\Dokumen\coolyeah\semester 6\proyek  sains data\projecthemoscan\metadata_anemia_combined.csv"
-OUTPUT_MODEL = r"C:\Users\bryant\OneDrive\Dokumen\coolyeah\semester 6\proyek  sains data\projecthemoscan\model_output"
+FOLDER_IMG   = r"c:\NANDA\TUGAS\SEMESTER 6\Proyek Sains Data\HemoScan\hasil_ekstrak"
+OUTPUT_CSV   = r"c:\NANDA\TUGAS\SEMESTER 6\Proyek Sains Data\HemoScan\metadata_anemia_combined.csv"
+OUTPUT_MODEL = r"c:\NANDA\TUGAS\SEMESTER 6\Proyek Sains Data\HemoScan\model_output"
 
 os.makedirs(OUTPUT_MODEL, exist_ok=True)
 print(f'✅ Output model akan disimpan di: {OUTPUT_MODEL}')

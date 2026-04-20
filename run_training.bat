@@ -59,7 +59,7 @@ echo    - Cross-validation  : 5-15 menit
 echo  ============================================================
 echo.
 
-python anemia_detection_final.py
+python prediction_engine.py
 
 :: ── Cek hasil ───────────────────────────────────────────────────
 if errorlevel 1 (

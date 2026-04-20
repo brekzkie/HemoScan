@@ -98,13 +98,16 @@ async def get_history():
 
 from fastapi.responses import FileResponse
 
+# Serve static files (images, etc.) - mount before other routes
+app.mount("/static", StaticFiles(directory=".", html=False), name="static")
+
+# Serve uploaded files
+app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
+
 # Serve index.html at root
 @app.get("/")
 async def read_index():
     return FileResponse("index.html")
-
-# Serve uploaded files
-app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
 
 if __name__ == "__main__":
     import uvicorn

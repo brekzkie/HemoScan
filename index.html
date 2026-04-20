@@ -94,7 +94,7 @@
                     setPage('result');
                     fetchHistory();
                 } catch (e) {
-                    alert("Prediction failed. Make sure server.py is running.");
+                    alert("Prediksi gagal. Pastikan server.py sedang berjalan.");
                 } finally {
                     setLoading(false);
                 }
@@ -105,11 +105,11 @@
                     <div className="flex justify-between items-center px-8 py-4 max-w-full mx-auto">
                         <div className="font-manrope text-xl font-extrabold tracking-widest text-primary cursor-pointer" onClick={() => setPage('home')}>HEMOSCAN</div>
                         <div className="hidden md:flex items-center space-x-12">
-                            <button className={`font-manrope font-bold tracking-tight ${page === 'home' ? 'text-primary border-b-2 border-primary pb-1' : 'text-secondary'}`} onClick={() => setPage('home')}>HOME</button>
-                            <button className={`font-manrope font-bold tracking-tight ${page === 'history' ? 'text-primary border-b-2 border-primary pb-1' : 'text-secondary'}`} onClick={() => setPage('history')}>HISTORY</button>
-                            <button className="font-manrope font-bold tracking-tight text-secondary">HELP</button>
+                            <button className={`font-manrope font-bold tracking-tight ${page === 'home' ? 'text-primary border-b-2 border-primary pb-1' : 'text-secondary'}`} onClick={() => setPage('home')}>BERANDA</button>
+                            <button className={`font-manrope font-bold tracking-tight ${page === 'history' ? 'text-primary border-b-2 border-primary pb-1' : 'text-secondary'}`} onClick={() => setPage('history')}>RIWAYAT</button>
+                            <button className="font-manrope font-bold tracking-tight text-secondary">BANTUAN</button>
                         </div>
-                        <button onClick={handleNewScan} className="primary-gradient text-white font-bold px-6 py-2.5 rounded-full text-sm scale-95 hover:scale-100 transition-all">New Scan</button>
+                        <button onClick={handleNewScan} className="primary-gradient text-white font-bold px-6 py-2.5 rounded-full text-sm scale-95 hover:scale-100 transition-all">Scan Baru</button>
                     </div>
                 </nav>
             );
@@ -118,42 +118,107 @@
                 <footer className="w-full py-12 px-8 bg-[#f2f4f5] mt-auto">
                     <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
                         <div>
-                            <div className="font-manrope font-semibold text-primary">HEMOSCAN CLINICAL LABS</div>
-                            <div className="text-xs text-secondary">© 2024 Hemoscan Clinical Labs. All rights reserved.</div>
+                            <div className="font-manrope font-semibold text-primary">LAB KLINIS HEMOSCAN</div>
+                            <div className="text-xs text-secondary">© 2024 Hemoscan Clinical Labs. Semua hak dilindungi.</div>
                         </div>
                         <div className="flex flex-wrap gap-x-8 gap-y-2 text-xs text-secondary">
-                            <a href="#">Privacy Policy</a>
-                            <a href="#">Terms of Service</a>
-                            <a href="#">Clinical Guidelines</a>
-                            <a href="#">HIPAA Compliance</a>
+                            <a href="#">Kebijakan Privasi</a>
+                            <a href="#">Syarat Layanan</a>
+                            <a href="#">Pedoman Klinis</a>
+                            <a href="#">Kepatuhan HIPAA</a>
                         </div>
                     </div>
                 </footer>
             );
 
             const HomeScreen = () => (
-                <main className="flex-grow flex flex-col items-center justify-center p-8 relative overflow-hidden">
-                    <div className="absolute top-1/4 -left-20 w-96 h-96 bg-primary opacity-5 rounded-full blur-3xl"></div>
-                    <div className="text-center z-10 max-w-2xl mb-16">
-                        <h1 className="font-headline text-on-surface font-extrabold tracking-tight text-5xl mb-6">Ready for your clinical<br/>blood assessment?</h1>
-                        <p className="text-secondary text-lg mb-12">Ensure your testing environment is well-lit and your test strip is ready for high-precision optical scanning.</p>
-                        <div className="flex flex-col items-center group">
-                            <button onClick={handleNewScan} className="primary-gradient w-32 h-32 rounded-full flex items-center justify-center text-white shadow-2xl transition-transform hover:scale-105 active:scale-95 mb-4">
-                                <span className="material-symbols-outlined text-5xl">add_circle</span>
-                            </button>
-                            <span className="font-headline font-bold text-primary tracking-widest text-sm uppercase">NEW SCAN</span>
+                <main className="flex-grow flex flex-col w-full">
+                    {/* Hero Section */}
+                    <section className="px-8 py-20 max-w-7xl mx-auto w-full">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                            {/* Left Content */}
+                            <div className="z-10">
+                                <h1 className="font-headline text-on-surface font-extrabold tracking-tight text-6xl mb-6 leading-tight">
+                                    Periksa Risiko Anemia,<br/>Dengan Mudah
+                                </h1>
+                                <p className="text-secondary text-lg mb-12 leading-relaxed">
+                                    Pastikan lingkungan pencahayaan baik, tarik perlahan kelopak mata bawah Anda (konjungtiva), dan ambil foto. Pemindaian optik presisi tinggi menangani sisanya.
+                                </p>
+                                <div className="flex flex-col items-start">
+                                    <button onClick={handleNewScan} className="primary-gradient text-white px-8 py-4 rounded-full font-bold shadow-lg hover:scale-105 transition-all flex items-center gap-2">
+                                        <span className="material-symbols-outlined">add_circle</span>
+                                        SCAN BARU
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Right Illustration - Woman with Eye */}
+                            <div className="flex items-center justify-center">
+                                <div className="relative w-full max-w-md">
+                                    <img 
+                                        src="/static/gambarceweknobg.png" 
+                                        alt="Woman demonstrating eye examination" 
+                                        className="w-full h-auto rounded-2xl shadow-2xl object-cover"
+                                        style={{filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.15))'}}
+                                        onError={(e) => {
+                                            console.error("Image failed to load from /static/gambarceweknobg.png");
+                                        }}
+                                    />
+                                    <div className="absolute -bottom-6 -right-6 w-40 h-40 bg-primary opacity-10 rounded-full blur-2xl"></div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl">
-                        <div className="bg-white p-8 rounded-xl border-l-4 border-primary shadow-sm">
-                            <h3 className="font-headline text-xl font-bold mb-3">What is Hemoscan?</h3>
-                            <p className="text-sm text-secondary">AI-powered medical web application for non-invasive anemia detection via conjunctiva analysis.</p>
+                    </section>
+
+                    {/* How It Works */}
+                    <section className="px-8 py-16 bg-[#f8fafb]">
+                        <div className="max-w-7xl mx-auto">
+                            <h2 className="font-headline text-3xl font-bold text-on-surface mb-12 text-center">CARA KERJANYA</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                {[
+                                    { icon: "camera_alt", title: "Potret", desc: "Ambil foto jernih kelopak mata bawah bagian dalam Anda (konjungtiva)." },
+                                    { icon: "smart_toy", title: "Analisis", desc: "Algoritma AI kami menganalisis gambar untuk indikator pucat anemia." },
+                                    { icon: "assessment", title: "Hasil", desc: "Lihat penilaian risiko instan Anda dalam hitungan detik." }
+                                ].map((item, i) => (
+                                    <div key={i} className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-lg transition-shadow text-center">
+                                        <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center">
+                                            <span className="material-symbols-outlined text-3xl text-primary">{item.icon}</span>
+                                        </div>
+                                        <h3 className="font-headline font-bold text-xl mb-2">{item.title}</h3>
+                                        <p className="text-secondary text-sm">{item.desc}</p>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                        <div className="glass-morphism p-8 rounded-xl border-l-4 border-secondary shadow-sm">
-                            <h3 className="font-headline text-xl font-bold mb-3">Technical Infrastructure</h3>
-                            <p className="text-sm text-secondary">Leverages MobileNetV2 architecture with quantized INT8/FP16 models for edge-optimized inference.</p>
+                    </section>
+
+                    {/* Info Cards */}
+                    <section className="px-8 py-16 max-w-7xl mx-auto w-full">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div className="bg-red-50 p-8 rounded-2xl border-l-4 border-primary">
+                                <div className="flex items-start gap-4">
+                                    <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <span className="material-symbols-outlined text-xl text-primary">medical_services</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-headline font-bold text-xl mb-2">APA ITU HEMOSCAN?</h3>
+                                        <p className="text-secondary text-sm">Pemeriksaan Anemia Non-invasif: Analisis konjungtiva mata non-invasif, tanpa jarum atau tes darah.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="bg-blue-50 p-8 rounded-2xl border-l-4 border-secondary">
+                                <div className="flex items-start gap-4">
+                                    <div className="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <span className="material-symbols-outlined text-xl text-secondary">verified_user</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-headline font-bold text-xl mb-2">TEKNOLOGI & AKURASI</h3>
+                                        <p className="text-secondary text-sm">Manfaatkan AI MobileNetV2 tingkat klinis untuk penilaian risiko anemia yang cepat dan andal.</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    </section>
                 </main>
             );
 
@@ -164,15 +229,15 @@
                         <div className="flex items-center justify-center space-x-12 mb-12">
                             <div className="flex flex-col items-center pb-2 border-b-2 border-primary text-primary">
                                 <span className="text-xs font-bold font-headline mb-1">01</span>
-                                <span className="text-sm font-semibold font-headline">Identity</span>
+                                <span className="text-sm font-semibold font-headline">Identitas</span>
                             </div>
                             <div className="flex flex-col items-center pb-2 text-secondary opacity-40">
                                 <span className="text-xs font-bold font-headline mb-1">02</span>
-                                <span className="text-sm font-semibold font-headline">Scan</span>
+                                <span className="text-sm font-semibold font-headline">Pemindaian</span>
                             </div>
                             <div className="flex flex-col items-center pb-2 text-secondary opacity-40">
                                 <span className="text-xs font-bold font-headline mb-1">03</span>
-                                <span className="text-sm font-semibold font-headline">Result</span>
+                                <span className="text-sm font-semibold font-headline">Hasil</span>
                             </div>
                         </div>
                         <div className="bg-white rounded-xl p-10 shadow-sm border-l-4 border-primary">
@@ -233,7 +298,7 @@
                                 videoRef.current.srcObject = stream;
                                 setStreaming(true);
                             }
-                        } catch (err) { alert("Camera error: " + err.message); }
+                        } catch (err) { alert("Kesalahan Kamera: " + err.message); }
                     }
                     setupCamera();
                     return () => { if (stream) stream.getTracks().forEach(t => t.stop()); };
@@ -252,22 +317,33 @@
                 return (
                     <main className="max-w-7xl mx-auto px-8 py-12 flex flex-col items-center">
                         <div className="flex items-center justify-center mb-16 space-x-4">
-                            <div className="flex items-center space-x-2 text-secondary opacity-50"><div className="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center text-xs font-bold">01</div><span className="text-xs font-bold">PREPARATION</span></div>
+                            <div className="flex items-center space-x-2 text-secondary opacity-50"><div className="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center text-xs font-bold">01</div><span className="text-xs font-bold">PERSIAPAN</span></div>
                             <div className="w-16 h-[2px] bg-secondary opacity-20"></div>
-                            <div className="flex items-center space-x-2 text-primary font-bold"><div className="w-10 h-10 rounded-full primary-gradient text-white flex items-center justify-center text-sm font-extrabold shadow-lg">02</div><span className="text-sm tracking-widest">SCAN</span></div>
+                            <div className="flex items-center space-x-2 text-primary font-bold"><div className="w-10 h-10 rounded-full primary-gradient text-white flex items-center justify-center text-sm font-extrabold shadow-lg">02</div><span className="text-sm tracking-widest">PEMINDAIAN</span></div>
                             <div className="w-16 h-[2px] bg-secondary opacity-20"></div>
-                            <div className="flex items-center space-x-2 text-secondary opacity-50"><div className="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center text-xs font-bold">03</div><span className="text-xs font-bold">RESULTS</span></div>
+                            <div className="flex items-center space-x-2 text-secondary opacity-50"><div className="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center text-xs font-bold">03</div><span className="text-xs font-bold">HASIL</span></div>
                         </div>
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full">
                             <div className="lg:col-span-5 space-y-8">
-                                <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary text-xs font-bold rounded-full tracking-wider">GUIDED CAPTURE</span>
-                                <h1 className="font-headline text-5xl font-bold tracking-tight">Capturing the <span className="text-primary">Conjunctiva</span></h1>
-                                <p className="text-secondary text-lg">Gently pull down your lower eyelid to expose the inner pale pink conjunctiva tissue.</p>
-                                <div className="space-y-4">
-                                    {[ "Position eyes directly into camera", "Pull lower eyelid down", "Align within red frame" ].map((t, i) => (
-                                        <div key={i} className="flex items-center gap-4">
-                                            <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">{i+1}</div>
-                                            <span className="font-semibold text-secondary">{t}</span>
+                                <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary text-xs font-bold rounded-full tracking-wider">PENANGKAPAN TERPANDU</span>
+                                <h1 className="font-headline text-5xl font-bold tracking-tight">Menangkap <span className="text-primary">Konjungtiva</span></h1>
+                                <p className="text-secondary text-lg">Tarik kelopak mata bawah Anda dengan lembut untuk mengekspos jaringan konjungtiva putih muda di bagian dalam.</p>
+                                <div className="space-y-6">
+                                    {[
+                                        { text: "Posisikan mata langsung ke kamera", img: "gambar1.png" },
+                                        { text: "Tarik kelopak mata bawah", img: "gambar2.png" },
+                                        { text: "Sejajarkan dalam bingkai merah", img: "gambar3.png" }
+                                    ].map((item, i) => (
+                                        <div key={i} className="space-y-3">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">{i+1}</div>
+                                                <span className="font-semibold text-secondary">{item.text}</span>
+                                            </div>
+                                            <img 
+                                                src={`/static/${item.img}`} 
+                                                alt={`Step ${i+1}: ${item.text}`}
+                                                className="w-32 h-24 rounded-lg object-cover ml-12 shadow-md"
+                                            />
                                         </div>
                                     ))}
                                 </div>
@@ -284,18 +360,18 @@
                                             <div className="absolute top-1/2 left-0 w-full h-[1px] bg-primary/40 shadow-[0_0_10px_#952528]"></div>
                                         </div>
                                         <div className="mt-8 glass-morphism px-6 py-2 rounded-full border border-white/20">
-                                            <p className="text-on-surface text-sm font-bold tracking-tight">KEEP EYE STEADY</p>
+                                            <p className="text-on-surface text-sm font-bold tracking-tight">MATA TETAP STABIL</p>
                                         </div>
                                     </div>
                                     {loading && (
                                         <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white z-20">
                                             <div className="w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin mb-4"></div>
-                                            <p className="font-bold">Analyzing Specimen...</p>
+                                            <p className="font-bold">Menganalisis Sampel...</p>
                                         </div>
                                     )}
                                 </div>
                                 <button onClick={capture} disabled={!streaming || loading} className="mt-12 primary-gradient text-white px-12 py-6 rounded-3xl shadow-xl flex items-center space-x-6 hover:scale-105 transition-all">
-                                    <span className="font-manrope text-2xl font-extrabold tracking-tight">Check Anemia</span>
+                                    <span className="font-manrope text-2xl font-extrabold tracking-tight">Cek Anemia</span>
                                     <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
                                         <span className="material-symbols-outlined text-3xl">arrow_forward</span>
                                     </div>
@@ -314,24 +390,24 @@
                 return (
                     <main className="max-w-7xl mx-auto px-8 py-8 flex flex-col gap-8">
                         <div className="w-full flex items-center justify-center gap-4 py-4 opacity-50">
-                            <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-full bg-primary-container text-white flex items-center justify-center font-bold text-xs">01</div><span className="text-xs font-bold tracking-wider">PREPARATION</span></div>
+                            <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-full bg-primary-container text-white flex items-center justify-center font-bold text-xs">01</div><span className="text-xs font-bold tracking-wider">PERSIAPAN</span></div>
                             <div className="w-12 h-[2px] bg-[#eceeef]"></div>
-                            <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-full bg-primary-container text-white flex items-center justify-center font-bold text-xs">02</div><span className="text-xs font-bold tracking-wider">SCANNING</span></div>
+                            <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-full bg-primary-container text-white flex items-center justify-center font-bold text-xs">02</div><span className="text-xs font-bold tracking-wider">PEMINDAIAN</span></div>
                             <div className="w-12 h-[2px] bg-[#eceeef]"></div>
-                            <div className="flex items-center gap-3 opacity-100"><div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shadow-lg">03</div><span className="text-xs font-bold text-primary tracking-wider">RESULT</span></div>
+                            <div className="flex items-center gap-3 opacity-100"><div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shadow-lg">03</div><span className="text-xs font-bold text-primary tracking-wider">HASIL</span></div>
                         </div>
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                             <div className="lg:col-span-8 flex flex-col gap-8">
                                 <section className={`bg-white rounded-xl border-l-4 ${isAnemia ? 'border-primary' : 'border-green-500'} shadow-sm p-8`}>
                                     <div className="flex justify-between items-start mb-6">
                                         <div>
-                                            <h1 className="font-headline font-bold text-secondary mb-1">Diagnosis Result</h1>
+                                            <h1 className="font-headline font-bold text-secondary mb-1">Hasil Diagnosis</h1>
                                             <div className="flex items-center gap-3">
                                                 <span className={`font-headline font-extrabold text-4xl ${isAnemia ? 'text-primary' : 'text-green-600'}`}>
                                                     {prediction.prediksi.toUpperCase()}
                                                 </span>
                                                 <span className={`px-3 py-1 rounded-md text-[0.65rem] font-bold tracking-widest uppercase ${isAnemia ? 'bg-red-100 text-primary' : 'bg-green-100 text-green-700'}`}>
-                                                    {isAnemia ? 'Clinical Focus Required' : 'Physiological Stable'}
+                                                    {isAnemia ? 'Perhatian Klinis Diperlukan' : 'Stabil Fisiologis'}
                                                 </span>
                                             </div>
                                         </div>
@@ -342,18 +418,18 @@
                                             </svg>
                                             <div className="absolute flex flex-col items-center">
                                                 <span className="text-xl font-extrabold">{confidence}%</span>
-                                                <span className="text-[0.6rem] font-bold text-secondary">Confidence</span>
+                                                <span className="text-[0.6rem] font-bold text-secondary">Kepercayaan</span>
                                             </div>
                                         </div>
                                     </div>
                                     <div className="bg-[#f2f4f5] p-6 rounded-xl flex items-center gap-8">
                                         <div className="flex flex-col gap-1">
-                                            <span className="text-xs font-bold text-secondary">PROBABILITY</span>
+                                            <span className="text-xs font-bold text-secondary">PROBABILITAS</span>
                                             <div className="text-3xl font-extrabold">{prediction.probabilitas}</div>
                                         </div>
                                         <div className="w-[2px] h-12 bg-[#eceeef]"></div>
                                         <div className="flex flex-col gap-1">
-                                            <span className="text-xs font-bold text-secondary">RISK LEVEL</span>
+                                            <span className="text-xs font-bold text-secondary">TINGKAT RISIKO</span>
                                             <div className="flex items-center gap-2">
                                                 <span className="text-3xl font-extrabold capitalize">{prediction.risk_level}</span>
                                                 <div className={`w-3 h-3 rounded-full ${prediction.risk_level === 'high' ? 'bg-red-600' : prediction.risk_level === 'medium' ? 'bg-amber-400' : 'bg-green-500'}`}></div>
@@ -363,29 +439,29 @@
                                     <p className="mt-6 text-secondary italic text-sm">{prediction.keterangan}</p>
                                 </section>
                                 <section className="flex flex-col gap-4">
-                                    <h2 className="font-headline font-bold text-xl text-secondary">Spectral Capture</h2>
+                                    <h2 className="font-headline font-bold text-xl text-secondary">Penangkapan Spektral</h2>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="bg-white rounded-xl p-4 shadow-sm">
                                             <img src={`${API_URL}${prediction.image_url}`} className="w-full aspect-video object-cover rounded-lg mb-4" />
-                                            <span className="text-xs font-bold uppercase text-secondary">Captured Specimen</span>
+                                            <span className="text-xs font-bold uppercase text-secondary">Sampel Tertangkap</span>
                                         </div>
                                         <div className="bg-white rounded-xl p-4 shadow-sm opacity-60">
                                             <div className="w-full aspect-video bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
                                                 <span className="material-symbols-outlined text-4xl text-gray-400">biotech</span>
                                             </div>
-                                            <span className="text-xs font-bold uppercase text-secondary">Reference Data</span>
+                                            <span className="text-xs font-bold uppercase text-secondary">Data Referensi</span>
                                         </div>
                                     </div>
                                 </section>
                             </div>
                             <aside className="lg:col-span-4 flex flex-col gap-6">
                                 <div className="bg-white p-8 rounded-xl shadow-sm">
-                                    <h2 className="font-headline font-bold text-xl text-secondary mb-6">Next Steps</h2>
+                                    <h2 className="font-headline font-bold text-xl text-secondary mb-6">Langkah Berikutnya</h2>
                                     <div className="flex flex-col gap-4">
                                         {[
-                                            { icon: "medical_services", title: "Consult Specialist", desc: "Schedule for clinical validation.", color: "bg-red-100 text-red-600" },
-                                            { icon: "restaurant", title: "Dietary Adjustment", desc: "Increase iron-rich foods.", color: "bg-amber-100 text-amber-600" },
-                                            { icon: "water_drop", title: "Hydration Focus", desc: "Maintain plasma stability.", color: "bg-blue-100 text-blue-600" }
+                                            { icon: "medical_services", title: "Konsultasi Spesialis", desc: "Jadwalkan untuk validasi klinis.", color: "bg-red-100 text-red-600" },
+                                            { icon: "restaurant", title: "Penyesuaian Nutri", desc: "Tingkatkan makanan kaya zat besi.", color: "bg-amber-100 text-amber-600" },
+                                            { icon: "water_drop", title: "Fokus Hidrasi", desc: "Pertahankan stabilitas plasma.", color: "bg-blue-100 text-blue-600" }
                                         ].map((step, idx) => (
                                             <div key={idx} className="flex items-center gap-4 p-4 border border-[#f2f4f5] rounded-xl">
                                                 <div className={`w-12 h-12 rounded-full flex items-center justify-center ${step.color}`}>
@@ -400,10 +476,10 @@
                                     </div>
                                     <div className="mt-8 flex flex-col gap-3">
                                         <button onClick={() => setPage('home')} className="w-full primary-gradient text-white py-4 rounded-xl font-bold text-sm shadow-lg flex items-center justify-center gap-2">
-                                            <span className="material-symbols-outlined text-sm">home</span> Save & Back Home
+                                            <span className="material-symbols-outlined text-sm">home</span> Simpan & Kembali Beranda
                                         </button>
                                         <button className="w-full bg-[#f2f4f5] text-secondary py-4 rounded-xl font-bold text-sm hover:bg-gray-200 flex items-center justify-center gap-2">
-                                            <span className="material-symbols-outlined text-sm">picture_as_pdf</span> Download PDF
+                                            <span className="material-symbols-outlined text-sm">picture_as_pdf</span> Unduh PDF
                                         </button>
                                     </div>
                                 </div>
@@ -416,8 +492,8 @@
             const HistoryScreen = () => (
                 <main className="flex-grow p-8 max-w-7xl mx-auto w-full">
                     <header className="mb-10">
-                        <h1 className="font-manrope text-3xl font-bold text-on-surface mb-2">History Dashboard</h1>
-                        <p className="text-secondary text-sm">Review clinical diagnostic history and AI performance metrics.</p>
+                        <h1 className="font-manrope text-3xl font-bold text-on-surface mb-2">Dasbor Riwayat</h1>
+                        <p className="text-secondary text-sm">Tinjau riwayat diagnostik klinis dan metrik kinerja AI.</p>
                     </header>
                     <div className="bg-white rounded-xl shadow-sm overflow-hidden p-6">
                         <div className="overflow-x-auto no-scrollbar">
@@ -425,12 +501,12 @@
                                 <thead>
                                     <tr className="text-secondary text-xs font-bold tracking-widest uppercase">
                                         <th className="pb-2 pl-4">ID</th>
-                                        <th className="pb-2">Eye Image</th>
-                                        <th className="pb-2">Patient Name</th>
-                                        <th className="pb-2">Age</th>
-                                        <th className="pb-2">AI Prediction</th>
-                                        <th className="pb-2">Confidence</th>
-                                        <th className="pb-2">Date/Time</th>
+                                        <th className="pb-2">Gambar Mata</th>
+                                        <th className="pb-2">Nama Pasien</th>
+                                        <th className="pb-2">Usia</th>
+                                        <th className="pb-2">Prediksi AI</th>
+                                        <th className="pb-2">Kepercayaan</th>
+                                        <th className="pb-2">Tanggal/Waktu</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -443,7 +519,7 @@
                                                 </div>
                                             </td>
                                             <td className="py-4 font-bold">{h.nama}</td>
-                                            <td className="py-4 text-secondary text-sm">{h.umur} y.o</td>
+                                            <td className="py-4 text-secondary text-sm">{h.umur} tahun</td>
                                             <td className="py-4">
                                                 <span className={`px-3 py-1 rounded-full text-xs font-bold ${h.prediksi === 'Anemia' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
                                                     {h.prediksi}
@@ -460,7 +536,7 @@
                                             <td className="py-4 pr-4 rounded-r-xl text-secondary text-xs">{h.timestamp}</td>
                                         </tr>
                                     ))}
-                                    {history.length === 0 && <tr><td colSpan="7" className="text-center py-12 text-secondary">No scan history available yet.</td></tr>}
+                                    {history.length === 0 && <tr><td colSpan="7" className="text-center py-12 text-secondary">Belum ada riwayat pemindaian.</td></tr>}
                                 </tbody>
                             </table>
                         </div>

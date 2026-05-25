@@ -1,435 +1,562 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HEMOSCAN - AI Anemia Detection</title>
+    <title>HemoScan — Skrining Anemia Non-Invasif</title>
+    <meta name="description" content="Solusi berbasis kecerdasan buatan untuk skrining anemia non-invasif melalui analisis konjungtiva mata.">
     <link rel="icon" type="image/png" href="/favicon.ico?v=1.1">
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#952528",
-                        "primary-container": "#b63e3e",
-                        "secondary": "#48626e",
-                        "surface-container-low": "#f2f4f5",
-                        "surface-container-lowest": "#ffffff",
-                        "on-surface": "#191c1d",
-                    },
-                    fontFamily: {
-                        "headline": ["Manrope"],
-                        "body": ["Inter"]
-                    }
-                }
-            }
-        }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-        .glass-morphism { background: rgba(225, 227, 228, 0.4); backdrop-filter: blur(20px); }
-        .primary-gradient { background: linear-gradient(135deg, #952528 0%, #b63e3e 100%); }
+        /* === Empathetic Laboratory Design System === */
+        :root {
+            --primary: #952528;
+            --primary-container: #b63e3e;
+            --primary-fixed: #f5dfdf;
+            --primary-dark: #6f1c1f;
+            --background: #f8fafb;
+            --surface: #f8fafb;
+            --surface-container-lowest: #ffffff;
+            --surface-container-low: #f2f4f5;
+            --surface-container: #eceeef;
+            --surface-container-high: #e4e6e7;
+            --surface-variant: #eaecee;
+            --foreground: #191c1d;
+            --on-surface: #191c1d;
+            --secondary: #48626e;
+            --outline-variant: #e4beba;
+            --error: #ba1a1a;
+            --error-container: #ffdad6;
+            --on-error-container: #410002;
+            --gradient-primary: linear-gradient(135deg, #952528 0%, #b63e3e 100%);
+            --shadow-ambient: 0 24px 48px rgba(25, 28, 29, 0.06);
+            --shadow-ambient-sm: 0 8px 24px rgba(25, 28, 29, 0.04);
+            --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+            --font-display: 'Manrope', 'Inter', system-ui, sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; border-color: rgba(228, 190, 186, 0.2); }
+        body {
+            background-color: var(--background);
+            color: var(--foreground);
+            font-family: var(--font-sans);
+            font-feature-settings: "ss01", "cv11";
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: -0.02em; }
+
+        /* Typography scale */
+        .text-display-lg { font-family: var(--font-display); font-size: clamp(2.5rem, 6vw, 3.5rem); line-height: 1.05; font-weight: 800; letter-spacing: -0.03em; }
+        .text-display-md { font-family: var(--font-display); font-size: clamp(1.75rem, 4vw, 2.75rem); line-height: 1.1; font-weight: 800; letter-spacing: -0.025em; }
+        .text-headline-lg { font-family: var(--font-display); font-size: 2.125rem; line-height: 1.15; font-weight: 700; letter-spacing: -0.02em; }
+        .text-headline-md { font-family: var(--font-display); font-size: 1.75rem; line-height: 1.2; font-weight: 700; letter-spacing: -0.015em; }
+        .text-title-lg { font-family: var(--font-sans); font-size: 1.125rem; line-height: 1.4; font-weight: 600; }
+        .text-title-sm { font-family: var(--font-sans); font-size: 0.9375rem; line-height: 1.4; font-weight: 600; }
+        .text-body-md { font-family: var(--font-sans); font-size: 0.875rem; line-height: 1.6; font-weight: 400; }
+        .text-label-md { font-family: var(--font-sans); font-size: 0.75rem; line-height: 1.4; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+
+        /* Glass morphism */
+        .glass-panel {
+            background-color: rgba(234, 236, 238, 0.6);
+            backdrop-filter: blur(20px) saturate(140%);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: #ffffff;
+            border-radius: 1.5rem;
+            font-family: var(--font-sans);
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.875rem 1.75rem;
+            font-size: 0.9375rem;
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: var(--shadow-ambient); }
+        .btn-primary:active { transform: translateY(0) scale(0.98); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .btn-secondary {
+            background-color: var(--surface-container-high);
+            color: var(--on-surface);
+            border-radius: 1.5rem;
+            font-family: var(--font-sans);
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.9375rem;
+        }
+        .btn-secondary:hover { background-color: var(--surface-container); }
+
+        /* Inputs */
+        .input-ghost {
+            background-color: var(--surface-container-low);
+            border: 2px solid transparent;
+            border-radius: 0.875rem;
+            padding: 0.75rem 1rem;
+            color: var(--on-surface);
+            font-family: var(--font-sans);
+            font-size: 0.9375rem;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+            width: 100%;
+            outline: none;
+        }
+        .input-ghost:focus {
+            background-color: var(--surface-container-lowest);
+            border-color: rgba(228, 190, 186, 0.4);
+        }
+        .input-ghost::placeholder { color: var(--secondary); opacity: 0.6; }
+
+        /* Clinical accent */
+        .clinical-accent { position: relative; }
+        .clinical-accent::before {
+            content: "";
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px; border-radius: 4px;
+            background-color: var(--primary-fixed);
+        }
+
+        /* Shadows */
+        .shadow-ambient { box-shadow: var(--shadow-ambient); }
+        .shadow-ambient-sm { box-shadow: var(--shadow-ambient-sm); }
+
+        /* Animations */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes pulse-glow {
+            0%, 100% { transform: scale(1); opacity: 0.85; }
+            50% { transform: scale(1.08); opacity: 1; }
+        }
+        @keyframes pulse-inner {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(0.92); }
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-fade-up { animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        .animate-fade-in { animation: fadeIn 0.4s ease forwards; }
+        .animate-pulse-glow { animation: pulse-glow 4s ease-in-out infinite; }
+        .animate-pulse-inner { animation: pulse-inner 2.4s ease-in-out infinite; }
+        .animate-spin { animation: spin 1s linear infinite; }
+
+        .delay-100 { animation-delay: 80ms; }
+        .delay-200 { animation-delay: 160ms; }
+        .delay-300 { animation-delay: 240ms; }
+        .delay-400 { animation-delay: 320ms; }
+        .delay-500 { animation-delay: 400ms; }
+        .delay-600 { animation-delay: 480ms; }
+
+        /* Mirror webcam */
+        video.mirror { transform: scaleX(-1); }
+
+        /* Scrollbar */
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Status badges */
+        .badge-anemia { background-color: var(--error-container); color: var(--on-error-container); }
+        .badge-normal { background-color: var(--primary-fixed); color: var(--primary); }
     </style>
 </head>
-<body class="bg-[#f8fafb] text-[#191c1d] font-body">
+<body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect, useRef, useCallback } = React;
 
         const API_URL = "http://localhost:8000";
 
-        const Navbar = ({ page, setPage, handleNewScan }) => (
-            <nav className="w-full top-0 sticky bg-[#f8fafb] z-50 border-b border-[#f2f4f5]">
-                <div className="flex justify-between items-center px-8 py-4 max-w-full mx-auto">
-                    <div className="flex items-center gap-3 cursor-pointer" onClick={() => setPage('home')}>
-                        <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
-                        <div className="font-manrope text-xl font-extrabold tracking-widest text-primary">HEMOSCAN</div>
+        const SYMPTOMS = [
+            "Mudah lelah", "Kulit pucat", "Pusing", "Tangan dingin",
+            "Sakit kepala", "Sesak napas", "Kuku rapuh", "Jantung berdebar"
+        ];
+
+        // ─── SVG Icons (inline Lucide-style) ────────────────────
+        const IconHeartPulse = () => (
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                <path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/>
+            </svg>
+        );
+        const IconArrowRight = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+            </svg>
+        );
+        const IconArrowLeft = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
+            </svg>
+        );
+        const IconCamera = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+                <circle cx="12" cy="13" r="3"/>
+            </svg>
+        );
+        const IconUpload = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+        );
+        const IconEye = () => (
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
+                <circle cx="12" cy="12" r="3"/>
+            </svg>
+        );
+        const IconHistory = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>
+            </svg>
+        );
+        const IconPlus = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14"/><path d="M12 5v14"/>
+            </svg>
+        );
+        const IconTrash = () => (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+            </svg>
+        );
+        const IconRotate = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>
+            </svg>
+        );
+        const IconAlertCircle = () => (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+        );
+        const IconCheckCircle = () => (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+        );
+        const IconSparkles = () => (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+                <path d="M20 3v4"/><path d="M22 5h-4"/>
+            </svg>
+        );
+        const IconSyringe = () => (
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m18 2 4 4"/><path d="m17 7 3-3"/><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/><path d="m9 11 4 4"/><path d="m5 19-3 3"/><path d="m14 4 6 6"/>
+            </svg>
+        );
+        const IconEyeOff = () => (
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/>
+                <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/>
+                <path d="m2 2 20 20"/>
+            </svg>
+        );
+        const IconScanEye = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+                <circle cx="12" cy="12" r="1"/><path d="M18.944 12.33a1 1 0 0 0 0-.66 7.5 7.5 0 0 0-13.888 0 1 1 0 0 0 0 .66 7.5 7.5 0 0 0 13.888 0"/>
+            </svg>
+        );
+        const IconCheck = () => (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+            </svg>
+        );
+        const IconX = () => (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+            </svg>
+        );
+        const IconLogIn = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
+            </svg>
+        );
+        const IconLogOut = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+        );
+        const IconXClose = ({size = 16}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+            </svg>
+        );
+        const IconEyeSmall = () => (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
+                <circle cx="12" cy="12" r="3"/>
+            </svg>
+        );
+        const IconEyeOffSmall = () => (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/>
+                <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/>
+            </svg>
+        );
+
+
+        // ─── Navbar ─────────────────────────────────────────────
+        const Navbar = ({ onHistory, onHome, onLogin, isLoggedIn }) => (
+            <nav style={{
+                position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
+                padding: '1.5rem 2rem',
+                backgroundColor: 'rgba(248, 250, 251, 0.75)',
+                backdropFilter: 'blur(16px) saturate(140%)',
+                WebkitBackdropFilter: 'blur(16px) saturate(140%)',
+            }} className="animate-fade-up">
+                <div style={{ maxWidth: '80rem', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <button onClick={onHome} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'none', border: 'none', cursor: 'pointer' }}>
+                        <span style={{
+                            width: '2.75rem', height: '2.75rem', borderRadius: '1rem',
+                            backgroundColor: 'var(--surface-container)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            color: 'var(--primary)', transition: 'transform 0.2s',
+                        }}>
+                            <IconHeartPulse />
+                        </span>
+                        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.25rem', letterSpacing: '-0.02em', color: 'var(--on-surface)' }}>
+                            HemoScan
+                        </span>
+                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <button onClick={onHistory} className="text-title-sm" style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                            color: 'var(--secondary)', background: 'none', border: 'none', cursor: 'pointer',
+                            transition: 'color 0.2s',
+                        }}>
+                            <IconHistory /> Riwayat Klinis
+                        </button>
+                        <button onClick={onLogin} className="text-title-sm" style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                            padding: '0.5rem 1rem', borderRadius: '9999px',
+                            background: 'var(--gradient-primary)', color: '#fff',
+                            border: 'none', cursor: 'pointer', boxShadow: 'var(--shadow-ambient-sm)',
+                            transition: 'opacity 0.2s',
+                        }}>
+                            {isLoggedIn ? <><IconLogOut /> Keluar</> : <><IconLogIn /> Masuk</>}
+                        </button>
                     </div>
-                    <div className="hidden md:flex items-center space-x-12">
-                        <button className={`font-manrope font-bold tracking-tight ${page === 'home' ? 'text-primary border-b-2 border-primary pb-1' : 'text-secondary'}`} onClick={() => setPage('home')}>HOME</button>
-                        <button className={`font-manrope font-bold tracking-tight ${page === 'history' ? 'text-primary border-b-2 border-primary pb-1' : 'text-secondary'}`} onClick={() => setPage('history')}>HISTORY</button>
-                        <button className="font-manrope font-bold tracking-tight text-secondary">HELP</button>
-                    </div>
-                    <button onClick={handleNewScan} className="primary-gradient text-white font-bold px-6 py-2.5 rounded-full text-sm scale-95 hover:scale-100 transition-all">New Scan</button>
                 </div>
             </nav>
         );
 
-        const Footer = () => (
-            <footer className="w-full py-12 px-8 bg-[#f2f4f5] mt-auto">
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
-                    <div>
-                        <div className="font-manrope font-semibold text-primary">HEMOSCAN CLINICAL LABS</div>
-                        <div className="text-xs text-secondary">© 2024 Hemoscan Clinical Labs. All rights reserved.</div>
+        // ─── Footer ─────────────────────────────────────────────
+        const Footer = ({ onOpenLegal }) => (
+            <footer style={{ width: '100%', marginTop: '6rem', backgroundColor: 'var(--surface-container-low)' }}>
+                <div style={{ maxWidth: '80rem', margin: '0 auto', padding: '3.5rem 2rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '2rem', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <span style={{
+                                width: '2.75rem', height: '2.75rem', borderRadius: '1rem',
+                                backgroundColor: 'var(--surface-container-lowest)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                color: 'var(--primary)',
+                            }}>
+                                <IconHeartPulse />
+                            </span>
+                            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.25rem', letterSpacing: '-0.02em', color: 'var(--on-surface)' }}>
+                                HemoScan
+                            </span>
+                        </div>
                     </div>
-                    <div className="flex flex-wrap gap-x-8 gap-y-2 text-xs text-secondary">
-                        <a href="#">Privacy Policy</a>
-                        <a href="#">Terms of Service</a>
-                        <a href="#">Clinical Guidelines</a>
-                        <a href="#">HIPAA Compliance</a>
+                    <div style={{ margin: '2rem 0', height: '1px', width: '100%', backgroundColor: 'rgba(149, 37, 40, 0.25)' }} />
+                    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem' }}>
+                        <div className="text-body-md" style={{ color: 'var(--secondary)' }}>
+                            <p>© 2026 HemoScan Project ITS.</p>
+                            <p style={{ opacity: 0.7 }}>Karya Cipta Inovasi Sains Data.</p>
+                        </div>
+                        <nav style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.5rem' }}>
+                            {["Terms of Use", "Help & Support"].map(label => (
+                                <a key={label} href="#" onClick={(e) => { e.preventDefault(); onOpenLegal?.(label === "Terms of Use" ? "terms" : "help"); }} className="text-title-sm" style={{
+                                    padding: '0.5rem 1rem', borderRadius: '9999px',
+                                    color: 'var(--secondary)', textDecoration: 'none', transition: 'all 0.2s',
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--surface-container)'; e.currentTarget.style.color = 'var(--on-surface)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--secondary)'; }}
+                                >{label}</a>
+                            ))}
+                        </nav>
                     </div>
                 </div>
             </footer>
         );
 
-        const HomeScreen = ({ handleNewScan, setPage }) => (
-            <main className="flex-grow flex flex-col items-center justify-center p-8 relative overflow-hidden">
-                <div className="absolute top-1/4 -left-20 w-96 h-96 bg-primary opacity-5 rounded-full blur-3xl"></div>
-                <div className="text-center z-10 max-w-2xl mb-16">
-                    <h1 className="font-headline text-on-surface font-extrabold tracking-tight text-5xl mb-6">Ready for your clinical<br/>blood assessment?</h1>
-                    <p className="text-secondary text-lg mb-12">Ensure your testing environment is well-lit and your test strip is ready for high-precision optical scanning.</p>
-                    <div className="flex flex-col items-center group">
-                        <button onClick={handleNewScan} className="primary-gradient w-32 h-32 rounded-full flex items-center justify-center text-white shadow-2xl transition-transform hover:scale-105 active:scale-95 mb-4">
-                            <span className="material-symbols-outlined text-5xl">add_circle</span>
+        // ─── Legal Modal (Terms of Use & Help/Support) ───────────
+        const LegalModal = ({ type, onClose }) => {
+            const isTerms = type === 'terms';
+            return (
+                <div style={{
+                    position: 'fixed', inset: 0, zIndex: 110,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    padding: '2rem',
+                    backgroundColor: 'rgba(25, 28, 29, 0.4)',
+                    backdropFilter: 'blur(16px) saturate(140%)',
+                }} onClick={onClose}>
+                    <div style={{
+                        position: 'relative', width: '100%', maxWidth: '42rem',
+                        maxHeight: '85vh', overflowY: 'auto',
+                        borderRadius: '2rem', padding: '2.5rem',
+                        backgroundColor: 'var(--surface-container-lowest)',
+                        border: '1px solid rgba(149, 37, 40, 0.1)',
+                        boxShadow: 'var(--shadow-ambient)',
+                    }} onClick={e => e.stopPropagation()} className="animate-fade-up">
+                        <button onClick={onClose} style={{
+                            position: 'absolute', top: '1.5rem', right: '1.5rem',
+                            width: '2.5rem', height: '2.5rem', borderRadius: '9999px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            border: 'none', cursor: 'pointer',
+                            backgroundColor: 'var(--surface-container-low)',
+                            color: 'var(--secondary)',
+                            transition: 'background-color 0.2s',
+                        }} onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--surface-container)'}
+                           onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'var(--surface-container-low)'; e.currentTarget.style.color = 'var(--secondary)'; }}>
+                            <IconPlus style={{ transform: 'rotate(45deg)', width: '1.25rem', height: '1.25rem' }} />
                         </button>
-                        <span className="font-headline font-bold text-primary tracking-widest text-sm uppercase">NEW SCAN</span>
-                    </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl">
-                    <div className="bg-white p-8 rounded-xl border-l-4 border-primary shadow-sm">
-                        <h3 className="font-headline text-xl font-bold mb-3">What is Hemoscan?</h3>
-                        <p className="text-sm text-secondary">AI-powered medical web application for non-invasive anemia detection via conjunctiva analysis.</p>
-                    </div>
-                    <div className="glass-morphism p-8 rounded-xl border-l-4 border-secondary shadow-sm">
-                        <h3 className="font-headline text-xl font-bold mb-3">Technical Infrastructure</h3>
-                        <p className="text-sm text-secondary">Leverages MobileNetV2 architecture with quantized INT8/FP16 models for edge-optimized inference.</p>
-                    </div>
-                </div>
-            </main>
-        );
 
-        const IdentityScreen = ({ patient, setPatient, setPage }) => {
-            const symptomsList = ["Pucat", "Lemas", "Mata Berkunang", "Sesak Napas"];
-            return (
-                <main className="flex-grow p-8 max-w-4xl mx-auto w-full">
-                    <div className="flex items-center justify-center space-x-12 mb-12">
-                        <div className="flex flex-col items-center pb-2 border-b-2 border-primary text-primary">
-                            <span className="text-xs font-bold font-headline mb-1">01</span>
-                            <span className="text-sm font-semibold font-headline">Identity</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                            <span className="text-label-md" style={{ color: 'var(--primary)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                                HEMOSCAN
+                            </span>
+                            <span style={{ width: '4px', height: '4px', borderRadius: '50%', backgroundColor: 'var(--secondary)' }} />
+                            <span className="text-label-md" style={{ color: 'var(--secondary)' }}>
+                                {isTerms ? 'Kebijakan Layanan' : 'Pusat Dukungan'}
+                            </span>
                         </div>
-                        <div className="flex flex-col items-center pb-2 text-secondary opacity-40">
-                            <span className="text-xs font-bold font-headline mb-1">02</span>
-                            <span className="text-sm font-semibold font-headline">Scan</span>
-                        </div>
-                        <div className="flex flex-col items-center pb-2 text-secondary opacity-40">
-                            <span className="text-xs font-bold font-headline mb-1">03</span>
-                            <span className="text-sm font-semibold font-headline">Result</span>
-                        </div>
-                    </div>
-                    <div className="bg-white rounded-xl p-10 shadow-sm border-l-4 border-primary">
-                        <h2 className="font-headline text-2xl font-bold mb-8">Identitas Pasien</h2>
-                        <div className="space-y-8">
-                            <div className="space-y-2">
-                                <label className="text-sm font-semibold text-secondary">Nama Lengkap</label>
-                                <input value={patient.name} onChange={e => setPatient({...patient, name: e.target.value})} className="w-full bg-[#f2f4f5] border-none rounded-lg p-4 outline-none focus:ring-2 focus:ring-primary/10" placeholder="Masukkan nama" />
-                            </div>
-                            <div className="grid grid-cols-2 gap-8">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-secondary">Usia</label>
-                                    <input type="number" value={patient.age} onChange={e => setPatient({...patient, age: e.target.value})} className="w-full bg-[#f2f4f5] border-none rounded-lg p-4 outline-none focus:ring-2 focus:ring-primary/10" placeholder="Contoh: 25" />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-secondary">Jenis Kelamin</label>
-                                    <select value={patient.gender} onChange={e => setPatient({...patient, gender: e.target.value})} className="w-full bg-[#f2f4f5] border-none rounded-lg p-4 outline-none">
-                                        <option value="M">Pria</option>
-                                        <option value="F">Wanita</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="space-y-4">
-                                <label className="text-sm font-semibold text-secondary">Gejala Klinis</label>
-                                <div className="grid grid-cols-2 gap-4">
-                                    {symptomsList.map(s => (
-                                        <label key={s} className="flex items-center space-x-3 p-4 bg-[#f2f4f5] rounded-lg cursor-pointer">
-                                            <input type="checkbox" checked={patient.symptoms.includes(s)} onChange={e => {
-                                                const newSymp = e.target.checked ? [...patient.symptoms, s] : patient.symptoms.filter(x => x !== s);
-                                                setPatient({...patient, symptoms: newSymp});
-                                            }} className="text-primary rounded focus:ring-primary" />
-                                            <span className="text-sm font-medium">{s}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="flex justify-end pt-4">
-                                <button disabled={!patient.name || !patient.age} onClick={() => setPage('scan')} className="primary-gradient text-white px-10 py-4 rounded-full font-bold shadow-lg disabled:opacity-50 flex items-center gap-2">
-                                    Lanjutkan <span className="material-symbols-outlined">arrow_forward</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </main>
-            );
-        };
 
-        const ScanScreen = ({ processPrediction, loading }) => {
-            const videoRef = useRef(null);
-            const [streaming, setStreaming] = useState(false);
+                        <h2 className="text-headline-lg" style={{ color: 'var(--on-surface)', marginBottom: '1.5rem' }}>
+                            {isTerms ? 'Terms of Use (Syarat & Ketentuan)' : 'Help & Support (Bantuan & Dukungan)'}
+                        </h2>
 
-            useEffect(() => {
-                let stream = null;
-                async function setupCamera() {
-                    try {
-                        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-                        if (videoRef.current) {
-                            videoRef.current.srcObject = stream;
-                            setStreaming(true);
-                        }
-                    } catch (err) { alert("Camera error: " + err.message); }
-                }
-                setupCamera();
-                return () => { if (stream) stream.getTracks().forEach(t => t.stop()); };
-            }, []);
+                        <div style={{
+                            color: 'var(--secondary)', fontSize: '0.9375rem', lineHeight: 1.7,
+                            display: 'flex', flexDirection: 'column', gap: '1.25rem'
+                        }}>
+                            {isTerms ? (
+                                <>
+                                    <p style={{ fontSize: '0.8125rem', opacity: 0.7 }}>Terakhir Diperbarui: Mei 2026</p>
+                                    <p>
+                                        Selamat datang di <strong>HemoScan</strong>. Dengan mengakses dan menggunakan aplikasi web HemoScan, Anda menyetujui untuk terikat oleh Syarat dan Ketentuan berikut. Mohon baca dengan saksama sebelum menggunakan layanan kami.
+                                    </p>
 
-            const capture = () => {
-                const canvas = document.createElement('canvas');
-                canvas.width = videoRef.current.videoWidth;
-                canvas.height = videoRef.current.videoHeight;
-                canvas.getContext('2d').drawImage(videoRef.current, 0, 0);
-                canvas.toBlob(blob => {
-                    processPrediction(blob);
-                }, 'image/png');
-            };
-
-            return (
-                <main className="max-w-7xl mx-auto px-8 py-12 flex flex-col items-center">
-                    <div className="flex items-center justify-center mb-16 space-x-4">
-                        <div className="flex items-center space-x-2 text-secondary opacity-50"><div className="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center text-xs font-bold">01</div><span className="text-xs font-bold">PREPARATION</span></div>
-                        <div className="w-16 h-[2px] bg-secondary opacity-20"></div>
-                        <div className="flex items-center space-x-2 text-primary font-bold"><div className="w-10 h-10 rounded-full primary-gradient text-white flex items-center justify-center text-sm font-extrabold shadow-lg">02</div><span className="text-sm tracking-widest">SCAN</span></div>
-                        <div className="w-16 h-[2px] bg-secondary opacity-20"></div>
-                        <div className="flex items-center space-x-2 text-secondary opacity-50"><div className="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center text-xs font-bold">03</div><span className="text-xs font-bold">RESULTS</span></div>
-                    </div>
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full">
-                        <div className="lg:col-span-5 space-y-8">
-                            <span className="inline-block px-4 py-1.5 bg-primary/10 text-primary text-xs font-bold rounded-full tracking-wider">GUIDED CAPTURE</span>
-                            <h1 className="font-headline text-5xl font-bold tracking-tight">Capturing the <span className="text-primary">Conjunctiva</span></h1>
-                            <p className="text-secondary text-lg">Gently pull down your lower eyelid to expose the inner pale pink conjunctiva tissue.</p>
-                            <div className="space-y-4">
-                                {[ "Position eyes directly into camera", "Pull lower eyelid down", "Align within red frame" ].map((t, i) => (
-                                    <div key={i} className="flex items-center gap-4">
-                                        <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">{i+1}</div>
-                                        <span className="font-semibold text-secondary">{t}</span>
+                                    <div style={{ borderRadius: '1.25rem', padding: '1.25rem', backgroundColor: 'var(--error-container)', color: 'var(--on-error-container)' }}>
+                                        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+                                            <IconAlertCircle style={{ flexShrink: 0, marginTop: '0.25rem' }} />
+                                            <div>
+                                                <h4 className="text-title-sm" style={{ fontWeight: 700, marginBottom: '0.25rem' }}>1. Penafian Medis (Medical Disclaimer)</h4>
+                                                <p style={{ fontSize: '0.875rem', lineHeight: 1.6 }}>
+                                                    HemoScan adalah alat bantu skrining awal berbasis Kecerdasan Buatan (AI) non-invasif untuk mendeteksi indikasi anemia melalui citra konjungtiva mata. Aplikasi ini <strong>BUKAN</strong> pengganti diagnosis medis profesional, saran dokter, atau tes laboratorium darah klinis. Keputusan medis apa pun tidak boleh diambil semata-mata berdasarkan hasil dari aplikasi ini. Jika Anda menerima hasil deteksi berisiko atau mengalami gejala mencurigakan, segera berkonsultasilah dengan tenaga medis profesional.
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
-                                ))}
-                            </div>
+
+                                    <div>
+                                        <h4 className="text-title-sm" style={{ color: 'var(--on-surface)', fontWeight: 700, marginBottom: '0.375rem' }}>2. Keterbatasan Alat dan Akurasi</h4>
+                                        <p>
+                                            Akurasi prediksi model dipengaruhi oleh kualitas gambar konjungtiva yang diunggah, kondisi pencahayaan sekitar, fokus kamera, serta penarikan kelopak mata bawah yang benar.
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <h4 className="text-title-sm" style={{ color: 'var(--on-surface)', fontWeight: 700, marginBottom: '0.375rem' }}>3. Kebijakan Penggunaan Data</h4>
+                                        <p>
+                                            Gambar dan informasi klinis yang Anda unggah diproses secara langsung untuk memberikan analisis instan. Informasi ini disimpan di database kami secara rahasia dan aman untuk menyajikan fitur riwayat pemindaian klinis Anda. Kami tidak akan membagikan data pribadi Anda kepada pihak ketiga tanpa persetujuan eksplisit.
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <h4 className="text-title-sm" style={{ color: 'var(--on-surface)', fontWeight: 700, marginBottom: '0.375rem' }}>4. Batasan Tanggung Jawab</h4>
+                                        <p>
+                                            Penggunaan aplikasi ini sepenuhnya merupakan risiko dan tanggung jawab pengguna. Tim pengembang HemoScan ITS tidak bertanggung jawab atas kerugian medis, tindakan klinis salah, atau konsekuensi apa pun yang timbul dari penafsiran hasil skrining mandiri ini.
+                                        </p>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <p>
+                                        Butuh bantuan atau mengalami kendala teknis? Halaman dukungan ini menyajikan panduan dan solusi cepat untuk Anda dalam menggunakan layanan skrining HemoScan.
+                                    </p>
+
+                                    <div>
+                                        <h4 className="text-title-sm" style={{ color: 'var(--on-surface)', fontWeight: 700, marginBottom: '0.5rem' }}>💡 Cara Melakukan Pemindaian dengan Benar</h4>
+                                        <ul style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                            <li><strong>Pencahayaan:</strong> Pastikan wajah berada di area terang (cahaya alami atau putih hangat) dan hindari bayangan tajam pada mata.</li>
+                                            <li><strong>Posisi Kelopak Mata:</strong> Gunakan jari bersih Anda untuk menarik kelopak mata bawah perlahan hingga bagian dalam yang berwarna kemerahan (konjungtiva) terlihat jelas.</li>
+                                            <li><strong>Fokus Kamera:</strong> Dekatkan kamera ponsel/laptop Anda sekitar 10-15 cm, biarkan fokus otomatis mengunci area konjungtiva dengan tajam (tidak blur).</li>
+                                        </ul>
+                                    </div>
+
+                                    <div style={{ borderRadius: '1.25rem', padding: '1.25rem', backgroundColor: 'var(--surface-container-low)' }}>
+                                        <h4 className="text-title-sm" style={{ color: 'var(--on-surface)', fontWeight: 700, marginBottom: '0.5rem' }}>❓ Pertanyaan Umum (FAQ)</h4>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.875rem' }}>
+                                            <div>
+                                                <strong style={{ color: 'var(--on-surface)' }}>Q: Mengapa hasil deteksi saya berbeda dengan tes lab?</strong>
+                                                <p style={{ marginTop: '0.125rem' }}>A: HemoScan mendeteksi anemia berdasarkan analisis visual warna pucat konjungtiva mata lewat AI. Tes darah lab mengukur konsentrasi hemoglobin darah secara mikroskopis yang tetap menjadi standar diagnosis klinis utama.</p>
+                                            </div>
+                                            <div style={{ borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: '0.5rem' }}>
+                                                <strong style={{ color: 'var(--on-surface)' }}>Q: Mengapa kamera laptop/HP saya tidak dapat dibuka?</strong>
+                                                <p style={{ marginTop: '0.125rem' }}>A: Pastikan Anda telah memberikan izin (permission) akses kamera untuk situs web ini pada pengaturan peramban Anda.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h4 className="text-title-sm" style={{ color: 'var(--on-surface)', fontWeight: 700, marginBottom: '0.375rem' }}>📧 Hubungi Tim Dukungan Kami</h4>
+                                        <p>
+                                            Jika Anda memiliki masukan, kendala server, atau kebutuhan riset kolaboratif, silakan hubungi tim HemoScan ITS via e-mail di:
+                                        </p>
+                                        <div style={{ marginTop: '0.5rem', fontWeight: 600, color: 'var(--primary)', fontFamily: 'monospace', fontSize: '1rem' }}>
+                                            support@hemoscan.com · iqdamshidqiali@gmail.com
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
-                        <div className="lg:col-span-7 flex flex-col items-center">
-                            <div className="w-full aspect-video bg-black rounded-3xl overflow-hidden relative shadow-2xl">
-                                <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover mirror" />
-                                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                    <div className="w-48 h-32 border-2 border-primary/50 rounded-xl relative">
-                                        <div className="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-primary -translate-x-1 -translate-y-1"></div>
-                                        <div className="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-primary translate-x-1 -translate-y-1"></div>
-                                        <div className="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-primary -translate-x-1 translate-y-1"></div>
-                                        <div className="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-primary translate-x-1 translate-y-1"></div>
-                                        <div className="absolute top-1/2 left-0 w-full h-[1px] bg-primary/40 shadow-[0_0_10px_#952528]"></div>
-                                    </div>
-                                    <div className="mt-8 glass-morphism px-6 py-2 rounded-full border border-white/20">
-                                        <p className="text-on-surface text-sm font-bold tracking-tight">KEEP EYE STEADY</p>
-                                    </div>
-                                </div>
-                                {loading && (
-                                    <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white z-20">
-                                        <div className="w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin mb-4"></div>
-                                        <p className="font-bold">Analyzing Specimen...</p>
-                                    </div>
-                                )}
-                            </div>
-                            <button onClick={capture} disabled={!streaming || loading} className="mt-12 primary-gradient text-white px-12 py-6 rounded-3xl shadow-xl flex items-center space-x-6 hover:scale-105 transition-all">
-                                <span className="font-manrope text-2xl font-extrabold tracking-tight">Check Anemia</span>
-                                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-3xl">arrow_forward</span>
-                                </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2rem' }}>
+                            <button onClick={onClose} className="btn-secondary" style={{ padding: '0.625rem 1.5rem' }}>
+                                Tutup Halaman
                             </button>
                         </div>
                     </div>
-                </main>
-            );
-        };
-
-        const ResultScreen = ({ prediction, setPage }) => {
-            if (!prediction) return null;
-            const isAnemia = prediction.prediksi === 'Anemia';
-            const confidence = Math.round(prediction.probabilitas * 100);
-            
-            return (
-                <main className="max-w-7xl mx-auto px-8 py-8 flex flex-col gap-8">
-                    <div className="w-full flex items-center justify-center gap-4 py-4 opacity-50">
-                        <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-full bg-primary-container text-white flex items-center justify-center font-bold text-xs">01</div><span className="text-xs font-bold tracking-wider">PREPARATION</span></div>
-                        <div className="w-12 h-[2px] bg-[#eceeef]"></div>
-                        <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-full bg-primary-container text-white flex items-center justify-center font-bold text-xs">02</div><span className="text-xs font-bold tracking-wider">SCANNING</span></div>
-                        <div className="w-12 h-[2px] bg-[#eceeef]"></div>
-                        <div className="flex items-center gap-3 opacity-100"><div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shadow-lg">03</div><span className="text-xs font-bold text-primary tracking-wider">RESULT</span></div>
-                    </div>
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                        <div className="lg:col-span-8 flex flex-col gap-8">
-                            <section className={`bg-white rounded-xl border-l-4 ${isAnemia ? 'border-primary' : 'border-green-500'} shadow-sm p-8`}>
-                                <div className="flex justify-between items-start mb-6">
-                                    <div>
-                                        <h1 className="font-headline font-bold text-secondary mb-1">Diagnosis Result</h1>
-                                        <div className="flex items-center gap-3">
-                                            <span className={`font-headline font-extrabold text-4xl ${isAnemia ? 'text-primary' : 'text-green-600'}`}>
-                                                {prediction.prediksi.toUpperCase()}
-                                            </span>
-                                            <span className={`px-3 py-1 rounded-md text-[0.65rem] font-bold tracking-widest uppercase ${isAnemia ? 'bg-red-100 text-primary' : 'bg-green-100 text-green-700'}`}>
-                                                {isAnemia ? 'Clinical Focus Required' : 'Physiological Stable'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="relative w-24 h-24 flex items-center justify-center">
-                                        <svg className="w-full h-full -rotate-90">
-                                            <circle cx="48" cy="48" r="40" fill="transparent" stroke="#eceeef" strokeWidth="8" />
-                                            <circle cx="48" cy="48" r="40" fill="transparent" stroke={isAnemia ? "#952528" : "#22c55e"} strokeWidth="8" strokeDasharray="251.2" strokeDashoffset={251.2 * (1 - confidence/100)} strokeLinecap="round" />
-                                        </svg>
-                                        <div className="absolute flex flex-col items-center">
-                                            <span className="text-xl font-extrabold">{confidence}%</span>
-                                            <span className="text-[0.6rem] font-bold text-secondary">Confidence</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="bg-[#f2f4f5] p-6 rounded-xl flex items-center gap-8">
-                                    <div className="flex flex-col gap-1">
-                                        <span className="text-xs font-bold text-secondary">PROBABILITY</span>
-                                        <div className="text-3xl font-extrabold">{prediction.probabilitas}</div>
-                                    </div>
-                                    <div className="w-[2px] h-12 bg-[#eceeef]"></div>
-                                    <div className="flex flex-col gap-1">
-                                        <span className="text-xs font-bold text-secondary">RISK LEVEL</span>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-3xl font-extrabold capitalize">{prediction.risk_level}</span>
-                                            <div className={`w-3 h-3 rounded-full ${prediction.risk_level === 'high' ? 'bg-red-600' : prediction.risk_level === 'medium' ? 'bg-amber-400' : 'bg-green-500'}`}></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <p className="mt-6 text-secondary italic text-sm">{prediction.keterangan}</p>
-                            </section>
-                            <section className="flex flex-col gap-4">
-                                <h2 className="font-headline font-bold text-xl text-secondary">Spectral Capture</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="bg-white rounded-xl p-4 shadow-sm">
-                                        <img src={`${API_URL}${prediction.image_url}`} className="w-full aspect-video object-cover rounded-lg mb-4" />
-                                        <span className="text-xs font-bold uppercase text-secondary">Captured Specimen</span>
-                                    </div>
-                                    <div className="bg-white rounded-xl p-4 shadow-sm opacity-60">
-                                        <div className="w-full aspect-video bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
-                                            <span className="material-symbols-outlined text-4xl text-gray-400">biotech</span>
-                                        </div>
-                                        <span className="text-xs font-bold uppercase text-secondary">Reference Data</span>
-                                    </div>
-                                </div>
-                            </section>
-                        </div>
-                        <aside className="lg:col-span-4 flex flex-col gap-6">
-                            <div className="bg-white p-8 rounded-xl shadow-sm">
-                                <h2 className="font-headline font-bold text-xl text-secondary mb-6">Next Steps</h2>
-                                <div className="flex flex-col gap-4">
-                                    {[
-                                        { icon: "medical_services", title: "Consult Specialist", desc: "Schedule for clinical validation.", color: "bg-red-100 text-red-600" },
-                                        { icon: "restaurant", title: "Dietary Adjustment", desc: "Increase iron-rich foods.", color: "bg-amber-100 text-amber-600" },
-                                        { icon: "water_drop", title: "Hydration Focus", desc: "Maintain plasma stability.", color: "bg-blue-100 text-blue-600" }
-                                    ].map((step, idx) => (
-                                        <div key={idx} className="flex items-center gap-4 p-4 border border-[#f2f4f5] rounded-xl">
-                                            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${step.color}`}>
-                                                <span className="material-symbols-outlined">{step.icon}</span>
-                                            </div>
-                                            <div>
-                                                <h3 className="font-bold text-sm">{step.title}</h3>
-                                                <p className="text-[0.7rem] text-secondary">{step.desc}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="mt-8 flex flex-col gap-3">
-                                    <button onClick={() => setPage('home')} className="w-full primary-gradient text-white py-4 rounded-xl font-bold text-sm shadow-lg flex items-center justify-center gap-2">
-                                        <span className="material-symbols-outlined text-sm">home</span> Save & Back Home
-                                    </button>
-                                    <button className="w-full bg-[#f2f4f5] text-secondary py-4 rounded-xl font-bold text-sm hover:bg-gray-200 flex items-center justify-center gap-2">
-                                        <span className="material-symbols-outlined text-sm">picture_as_pdf</span> Download PDF
-                                    </button>
-                                </div>
-                            </div>
-                        </aside>
-                    </div>
-                </main>
-            );
-        };
-
-        const HistoryScreen = ({ history, setPrediction, setPage, setIsLoggedIn }) => (
-            <main className="flex-grow p-8 max-w-7xl mx-auto w-full">
-                <header className="mb-10 flex justify-between items-end">
-                    <div>
-                        <h1 className="font-manrope text-3xl font-bold text-on-surface mb-2">History Dashboard</h1>
-                        <p className="text-secondary text-sm">Review clinical diagnostic history and AI performance metrics.</p>
-                    </div>
-                    <button onClick={() => setIsLoggedIn(false)} className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
-                        <span className="material-symbols-outlined text-sm">logout</span> Logout
-                    </button>
-                </header>
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden p-6">
-                    <div className="overflow-x-auto no-scrollbar">
-                        <table className="w-full text-left border-separate border-spacing-y-4">
-                            <thead>
-                                <tr className="text-secondary text-xs font-bold tracking-widest uppercase">
-                                    <th className="pb-2 pl-4">ID</th>
-                                    <th className="pb-2">Eye Image</th>
-                                    <th className="pb-2">Patient Name</th>
-                                    <th className="pb-2">Age</th>
-                                    <th className="pb-2">AI Prediction</th>
-                                    <th className="pb-2">Confidence</th>
-                                    <th className="pb-2">Date/Time</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {history.map((h, i) => (
-                                    <tr key={i} className="bg-[#f2f4f5] hover:bg-white transition-colors cursor-pointer" onClick={() => { setPrediction(h); setPage('result'); }}>
-                                        <td className="py-4 pl-4 rounded-l-xl font-bold text-secondary text-sm">{h.id}</td>
-                                        <td className="py-4">
-                                            <div className="w-12 h-12 rounded-lg overflow-hidden border">
-                                                <img src={`${API_URL}${h.image_url}`} className="w-full h-full object-cover" />
-                                            </div>
-                                        </td>
-                                        <td className="py-4 font-bold">{h.nama}</td>
-                                        <td className="py-4 text-secondary text-sm">{h.umur} y.o</td>
-                                        <td className="py-4">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${h.prediksi === 'Anemia' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
-                                                {h.prediksi}
-                                            </span>
-                                        </td>
-                                        <td className="py-4 w-48">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-full bg-white h-2 rounded-full overflow-hidden">
-                                                    <div className={`h-full rounded-full ${h.prediksi === 'Anemia' ? 'bg-primary' : 'bg-green-500'}`} style={{width: `${h.probabilitas * 100}%`}}></div>
-                                                </div>
-                                                <span className="text-xs font-bold">{Math.round(h.probabilitas * 100)}%</span>
-                                            </div>
-                                        </td>
-                                        <td className="py-4 pr-4 rounded-r-xl text-secondary text-xs">{h.timestamp}</td>
-                                    </tr>
-                                ))}
-                                {history.length === 0 && <tr><td colSpan="7" className="text-center py-12 text-secondary">No scan history available yet.</td></tr>}
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
-            </main>
-        );
+            );
+        };
 
-        const LoginScreen = ({ setIsLoggedIn }) => {
+
+
+        // ─── Auth Modal (returns user data on success) ────────────
+        const AuthModal = ({ onSuccess, onCancel }) => {
+            const [showPw, setShowPw] = useState(false);
             const [email, setEmail] = useState('');
             const [password, setPassword] = useState('');
             const [error, setError] = useState('');
             const [loading, setLoading] = useState(false);
 
-            const handleLogin = async (e) => {
+            const handleSubmit = async (e) => {
                 e.preventDefault();
                 setLoading(true);
                 setError('');
@@ -441,92 +568,739 @@
                     });
                     const data = await res.json();
                     if (res.ok) {
-                        setIsLoggedIn(true);
+                        onSuccess({ email: data.email, role: data.role, display_name: data.display_name });
                     } else {
-                        setError(data.detail || 'Login failed');
+                        setError(data.detail || 'Login gagal');
                     }
                 } catch (err) {
-                    setError('Server error. Make sure server.py is running.');
+                    setError('Server error. Pastikan server.py berjalan.');
                 } finally {
                     setLoading(false);
                 }
             };
 
             return (
-                <main className="flex-grow flex items-center justify-center p-8">
-                    <div className="bg-white rounded-2xl p-10 shadow-2xl border-l-8 border-primary w-full max-w-md">
-                        <div className="text-center mb-8">
-                            <h2 className="font-headline text-3xl font-extrabold text-on-surface mb-2">Restricted Access</h2>
-                            <p className="text-secondary text-sm">Please log in to view clinical history</p>
+                <div className="animate-fade-in" onClick={onCancel} style={{
+                    position: 'fixed', inset: 0, zIndex: 100,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem',
+                    backgroundColor: 'rgba(248, 250, 251, 0.7)',
+                    backdropFilter: 'blur(18px) saturate(140%)',
+                }}>
+                    <div onClick={e => e.stopPropagation()} className="animate-fade-up shadow-ambient" style={{
+                        width: '100%', maxWidth: '28rem', borderRadius: '2rem', overflow: 'hidden',
+                        backgroundColor: 'var(--surface-container-lowest)', position: 'relative',
+                    }}>
+                        <div style={{ height: '6px', width: '100%', background: 'var(--gradient-primary)' }} />
+                        <button onClick={onCancel} aria-label="Tutup" style={{
+                            position: 'absolute', top: '1.25rem', right: '1.25rem',
+                            width: '2.25rem', height: '2.25rem', borderRadius: '9999px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            backgroundColor: 'var(--surface-container-low)',
+                            color: 'var(--secondary)', border: 'none', cursor: 'pointer',
+                        }}>
+                            <IconXClose />
+                        </button>
+
+                        <div style={{ padding: '2.25rem 2.25rem 2rem' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                                <span style={{
+                                    width: '3.5rem', height: '3.5rem', borderRadius: '1rem',
+                                    backgroundColor: 'var(--primary-fixed)', color: 'var(--primary)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                }}>
+                                    <IconHeartPulse />
+                                </span>
+                                <h2 className="text-headline-md" style={{ color: 'var(--on-surface)', marginTop: '1.25rem' }}>
+                                    Masuk ke HemoScan
+                                </h2>
+                                <p className="text-body-md" style={{ color: 'var(--secondary)', marginTop: '0.5rem', maxWidth: '20rem' }}>
+                                    Masuk untuk melihat riwayat skrining anemia Anda.
+                                </p>
+                            </div>
+
+                            {/* Account info hint */}
+                            <div style={{
+                                marginTop: '1.5rem', padding: '0.75rem 1rem', borderRadius: '0.875rem',
+                                backgroundColor: 'var(--surface-container-low)', fontSize: '0.8125rem', lineHeight: 1.6,
+                            }}>
+                                <div style={{ fontWeight: 600, color: 'var(--on-surface)', marginBottom: '0.25rem' }}>Akun Tersedia:</div>
+                                <div style={{ color: 'var(--secondary)' }}>
+                                    <span style={{ color: 'var(--primary)', fontWeight: 600 }}>Admin:</span> admin@hemoscan.com / admin123<br/>
+                                    <span style={{ color: 'var(--secondary)', fontWeight: 600 }}>User:</span> user@hemoscan.com / user123<br/>
+                                    <span style={{ color: 'var(--secondary)', fontWeight: 600 }}>User:</span> dokter@hemoscan.com / dokter123
+                                </div>
+                            </div>
+
+                            <form onSubmit={handleSubmit} style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                <div>
+                                    <label className="text-label-md" style={{ color: 'var(--secondary)', display: 'block', marginBottom: '0.5rem' }}>Alamat Email</label>
+                                    <input className="input-ghost" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="admin@hemoscan.com" required />
+                                </div>
+                                <div>
+                                    <label className="text-label-md" style={{ color: 'var(--secondary)', display: 'block', marginBottom: '0.5rem' }}>Kata Sandi</label>
+                                    <div style={{ position: 'relative' }}>
+                                        <input className="input-ghost" type={showPw ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required style={{ paddingRight: '3rem' }} />
+                                        <button type="button" onClick={() => setShowPw(!showPw)} style={{
+                                            position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)',
+                                            background: 'none', border: 'none', color: 'var(--secondary)', cursor: 'pointer',
+                                        }}>
+                                            {showPw ? <IconEyeOffSmall /> : <IconEyeSmall />}
+                                        </button>
+                                    </div>
+                                </div>
+                                {error && <p className="text-body-md" style={{ color: 'var(--error)', textAlign: 'center', fontWeight: 600 }}>{error}</p>}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', paddingTop: '0.75rem' }}>
+                                    <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
+                                        {loading ? 'Mengautentikasi...' : 'Masuk'}
+                                    </button>
+                                    <button type="button" onClick={onCancel} className="btn-secondary" style={{ width: '100%', justifyContent: 'center' }}>
+                                        Batal
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                        <form onSubmit={handleLogin} className="space-y-6">
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold text-secondary uppercase tracking-widest">Email Address</label>
-                                <input 
-                                    type="email" 
-                                    value={email} 
-                                    onChange={e => setEmail(e.target.value)} 
-                                    className="w-full bg-[#f2f4f5] border-none rounded-xl p-4 outline-none focus:ring-2 focus:ring-primary/20" 
-                                    placeholder="admin@hemoscan.com"
-                                    required
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold text-secondary uppercase tracking-widest">Password</label>
-                                <input 
-                                    type="password" 
-                                    value={password} 
-                                    onChange={e => setPassword(e.target.value)} 
-                                    className="w-full bg-[#f2f4f5] border-none rounded-xl p-4 outline-none focus:ring-2 focus:ring-primary/20" 
-                                    placeholder="••••••••"
-                                    required
-                                />
-                            </div>
-                            {error && <p className="text-primary text-xs font-bold text-center">{error}</p>}
-                            <button 
-                                type="submit" 
-                                disabled={loading}
-                                className="w-full primary-gradient text-white py-4 rounded-xl font-bold shadow-lg hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
-                            >
-                                {loading ? 'Authenticating...' : 'Sign In'}
-                            </button>
-                        </form>
                     </div>
-                </main>
+                </div>
             );
         };
 
+
+        // ─── Landing View (Home + Form) ─────────────────────────
+        const LandingView = ({ onContinue }) => {
+            const [name, setName] = useState('');
+            const [age, setAge] = useState('');
+            const [gender, setGender] = useState('Perempuan');
+            const [symptoms, setSymptoms] = useState([]);
+
+            const toggle = (s) => setSymptoms(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
+            const canSubmit = name.trim().length > 1 && age && Number(age) > 0;
+
+            return (
+                <section style={{ minHeight: '100vh', paddingTop: '8rem', paddingBottom: '6rem', padding: '8rem 2rem 6rem' }}>
+                    {/* Hero + Form Grid */}
+                    <div style={{ maxWidth: '80rem', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr', gap: '3rem', alignItems: 'center' }} className="landing-grid">
+                        {/* Left — Intro */}
+                        <div className="animate-fade-up" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingTop: '1.5rem' }}>
+                            <div className="glass-panel" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '9999px', width: 'fit-content' }}>
+                                <IconSparkles />
+                                <span className="text-label-md" style={{ color: 'var(--on-surface)' }}>Anemia: Krisis Kesehatan Global (WHO)</span>
+                            </div>
+                            <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, color: 'var(--on-surface)', lineHeight: 1.1, letterSpacing: '-0.02em', fontSize: 'clamp(2.75rem, 5.4vw, 4rem)' }}>
+                                <span style={{ color: 'var(--primary)' }}>19 Juta</span> Warga RI Derita Anemia.
+                            </h1>
+                            <p style={{ color: 'var(--secondary)', fontSize: '1.0625rem', lineHeight: 1.7, maxWidth: '32rem' }}>
+                                Indonesia mencatat estimasi 19 juta kasus anemia pada perempuan setiap tahun selama 20 tahun terakhir. Atasi dengan diagnostik AI HemoScan yang objektif, real-time, dan tanpa rasa sakit.
+                            </p>
+                            
+                            {/* Statistics Grid */}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginTop: '1.5rem', maxWidth: '32rem' }}>
+                                {[
+                                    { v: "94.2%", l: "Akurasi model" },
+                                    { v: "<3 dtk", l: "Waktu inferensi" },
+                                    { v: "0", l: "Darah diambil" }
+                                ].map((s) => (
+                                    <div key={s.l}>
+                                        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.75rem', color: 'var(--on-surface)' }}>
+                                            {s.v}
+                                        </div>
+                                        <div className="text-label-md" style={{ color: 'var(--secondary)', marginTop: '0.25rem' }}>
+                                            {s.l}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Right — Form Card */}
+                        <div className="animate-fade-up delay-200" style={{ justifySelf: 'end', width: '100%', maxWidth: '36rem' }}>
+                            <div className="clinical-accent shadow-ambient" style={{
+                                padding: '2.5rem', borderRadius: '2rem', position: 'relative', overflow: 'hidden',
+                                backgroundColor: 'var(--surface-container-lowest)',
+                            }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                    <div>
+                                        <div className="text-label-md" style={{ color: 'var(--secondary)' }}>Langkah 01 · Profil Pasien</div>
+                                        <h2 className="text-headline-md" style={{ color: 'var(--on-surface)', marginTop: '0.25rem' }}>Skrining Baru</h2>
+                                    </div>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                        <div>
+                                            <label className="text-label-md" style={{ color: 'var(--secondary)', display: 'block', marginBottom: '0.5rem' }}>Nama Lengkap</label>
+                                            <input className="input-ghost" value={name} onChange={e => setName(e.target.value)} placeholder="cth. Amelia Hartwell" />
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                            <div>
+                                                <label className="text-label-md" style={{ color: 'var(--secondary)', display: 'block', marginBottom: '0.5rem' }}>Usia</label>
+                                                <input type="number" className="input-ghost" value={age} onChange={e => setAge(e.target.value)} placeholder="34" />
+                                            </div>
+                                            <div>
+                                                <label className="text-label-md" style={{ color: 'var(--secondary)', display: 'block', marginBottom: '0.5rem' }}>Jenis Kelamin</label>
+                                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                                    {["Perempuan", "Laki-laki"].map(g => (
+                                                        <button key={g} type="button" onClick={() => setGender(g)} style={{
+                                                            flex: 1, padding: '0.625rem 0.75rem', borderRadius: '1rem',
+                                                            fontSize: '0.875rem', fontWeight: 500, border: 'none', cursor: 'pointer',
+                                                            backgroundColor: gender === g ? 'var(--primary-fixed)' : 'var(--surface-container-low)',
+                                                            color: gender === g ? 'var(--primary)' : 'var(--secondary)',
+                                                            transition: 'all 0.2s',
+                                                        }}>
+                                                            {g}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="text-label-md" style={{ color: 'var(--secondary)', display: 'block', marginBottom: '0.75rem' }}>Gejala yang Dialami</label>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                                                {SYMPTOMS.map(s => (
+                                                    <button key={s} type="button" onClick={() => toggle(s)} style={{
+                                                        padding: '0.625rem 0.875rem', borderRadius: '1rem',
+                                                        fontSize: '0.875rem', fontWeight: 500, textAlign: 'left',
+                                                        border: 'none', cursor: 'pointer', transition: 'all 0.2s',
+                                                        backgroundColor: symptoms.includes(s) ? 'var(--primary-fixed)' : 'var(--surface-container-low)',
+                                                        color: symptoms.includes(s) ? 'var(--primary)' : 'var(--secondary)',
+                                                    }}>
+                                                        {s}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '1rem' }}>
+                                        <button disabled={!canSubmit} onClick={() => canSubmit && onContinue({
+                                            name: name.trim(), age: Number(age),
+                                            gender: gender === 'Perempuan' ? 'F' : 'M', symptoms
+                                        })} className="btn-primary">
+                                            Lanjutkan ke Pemindaian <IconArrowRight />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Problem Section */}
+                    <div className="animate-fade-up delay-400" style={{
+                        maxWidth: '80rem', margin: '8rem auto 0',
+                        borderRadius: '2.5rem', padding: 'clamp(2rem, 4vw, 4rem)',
+                        backgroundColor: 'var(--surface-container-low)',
+                    }}>
+                        <div className="text-label-md" style={{ color: 'var(--secondary)' }}>Kesenjangan Diagnostik Kritis</div>
+                        <h2 className="text-display-md" style={{ color: 'var(--on-surface)', marginTop: '0.75rem', maxWidth: '48rem' }}>
+                            Paradoks Antara Presisi Mahal dan <span style={{ color: 'var(--primary)' }}>Subjektivitas Murah.</span>
+                        </h2>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginTop: '3rem' }}>
+                            <div className="shadow-ambient-sm" style={{ borderRadius: '2rem', padding: '2.25rem', backgroundColor: 'var(--surface-container-lowest)' }}>
+                                <div style={{
+                                    width: '3.5rem', height: '3.5rem', borderRadius: '1rem',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
+                                    backgroundColor: 'var(--error-container)', color: 'var(--on-error-container)',
+                                }}>
+                                    <IconSyringe />
+                                    <span style={{
+                                        position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    }}>
+                                        <span style={{
+                                            display: 'block', width: '2.25rem', height: '3px',
+                                            transform: 'rotate(45deg)', borderRadius: '9999px',
+                                            backgroundColor: 'var(--on-error-container)',
+                                        }} />
+                                    </span>
+                                </div>
+                                <h3 className="text-headline-md" style={{ color: 'var(--on-surface)', marginTop: '1.5rem' }}>Metode Uji Darah Invasif</h3>
+                                <p style={{ color: 'var(--secondary)', marginTop: '0.75rem', fontSize: '1rem', lineHeight: 1.7 }}>
+                                    <span style={{ color: 'var(--on-surface)', fontWeight: 500 }}>Karakteristik Utama: </span>
+                                    Membutuhkan pengambilan darah, biaya tinggi, infrastruktur laboratorium, dan melukai pasien.
+                                </p>
+                            </div>
+                            <div className="shadow-ambient-sm" style={{ borderRadius: '2rem', padding: '2.25rem', backgroundColor: 'var(--surface-container-lowest)' }}>
+                                <div style={{
+                                    width: '3.5rem', height: '3.5rem', borderRadius: '1rem',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    backgroundColor: 'var(--primary-fixed)', color: 'var(--primary)',
+                                }}>
+                                    <IconEyeOff />
+                                </div>
+                                <h3 className="text-headline-md" style={{ color: 'var(--on-surface)', marginTop: '1.5rem' }}>Inspeksi Visual Manual</h3>
+                                <p style={{ color: 'var(--secondary)', marginTop: '0.75rem', fontSize: '1rem', lineHeight: 1.7 }}>
+                                    <span style={{ color: 'var(--on-surface)', fontWeight: 500 }}>Tantangan Klinis: </span>
+                                    Pengamatan pucat pada konjungtiva palpebra sangat subjektif, dan memiliki variabilitas antar-dokter yang tinggi.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Comparison Table */}
+                    <div className="animate-fade-up delay-500" style={{ maxWidth: '80rem', margin: '6rem auto 0' }}>
+                        <div style={{ maxWidth: '48rem' }}>
+                            <div className="text-label-md" style={{ color: 'var(--secondary)' }}>Memperkenalkan HemoScan</div>
+                            <h2 className="text-display-md" style={{ color: 'var(--on-surface)', marginTop: '0.75rem' }}>
+                                Mengotomatisasi ekstraksi fitur warna dan tekstur dari konjungtiva mata{' '}
+                                <span style={{ color: 'var(--primary)' }}>tanpa perlu melukai pasien.</span>
+                            </h2>
+                        </div>
+                        <div className="shadow-ambient" style={{ marginTop: '3rem', borderRadius: '2rem', overflow: 'hidden', backgroundColor: 'var(--surface-container-lowest)' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr 1fr 1.05fr', minWidth: '600px' }}>
+                                {/* Header */}
+                                <div className="text-label-md" style={{ padding: '1.5rem', color: 'var(--secondary)', backgroundColor: 'var(--surface-container)' }}>Aspek</div>
+                                <div className="text-title-sm" style={{ padding: '1.5rem', color: 'var(--on-surface)', backgroundColor: 'var(--surface-container)' }}>Tes Lab Darah</div>
+                                <div className="text-title-sm" style={{ padding: '1.5rem', color: 'var(--on-surface)', backgroundColor: 'var(--surface-container)' }}>Inspeksi Mata Visual</div>
+                                <div className="text-title-sm" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'var(--primary-fixed)', color: 'var(--primary)' }}>
+                                    <IconScanEye /> HemoScan
+                                </div>
+                                {/* Rows */}
+                                {[
+                                    { label: "Invasivitas", lab: "Ya ✕", vis: "Tidak ✓", hemo: "Tidak ✓" },
+                                    { label: "Kebutuhan Biaya", lab: "Tinggi 📈", vis: "Rendah 📉", hemo: "Rendah 📉" },
+                                    { label: "Kecepatan Diagnostik", lab: "Lambat 🕒", vis: "Cepat ⚡", hemo: "Real-time 🎯" },
+                                    { label: "Tingkat Objektivitas", lab: "Tinggi 📊", vis: "Sangat Rendah ❓", hemo: "Tinggi · AI 🤖" },
+                                ].map((row, idx) => (
+                                    <React.Fragment key={row.label}>
+                                        <div className="text-title-sm" style={{ padding: '1.5rem', color: 'var(--on-surface)', backgroundColor: idx % 2 === 0 ? 'var(--surface-container-lowest)' : 'var(--surface-container-low)' }}>{row.label}</div>
+                                        <div style={{ padding: '1.5rem', color: 'var(--secondary)', fontSize: '0.9375rem', backgroundColor: idx % 2 === 0 ? 'var(--surface-container-lowest)' : 'var(--surface-container-low)' }}>{row.lab}</div>
+                                        <div style={{ padding: '1.5rem', color: 'var(--secondary)', fontSize: '0.9375rem', backgroundColor: idx % 2 === 0 ? 'var(--surface-container-lowest)' : 'var(--surface-container-low)' }}>{row.vis}</div>
+                                        <div style={{ padding: '1.5rem', color: 'var(--primary)', fontSize: '0.9375rem', fontWeight: 500, backgroundColor: idx % 2 === 0 ? 'rgba(245, 223, 223, 0.65)' : 'rgba(245, 223, 223, 0.8)' }}>{row.hemo}</div>
+                                    </React.Fragment>
+                                ))}
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '2rem', color: 'var(--secondary)', fontSize: '0.875rem' }}>
+                            <span style={{ color: 'var(--primary)' }}><IconEyeSmall /></span>
+                            Pemindaian non-invasif yang berfokus pada empati pasien.
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+
+        // ─── Capture View ───────────────────────────────────────
+        const CaptureView = ({ onCaptured, onBack, loading }) => {
+            const [stage, setStage] = useState('prep');
+            const videoRef = useRef(null);
+            const fileRef = useRef(null);
+            const [streaming, setStreaming] = useState(false);
+
+            useEffect(() => {
+                if (stage !== 'capture') return;
+                let stream = null;
+                async function setup() {
+                    try {
+                        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 1280, height: 720 } });
+                        if (videoRef.current) { videoRef.current.srcObject = stream; setStreaming(true); }
+                    } catch (err) { alert("Camera error: " + err.message); }
+                }
+                setup();
+                return () => { if (stream) stream.getTracks().forEach(t => t.stop()); };
+            }, [stage]);
+
+            const capture = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = videoRef.current.videoWidth;
+                canvas.height = videoRef.current.videoHeight;
+                canvas.getContext('2d').drawImage(videoRef.current, 0, 0);
+                canvas.toBlob(blob => onCaptured(blob), 'image/png');
+            };
+
+            const handleFile = (e) => {
+                const f = e.target.files?.[0];
+                if (f) onCaptured(f);
+            };
+
+            return (
+                <section className="animate-fade-up" style={{ minHeight: '100vh', paddingTop: '8rem', paddingBottom: '5rem', padding: '8rem 2rem 5rem' }}>
+                    <div style={{ maxWidth: '64rem', margin: '0 auto' }}>
+                        <button onClick={onBack} className="text-title-sm" style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                            color: 'var(--secondary)', background: 'none', border: 'none', cursor: 'pointer',
+                            marginBottom: '2rem',
+                        }}>
+                            <IconArrowLeft /> Kembali
+                        </button>
+
+                        {stage === 'prep' ? (
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', alignItems: 'center' }} className="capture-grid">
+                                <div>
+                                    <div className="text-label-md" style={{ color: 'var(--secondary)' }}>Langkah 02 · Persiapan</div>
+                                    <h2 className="text-display-md" style={{ color: 'var(--on-surface)', marginTop: '0.5rem' }}>
+                                        Panduan Pemindaian Konjungtiva.
+                                    </h2>
+                                    <p style={{ color: 'var(--secondary)', marginTop: '1rem', maxWidth: '28rem', fontSize: '1.0625rem', lineHeight: 1.7 }}>
+                                        Tarik perlahan kelopak mata bawah Anda dengan ujung jari yang
+                                        bersih untuk memperlihatkan jaringan merah muda di bagian
+                                        dalam. Tahan dengan stabil di depan kamera.
+                                    </p>
+                                    <ul style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem', listStyle: 'none', padding: 0 }}>
+                                        {[
+                                            "Cahaya alami atau lampu putih hangat, hindari bayangan tajam",
+                                            "Jarak kamera 10–15 cm dari mata",
+                                            "Fokuskan bingkai pada jaringan kelopak mata bagian dalam",
+                                        ].map((t, i) => (
+                                            <li key={t} style={{ display: 'flex', gap: '1rem' }}>
+                                                <span className="text-label-md" style={{
+                                                    width: '1.75rem', height: '1.75rem', flexShrink: 0, borderRadius: '9999px',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    backgroundColor: 'var(--primary-fixed)', color: 'var(--primary)',
+                                                }}>{i + 1}</span>
+                                                <span style={{ color: 'var(--on-surface)', paddingTop: '0.125rem' }}>{t}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginTop: '2.5rem' }}>
+                                        <button onClick={() => setStage('capture')} className="btn-primary">
+                                            <IconCamera /> Buka Kamera
+                                        </button>
+                                        <button onClick={() => fileRef.current?.click()} className="btn-secondary">
+                                            <IconUpload /> Unggah Foto
+                                        </button>
+                                        <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} style={{ display: 'none' }} />
+                                    </div>
+                                </div>
+                                <div style={{ position: 'relative' }}>
+                                    <div className="shadow-ambient" style={{
+                                        aspectRatio: '4/5', borderRadius: '2.5rem',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+                                        backgroundColor: 'var(--surface-container)',
+                                    }}>
+                                        <div className="animate-pulse-glow" style={{
+                                            width: '10rem', height: '10rem', borderRadius: '9999px',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            backgroundColor: 'var(--primary-fixed)',
+                                        }}>
+                                            <span style={{ color: 'var(--primary)' }}><IconEye /></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div style={{ maxWidth: '48rem', margin: '0 auto' }}>
+                                <div className="text-label-md" style={{ color: 'var(--secondary)', textAlign: 'center', marginBottom: '1.5rem' }}>Langkah 02 · Pemindaian</div>
+                                <div className="shadow-ambient" style={{ position: 'relative', borderRadius: '2rem', overflow: 'hidden', backgroundColor: 'var(--surface-container-lowest)' }}>
+                                    <video ref={videoRef} autoPlay playsInline className="mirror" style={{ width: '100%', display: 'block' }} />
+                                    {loading && (
+                                        <div style={{
+                                            position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)',
+                                            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#fff', zIndex: 20,
+                                        }}>
+                                            <div style={{ width: '3rem', height: '3rem', border: '4px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '9999px' }} className="animate-spin" />
+                                            <p style={{ fontWeight: 700, marginTop: '1rem' }}>Menganalisis Spesimen...</p>
+                                        </div>
+                                    )}
+                                    <div style={{ position: 'absolute', left: '1.5rem', right: '1.5rem', bottom: '1.5rem' }}>
+                                        <div className="glass-panel" style={{
+                                            borderRadius: '1.5rem', padding: '1rem 1.5rem',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem',
+                                        }}>
+                                            <div>
+                                                <div className="text-label-md" style={{ color: 'var(--on-surface)' }}>Stabil · Terpusat · Fokus</div>
+                                                <div className="text-body-md" style={{ color: 'var(--secondary)' }}>Otomatis disesuaikan ke 224×224 px</div>
+                                            </div>
+                                            <button onClick={capture} disabled={!streaming || loading} className="btn-primary" style={{ padding: '0.75rem 1.5rem' }}>
+                                                <IconCamera /> Ambil Foto
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </section>
+            );
+        };
+
+
+        // ─── Processing View ────────────────────────────────────
+        const ProcessingView = ({ onDone }) => {
+            useEffect(() => {
+                const t = setTimeout(onDone, 2600);
+                return () => clearTimeout(t);
+            }, [onDone]);
+
+            return (
+                <section className="animate-fade-in" style={{
+                    minHeight: '100vh', paddingTop: '8rem', paddingBottom: '5rem',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8rem 2rem 5rem',
+                }}>
+                    <div style={{ textAlign: 'center' }}>
+                        <div className="animate-pulse-glow" style={{
+                            margin: '0 auto', width: '11rem', height: '11rem', borderRadius: '9999px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }} className="glass-panel animate-pulse-glow" style={{
+                            margin: '0 auto', width: '11rem', height: '11rem', borderRadius: '9999px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            backgroundColor: 'rgba(234, 236, 238, 0.6)',
+                            backdropFilter: 'blur(20px) saturate(140%)',
+                        }}>
+                            <div className="animate-pulse-inner" style={{
+                                width: '6rem', height: '6rem', borderRadius: '9999px',
+                                background: 'var(--gradient-primary)',
+                            }} />
+                        </div>
+                        <h2 className="text-headline-lg" style={{ color: 'var(--on-surface)', marginTop: '2.5rem' }}>
+                            Menganalisis tonality konjungtiva…
+                        </h2>
+                        <p className="text-body-md" style={{ color: 'var(--secondary)', marginTop: '0.75rem', maxWidth: '24rem', margin: '0.75rem auto 0' }}>
+                            Model kami sedang membandingkan distribusi kromatik dengan referensi terkalibrasi.
+                        </p>
+                    </div>
+                </section>
+            );
+        };
+
+
+        // ─── Result View ────────────────────────────────────────
+        const ResultView = ({ prediction, imageUrl, onNewScan, onHistory }) => {
+            if (!prediction) return null;
+            const isAnemia = prediction.prediksi === 'Anemia';
+            const confidence = prediction.probabilitas;
+            const confPct = (confidence * 100).toFixed(1);
+
+            return (
+                <section className="animate-fade-up" style={{
+                    minHeight: '100vh', paddingTop: '8rem', paddingBottom: '5rem', padding: '8rem 2rem 5rem',
+                    backgroundColor: 'var(--surface-container)',
+                }}>
+                    <div style={{ maxWidth: '56rem', margin: '0 auto' }}>
+                        <div className="text-label-md" style={{ color: 'var(--secondary)', marginBottom: '1rem' }}>
+                            Langkah 03 · Hasil
+                        </div>
+
+                        <div className="shadow-ambient" style={{
+                            borderRadius: '2rem', padding: 'clamp(2rem, 4vw, 3.5rem)',
+                            backgroundColor: 'var(--surface-container-lowest)',
+                        }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '2.5rem', alignItems: 'start' }} className="result-grid">
+                                <div>
+                                    <div className="text-label-md" style={{
+                                        display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                                        padding: '0.375rem 0.75rem', borderRadius: '9999px',
+                                        backgroundColor: isAnemia ? 'var(--error-container)' : 'var(--primary-fixed)',
+                                        color: isAnemia ? 'var(--on-error-container)' : 'var(--primary)',
+                                    }}>
+                                        {isAnemia ? <IconAlertCircle /> : <IconCheckCircle />}
+                                        {isAnemia ? 'Skrining Positif' : 'Dalam Rentang Normal'}
+                                    </div>
+
+                                    <h2 className="text-display-lg" style={{
+                                        marginTop: '1.5rem',
+                                        color: isAnemia ? 'var(--primary)' : 'var(--on-surface)',
+                                    }}>
+                                        {prediction.prediksi}
+                                    </h2>
+
+                                    <div style={{ marginTop: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', maxWidth: '28rem' }}>
+                                        <div>
+                                            <div className="text-label-md" style={{ color: 'var(--secondary)' }}>Tingkat Risiko</div>
+                                            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.5rem', color: 'var(--on-surface)', marginTop: '0.25rem' }}>
+                                                {prediction.risk_level === 'high' ? 'Tinggi' : prediction.risk_level === 'medium' ? 'Sedang' : 'Rendah'}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div className="text-label-md" style={{ color: 'var(--secondary)' }}>Probabilitas</div>
+                                            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.5rem', color: 'var(--on-surface)', marginTop: '0.25rem' }}>
+                                                {confPct}%
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <p style={{ color: 'var(--secondary)', marginTop: '1.5rem', maxWidth: '28rem', fontSize: '1rem', lineHeight: 1.7 }}>
+                                        {prediction.keterangan}
+                                    </p>
+
+                                    {isAnemia && (
+                                        <div className="text-title-sm" style={{
+                                            marginTop: '1.5rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                                            padding: '0.5rem 1rem', borderRadius: '1.5rem',
+                                            backgroundColor: 'var(--error-container)', color: 'var(--on-error-container)',
+                                        }}>
+                                            <IconAlertCircle /> Konsultasikan hasil dengan tenaga medis
+                                        </div>
+                                    )}
+
+                                    <p className="text-label-md" style={{ color: 'var(--secondary)', marginTop: '2rem', maxWidth: '28rem', lineHeight: 1.6 }}>
+                                        Disklaimer: HemoScan adalah alat skrining awal, bukan diagnosis final.
+                                    </p>
+
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginTop: '2.5rem' }}>
+                                        <button onClick={onNewScan} className="btn-secondary">
+                                            <IconRotate /> Pemindaian Baru
+                                        </button>
+                                        <button onClick={onHistory} className="btn-primary">
+                                            <IconHistory /> Lihat Riwayat
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    {imageUrl && (
+                                        <div style={{ borderRadius: '1rem', overflow: 'hidden', backgroundColor: 'var(--surface-container)' }}>
+                                            <img src={`${API_URL}${imageUrl}`} alt="Konjungtiva yang dipindai" style={{ width: '100%', display: 'block' }} />
+                                        </div>
+                                    )}
+                                    <div style={{ borderRadius: '1rem', padding: '1.25rem', backgroundColor: 'var(--surface-container-low)' }}>
+                                        <div className="text-label-md" style={{ color: 'var(--secondary)' }}>Pasien</div>
+                                        <div className="text-title-lg" style={{ color: 'var(--on-surface)', marginTop: '0.25rem' }}>{prediction.nama}</div>
+                                        <div className="text-body-md" style={{ color: 'var(--secondary)', marginTop: '0.25rem' }}>
+                                            {prediction.umur} tahun · {prediction.symptoms?.length || 0} gejala
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+
+        // ─── History View (role-aware) ────────────────────────────
+        const HistoryView = ({ history, onNewScan, onViewResult, user }) => (
+            <section className="animate-fade-up" style={{ minHeight: '100vh', paddingTop: '8rem', paddingBottom: '5rem', padding: '8rem 2rem 5rem' }}>
+                <div style={{ maxWidth: '64rem', margin: '0 auto' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '1.5rem', marginBottom: '3rem', flexWrap: 'wrap' }}>
+                        <div>
+                            <div className="text-label-md" style={{ color: 'var(--secondary)' }}>Arsip</div>
+                            <h1 className="text-display-md" style={{ color: 'var(--on-surface)', marginTop: '0.5rem' }}>Riwayat Klinis</h1>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+                                <p className="text-body-md" style={{ color: 'var(--secondary)' }}>
+                                    {history.length} pemindaian tercatat.
+                                </p>
+                                {/* Role badge */}
+                                {user && (
+                                    <span className="text-label-md" style={{
+                                        display: 'inline-flex', alignItems: 'center', gap: '0.375rem',
+                                        padding: '0.25rem 0.75rem', borderRadius: '9999px',
+                                        backgroundColor: user.role === 'admin' ? 'var(--error-container)' : 'var(--primary-fixed)',
+                                        color: user.role === 'admin' ? 'var(--on-error-container)' : 'var(--primary)',
+                                        fontSize: '0.6875rem',
+                                    }}>
+                                        {user.role === 'admin' ? '🔑 ADMIN — Semua Data' : `👤 ${user.display_name} — Data Pribadi`}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.75rem' }}>
+                            <button onClick={onNewScan} className="btn-primary">
+                                <IconPlus /> Pemindaian Baru
+                            </button>
+                        </div>
+                    </div>
+
+                    {history.length === 0 ? (
+                        <div style={{
+                            textAlign: 'center', padding: '6rem 2rem', borderRadius: '2rem',
+                            backgroundColor: 'var(--surface-container-low)',
+                        }}>
+                            <p className="text-title-lg" style={{ color: 'var(--on-surface)' }}>Belum ada pemindaian.</p>
+                            <p className="text-body-md" style={{ color: 'var(--secondary)', marginTop: '0.5rem' }}>
+                                {user?.role === 'admin'
+                                    ? 'Belum ada data pemindaian dari semua pengguna.'
+                                    : 'Anda belum memiliki riwayat pemindaian. Pastikan Anda login saat melakukan scan agar tersimpan.'}
+                            </p>
+                        </div>
+                    ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                            {history.map((r, i) => {
+                                const isAnemia = r.prediksi === 'Anemia';
+                                return (
+                                    <div key={i} onClick={() => onViewResult(r)}
+                                        className="animate-fade-up"
+                                        style={{
+                                            animationDelay: `${i * 60}ms`,
+                                            borderRadius: '1.5rem', padding: '1.75rem',
+                                            display: 'grid', gridTemplateColumns: '1fr auto', gap: '1.5rem', alignItems: 'center',
+                                            backgroundColor: 'var(--surface-container-lowest)',
+                                            cursor: 'pointer', transition: 'box-shadow 0.2s',
+                                        }}
+                                        onMouseEnter={e => e.currentTarget.style.boxShadow = 'var(--shadow-ambient-sm)'}
+                                        onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                                            <div style={{
+                                                width: '3rem', height: '3rem', borderRadius: '1rem',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                fontFamily: 'var(--font-display)', fontWeight: 700,
+                                                backgroundColor: isAnemia ? 'var(--error-container)' : 'var(--primary-fixed)',
+                                                color: isAnemia ? 'var(--on-error-container)' : 'var(--primary)',
+                                            }}>
+                                                {r.nama?.charAt(0) || '?'}
+                                            </div>
+                                            <div>
+                                                <div className="text-title-lg" style={{ color: 'var(--on-surface)' }}>{r.nama}</div>
+                                                <div className="text-body-md" style={{ color: 'var(--secondary)' }}>
+                                                    {r.timestamp} · {r.umur} tahun
+                                                    {user?.role === 'admin' && r.user_email && (
+                                                        <span style={{ marginLeft: '0.5rem', color: 'var(--primary)', fontWeight: 500 }}>· {r.user_email}</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div className="text-label-md" style={{
+                                                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                                                padding: '0.25rem 0.75rem', borderRadius: '9999px',
+                                                backgroundColor: isAnemia ? 'var(--error-container)' : 'var(--primary-fixed)',
+                                                color: isAnemia ? 'var(--on-error-container)' : 'var(--primary)',
+                                            }}>
+                                                {r.prediksi}
+                                            </div>
+                                            <div className="text-body-md" style={{ color: 'var(--secondary)', marginTop: '0.5rem' }}>
+                                                Probabilitas {(r.probabilitas * 100).toFixed(1)}%
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            </section>
+        );
+
+
+        // ─── Main App ───────────────────────────────────────────
         function App() {
-            const [page, setPage] = useState('home'); // home, identity, scan, result, history
-            const [patient, setPatient] = useState({ name: '', age: '', gender: 'M', symptoms: [] });
-            const [capturedImage, setCapturedImage] = useState(null);
+            const [view, setView] = useState('landing');
+            const [patient, setPatient] = useState(null);
             const [prediction, setPrediction] = useState(null);
             const [history, setHistory] = useState([]);
             const [loading, setLoading] = useState(false);
-            const [isLoggedIn, setIsLoggedIn] = useState(false);
+            // User state: null = not logged in, { email, role, display_name } = logged in
+            const [user, setUser] = useState(null);
+            const [authModal, setAuthModal] = useState({ isOpen: false, onSuccess: () => {} });
+            const [legalModal, setLegalModal] = useState({ isOpen: false, type: 'terms' });
 
-            useEffect(() => {
-                if (isLoggedIn) {
-                    fetchHistory();
-                }
-            }, [isLoggedIn]);
+            const isLoggedIn = !!user;
 
-            const fetchHistory = async () => {
+            const fetchHistory = async (userData) => {
+                const u = userData || user;
+                if (!u) return;
                 try {
-                    const res = await fetch(`${API_URL}/api/history`);
+                    const params = new URLSearchParams({ role: u.role, email: u.email });
+                    const res = await fetch(`${API_URL}/api/history?${params}`);
                     const data = await res.json();
                     setHistory(data);
                 } catch (e) { console.error("History fetch failed", e); }
             };
 
+            useEffect(() => { if (user) fetchHistory(); }, [user]);
+
             const handleNewScan = () => {
-                setPatient({ name: '', age: '', gender: 'M', symptoms: [] });
-                setCapturedImage(null);
+                setPatient(null);
                 setPrediction(null);
-                setPage('identity');
+                setView('landing');
             };
 
-            const processPrediction = async (blob) => {
+            const handleContinue = (data) => {
+                setPatient(data);
+                setView('capture');
+            };
+
+            // ─── Scan NO LONGER requires login ──────────────────
+            const handleCaptured = (blob) => {
                 setLoading(true);
                 const formData = new FormData();
                 formData.append('file', blob, 'scan.png');
@@ -534,32 +1308,79 @@
                 formData.append('age', patient.age);
                 formData.append('gender', patient.gender);
                 formData.append('symptoms', patient.symptoms.join(','));
+                // Track which user performed the scan (empty if guest)
+                formData.append('user_email', user ? user.email : '');
 
-                try {
-                    const res = await fetch(`${API_URL}/api/predict`, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const data = await res.json();
-                    setPrediction(data);
-                    setPage('result');
+                fetch(`${API_URL}/api/predict`, { method: 'POST', body: formData })
+                    .then(res => res.json())
+                    .then(data => {
+                        setPrediction(data);
+                        setView('processing');
+                        if (user) fetchHistory();
+                    })
+                    .catch(e => alert("Prediction failed. Make sure server.py is running."))
+                    .finally(() => setLoading(false));
+            };
+
+            const handleProcessingDone = () => { setView('result'); };
+
+            // ─── History REQUIRES login ──────────────────────────
+            const handleHistory = () => {
+                if (isLoggedIn) {
                     fetchHistory();
-                } catch (e) {
-                    alert("Prediction failed. Make sure server.py is running.");
-                } finally {
-                    setLoading(false);
+                    setView('history');
+                } else {
+                    setAuthModal({
+                        isOpen: true,
+                        onSuccess: (userData) => {
+                            setUser(userData);
+                            setAuthModal({ isOpen: false, onSuccess: () => {} });
+                            // Fetch filtered history then navigate
+                            fetchHistory(userData).then(() => setView('history'));
+                        }
+                    });
+                }
+            };
+
+            const handleLogin = () => {
+                if (isLoggedIn) {
+                    setUser(null);
+                    setHistory([]);
+                } else {
+                    setAuthModal({ isOpen: true, onSuccess: (userData) => {
+                        setUser(userData);
+                        setAuthModal({ isOpen: false, onSuccess: () => {} });
+                    }});
                 }
             };
 
             return (
-                <div className="min-h-screen flex flex-col">
-                    <Navbar page={page} setPage={setPage} handleNewScan={handleNewScan} />
-                    {page === 'home' && <HomeScreen handleNewScan={handleNewScan} setPage={setPage} />}
-                    {page === 'identity' && <IdentityScreen patient={patient} setPatient={setPatient} setPage={setPage} />}
-                    {page === 'scan' && <ScanScreen processPrediction={processPrediction} loading={loading} />}
-                    {page === 'result' && <ResultScreen prediction={prediction} setPage={setPage} />}
-                    {page === 'history' && (isLoggedIn ? <HistoryScreen history={history} setPrediction={setPrediction} setPage={setPage} setIsLoggedIn={setIsLoggedIn} /> : <LoginScreen setIsLoggedIn={setIsLoggedIn} />)}
-                    <Footer />
+                <div style={{ minHeight: '100vh', backgroundColor: 'var(--background)' }}>
+                    <Navbar onHistory={handleHistory} onHome={handleNewScan} onLogin={handleLogin} isLoggedIn={isLoggedIn} />
+
+                    {view === 'landing' && <LandingView onContinue={handleContinue} />}
+                    {view === 'capture' && <CaptureView onCaptured={handleCaptured} onBack={() => setView('landing')} loading={loading} />}
+                    {view === 'processing' && <ProcessingView onDone={handleProcessingDone} />}
+                    {view === 'result' && <ResultView prediction={prediction} imageUrl={prediction?.image_url} onNewScan={handleNewScan} onHistory={handleHistory} />}
+                    {view === 'history' && <HistoryView history={history} onNewScan={handleNewScan} onViewResult={(r) => { setPrediction(r); setView('result'); }} user={user} />}
+
+                    {authModal.isOpen && (
+                        <AuthModal
+                            onSuccess={(userData) => {
+                                authModal.onSuccess(userData);
+                            }}
+                            onCancel={() => setAuthModal({ isOpen: false, onSuccess: () => {} })}
+                        />
+                    )}
+
+                    {legalModal.isOpen && (
+                        <LegalModal
+                            type={legalModal.type}
+                            onClose={() => setLegalModal({ isOpen: false, type: 'terms' })}
+                        />
+                    )}
+
+                    <Footer onOpenLegal={(type) => setLegalModal({ isOpen: true, type })} />
                 </div>
             );
         }
@@ -567,5 +1388,22 @@
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
+
+    <style>
+        /* Responsive overrides */
+        @media (min-width: 1024px) {
+            .landing-grid { grid-template-columns: 1fr 1.05fr !important; }
+            .capture-grid { grid-template-columns: 1fr 1fr !important; }
+            .result-grid { grid-template-columns: 1.4fr 1fr !important; }
+        }
+        @media (max-width: 1023px) {
+            .landing-grid { grid-template-columns: 1fr !important; }
+            .capture-grid { grid-template-columns: 1fr !important; }
+            .result-grid { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 640px) {
+            nav > div { flex-wrap: wrap; gap: 0.5rem; }
+        }
+    </style>
 </body>
 </html>

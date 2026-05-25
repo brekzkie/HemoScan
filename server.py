@@ -3,15 +3,37 @@ import os
 import json
 import uuid
 import datetime
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from typing import Optional
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from PIL import Image
 import io
 
 # Import logic from inference.py
 from inference import load_model_components, predict_from_pil
+
+# ─── Account System ──────────────────────────────────────────────
+# Predefined accounts: admin and user roles
+ACCOUNTS = {
+    "admin@hemoscan.com": {
+        "password": "admin123",
+        "role": "admin",
+        "display_name": "Administrator"
+    },
+    "user@hemoscan.com": {
+        "password": "user123",
+        "role": "user",
+        "display_name": "User Demo"
+    },
+    "dokter@hemoscan.com": {
+        "password": "dokter123",
+        "role": "user",
+        "display_name": "Dr. Amelia"
+    },
+}
 
 class LoginRequest(BaseModel):
     email: str
@@ -50,20 +72,29 @@ def save_to_history(data: dict):
     with open(HISTORY_FILE, "w") as f:
         json.dump(history, f, indent=4)
 
+# ─── Login Endpoint (multi-account with roles) ───────────────────
 @app.post("/api/login")
 async def login(req: LoginRequest):
-    # Hardcoded credentials for simplicity
-    if req.email == "admin@hemoscan.com" and req.password == "admin123":
-        return {"status": "success", "message": "Login successful"}
+    account = ACCOUNTS.get(req.email)
+    if account and account["password"] == req.password:
+        return {
+            "status": "success",
+            "message": "Login successful",
+            "email": req.email,
+            "role": account["role"],
+            "display_name": account["display_name"]
+        }
     raise HTTPException(status_code=401, detail="Email atau password salah")
 
+# ─── Predict Endpoint (now tracks user_email) ────────────────────
 @app.post("/api/predict")
 async def predict(
     file: UploadFile = File(...),
     name: str = Form(...),
     age: int = Form(...),
-    gender: str = Form(...),  # 'M' or 'F'
-    symptoms: str = Form("")   # Comma separated
+    gender: str = Form(...),        # 'M' or 'F'
+    symptoms: str = Form(""),       # Comma separated
+    user_email: str = Form("")      # Email of logged-in user (empty if guest)
 ):
     if COMPONENTS is None:
         raise HTTPException(status_code=500, detail="Model components not loaded")
@@ -90,6 +121,7 @@ async def predict(
             "timestamp": timestamp,
             "image_url": f"/uploads/{image_id}",
             "symptoms": symptoms.split(",") if symptoms else [],
+            "user_email": user_email if user_email else "",
             **result
         }
         
@@ -100,14 +132,28 @@ async def predict(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# ─── History Endpoint (filtered by role) ──────────────────────────
 @app.get("/api/history")
-async def get_history():
-    if os.path.exists(HISTORY_FILE):
-        with open(HISTORY_FILE, "r") as f:
-            return json.load(f)
+async def get_history(
+    role: str = Query("user"),
+    email: str = Query("")
+):
+    if not os.path.exists(HISTORY_FILE):
+        return []
+    
+    with open(HISTORY_FILE, "r") as f:
+        history = json.load(f)
+    
+    # Admin sees everything
+    if role == "admin":
+        return history
+    
+    # Regular user sees only their own scans (matched by user_email)
+    if email:
+        filtered = [h for h in history if h.get("user_email", "") == email]
+        return filtered
+    
     return []
-
-from fastapi.responses import FileResponse
 
 # Serve index.html at root
 @app.get("/")

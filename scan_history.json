@@ -1,5 +1,41 @@
 [
     {
+        "id": "#SCN-40CB",
+        "timestamp": "May 25, 2026 \u2022 16:15",
+        "image_url": "/uploads/2bece4dc-8113-414b-8268-68338f59eec0.png",
+        "symptoms": [
+            "Pusing"
+        ],
+        "user_email": "",
+        "nama": "nqokw",
+        "umur": 12,
+        "gender": "Perempuan",
+        "age_group": "Anak-anak dan Remaja",
+        "prediksi": "Non-Anemia",
+        "probabilitas": 0.5761,
+        "threshold": 0.7499999999999998,
+        "keterangan": "Berdasarkan analisis gambar konjungtiva dan data pasien, nqokw tidak terindikasi anemia (probabilitas anemia 57.6%). Tetap jaga pola makan bergizi seimbang dan lakukan pemeriksaan rutin jika ada keluhan.",
+        "risk_level": "low"
+    },
+    {
+        "id": "#SCN-1AC3",
+        "timestamp": "May 04, 2026 \u2022 17:20",
+        "image_url": "/uploads/eac8d822-8662-4890-ab9c-b275a6198592.png",
+        "symptoms": [
+            "Lemas",
+            "Sesak Napas"
+        ],
+        "nama": "Iqdam shidqi",
+        "umur": 21,
+        "gender": "Laki-laki",
+        "age_group": "Anak-anak dan Remaja",
+        "prediksi": "Non-Anemia",
+        "probabilitas": 0.3768,
+        "threshold": 0.7499999999999998,
+        "keterangan": "Berdasarkan analisis gambar konjungtiva dan data pasien, Iqdam shidqi tidak terindikasi anemia (probabilitas anemia 37.7%). Tetap jaga pola makan bergizi seimbang dan lakukan pemeriksaan rutin jika ada keluhan.",
+        "risk_level": "low"
+    },
+    {
         "id": "#SCN-9768",
         "timestamp": "Apr 20, 2026 \u2022 16:50",
         "image_url": "/uploads/20f2e597-6322-469d-b4f9-52cac764da1b.png",

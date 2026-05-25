@@ -1,5 +1,23 @@
 [
     {
+        "id": "#SCN-91D3",
+        "timestamp": "May 25, 2026 \u2022 16:51",
+        "image_url": "/uploads/f74015e9-b296-42b2-bcdb-3173637834ca.png",
+        "symptoms": [
+            "Mudah lelah"
+        ],
+        "user_email": "",
+        "nama": "fghj",
+        "umur": 21,
+        "gender": "Laki-laki",
+        "age_group": "Anak-anak dan Remaja",
+        "prediksi": "Non-Anemia",
+        "probabilitas": 0.3768,
+        "threshold": 0.7499999999999998,
+        "keterangan": "Berdasarkan analisis gambar konjungtiva dan data pasien, fghj tidak terindikasi anemia (probabilitas anemia 37.7%). Tetap jaga pola makan bergizi seimbang dan lakukan pemeriksaan rutin jika ada keluhan.",
+        "risk_level": "low"
+    },
+    {
         "id": "#SCN-40CB",
         "timestamp": "May 25, 2026 \u2022 16:15",
         "image_url": "/uploads/2bece4dc-8113-414b-8268-68338f59eec0.png",

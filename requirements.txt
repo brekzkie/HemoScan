@@ -17,3 +17,8 @@ scipy>=1.11.0
 
 # Untuk aplikasi Streamlit
 streamlit>=1.35.0
+
+# Untuk aplikasi Modern UI (FastAPI)
+fastapi>=0.100.0
+uvicorn>=0.23.0
+python-multipart>=0.0.6

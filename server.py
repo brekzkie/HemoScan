@@ -2,6 +2,7 @@
 import os
 import json
 import uuid
+import sqlite3
 import datetime
 from typing import Optional
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Query
@@ -11,34 +12,64 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from PIL import Image
 import io
+import bcrypt
 
 # Import logic from inference.py
 from inference import load_model_components, predict_from_pil
 
-# ─── Account System ──────────────────────────────────────────────
-# Predefined accounts: admin and user roles
-ACCOUNTS = {
-    "admin@hemoscan.com": {
-        "password": "admin123",
-        "role": "admin",
-        "display_name": "Administrator"
-    },
-    "user@hemoscan.com": {
-        "password": "user123",
-        "role": "user",
-        "display_name": "User Demo"
-    },
-    "dokter@hemoscan.com": {
-        "password": "dokter123",
-        "role": "user",
-        "display_name": "Dr. Amelia"
-    },
-}
+# ─── Database Setup ──────────────────────────────────────────────
+DB_FILE = "hemoscan.db"
 
+def get_db():
+    """Get a database connection."""
+    conn = sqlite3.connect(DB_FILE)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def init_db():
+    """Initialize the database with the users table."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            display_name TEXT NOT NULL,
+            role TEXT NOT NULL DEFAULT 'user',
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )
+    """)
+    conn.commit()
+
+    # Seed default admin account if no users exist
+    cursor.execute("SELECT COUNT(*) as cnt FROM users")
+    count = cursor.fetchone()["cnt"]
+    if count == 0:
+        admin_hash = bcrypt.hashpw("admin123".encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+        cursor.execute(
+            "INSERT INTO users (email, password_hash, display_name, role) VALUES (?, ?, ?, ?)",
+            ("admin@hemoscan.com", admin_hash, "Administrator", "admin")
+        )
+        conn.commit()
+        print("[DB] Default admin account created: admin@hemoscan.com / admin123")
+
+    conn.close()
+
+# Initialize database on startup
+init_db()
+
+# ─── Pydantic Models ─────────────────────────────────────────────
 class LoginRequest(BaseModel):
     email: str
     password: str
 
+class RegisterRequest(BaseModel):
+    email: str
+    password: str
+    display_name: str
+
+# ─── FastAPI App ──────────────────────────────────────────────────
 app = FastAPI(title="HemoScan API")
 
 # Enable CORS for frontend development
@@ -72,17 +103,63 @@ def save_to_history(data: dict):
     with open(HISTORY_FILE, "w") as f:
         json.dump(history, f, indent=4)
 
-# ─── Login Endpoint (multi-account with roles) ───────────────────
+# ─── Register Endpoint ───────────────────────────────────────────
+@app.post("/api/register")
+async def register(req: RegisterRequest):
+    # Validate input
+    if not req.email or not req.password or not req.display_name:
+        raise HTTPException(status_code=400, detail="Semua kolom wajib diisi")
+
+    if len(req.password) < 6:
+        raise HTTPException(status_code=400, detail="Password minimal 6 karakter")
+
+    if len(req.display_name.strip()) < 2:
+        raise HTTPException(status_code=400, detail="Nama lengkap minimal 2 karakter")
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Check if email already exists
+    cursor.execute("SELECT id FROM users WHERE email = ?", (req.email,))
+    if cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=409, detail="Email sudah terdaftar")
+
+    # Hash password with bcrypt
+    password_hash = bcrypt.hashpw(req.password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+    # Insert new user
+    cursor.execute(
+        "INSERT INTO users (email, password_hash, display_name, role) VALUES (?, ?, ?, ?)",
+        (req.email, password_hash, req.display_name.strip(), "user")
+    )
+    conn.commit()
+    conn.close()
+
+    return {
+        "status": "success",
+        "message": "Pendaftaran berhasil! Silakan masuk.",
+        "email": req.email,
+        "display_name": req.display_name.strip()
+    }
+
+# ─── Login Endpoint (database-backed with bcrypt) ────────────────
 @app.post("/api/login")
 async def login(req: LoginRequest):
-    account = ACCOUNTS.get(req.email)
-    if account and account["password"] == req.password:
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM users WHERE email = ?", (req.email,))
+    user = cursor.fetchone()
+    conn.close()
+
+    if user and bcrypt.checkpw(req.password.encode("utf-8"), user["password_hash"].encode("utf-8")):
         return {
             "status": "success",
             "message": "Login successful",
-            "email": req.email,
-            "role": account["role"],
-            "display_name": account["display_name"]
+            "email": user["email"],
+            "role": user["role"],
+            "display_name": user["display_name"]
         }
     raise HTTPException(status_code=401, detail="Email atau password salah")
 

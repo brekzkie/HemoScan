@@ -1,5 +1,6 @@
 [
     {
+<<<<<<< HEAD
         "id": "#SCN-91D3",
         "timestamp": "May 25, 2026 \u2022 16:51",
         "image_url": "/uploads/f74015e9-b296-42b2-bcdb-3173637834ca.png",
@@ -15,6 +16,76 @@
         "probabilitas": 0.3768,
         "threshold": 0.7499999999999998,
         "keterangan": "Berdasarkan analisis gambar konjungtiva dan data pasien, fghj tidak terindikasi anemia (probabilitas anemia 37.7%). Tetap jaga pola makan bergizi seimbang dan lakukan pemeriksaan rutin jika ada keluhan.",
+=======
+        "id": "#SCN-16FE",
+        "timestamp": "May 25, 2026 \u2022 17:24",
+        "image_url": "/uploads/c8956856-d43e-4e77-be72-2c556f1304e2.png",
+        "symptoms": [
+            "Mudah lelah"
+        ],
+        "user_email": "nandakeren@gmail.com",
+        "nama": "sikanjut",
+        "umur": 69,
+        "gender": "Perempuan",
+        "age_group": "Lansia",
+        "prediksi": "Non-Anemia",
+        "probabilitas": 0.6173,
+        "threshold": 0.7499999999999998,
+        "keterangan": "Berdasarkan analisis gambar konjungtiva dan data pasien, sikanjut tidak terindikasi anemia (probabilitas anemia 61.7%). Tetap jaga pola makan bergizi seimbang dan lakukan pemeriksaan rutin jika ada keluhan.",
+        "risk_level": "low"
+    },
+    {
+        "id": "#SCN-F5BB",
+        "timestamp": "May 25, 2026 \u2022 17:19",
+        "image_url": "/uploads/dec40baa-7af0-487d-a56c-780acc525db3.png",
+        "symptoms": [
+            "Kulit pucat"
+        ],
+        "user_email": "nandakeren@gmail.com",
+        "nama": "Uqdam",
+        "umur": 231,
+        "gender": "Perempuan",
+        "age_group": "Lansia",
+        "prediksi": "Anemia",
+        "probabilitas": 0.7887,
+        "threshold": 0.7499999999999998,
+        "keterangan": "Berdasarkan analisis gambar konjungtiva dan data pasien, Uqdam terindikasi mengalami anemia (probabilitas 78.9%). Disarankan untuk segera melakukan pemeriksaan darah lengkap dan berkonsultasi dengan dokter.",
+        "risk_level": "medium"
+    },
+    {
+        "id": "#SCN-11AF",
+        "timestamp": "May 25, 2026 \u2022 17:05",
+        "image_url": "/uploads/f0fd8715-fca7-4363-8a6d-2d5d6b866d63.png",
+        "symptoms": [],
+        "user_email": "",
+        "nama": "ajaja",
+        "umur": 22,
+        "gender": "Perempuan",
+        "age_group": "Anak-anak dan Remaja",
+        "prediksi": "Non-Anemia",
+        "probabilitas": 0.6614,
+        "threshold": 0.7499999999999998,
+        "keterangan": "Berdasarkan analisis gambar konjungtiva dan data pasien, ajaja tidak terindikasi anemia (probabilitas anemia 66.1%). Tetap jaga pola makan bergizi seimbang dan lakukan pemeriksaan rutin jika ada keluhan.",
+        "risk_level": "low"
+    },
+    {
+        "id": "#SCN-3582",
+        "timestamp": "May 25, 2026 \u2022 17:00",
+        "image_url": "/uploads/1e0fbb43-a324-4e70-b3a5-42a5d14ec3d5.png",
+        "symptoms": [
+            "Kulit pucat",
+            "Mudah lelah"
+        ],
+        "user_email": "",
+        "nama": "wygg",
+        "umur": 2,
+        "gender": "Laki-laki",
+        "age_group": "Anak-anak dan Remaja",
+        "prediksi": "Non-Anemia",
+        "probabilitas": 0.1928,
+        "threshold": 0.7499999999999998,
+        "keterangan": "Berdasarkan analisis gambar konjungtiva dan data pasien, wygg tidak terindikasi anemia (probabilitas anemia 19.3%). Tetap jaga pola makan bergizi seimbang dan lakukan pemeriksaan rutin jika ada keluhan.",
+>>>>>>> 493014241d873a9e37f61469dc9f94090cf1432d
         "risk_level": "low"
     },
     {

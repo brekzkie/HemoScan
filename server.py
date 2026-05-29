@@ -244,6 +244,18 @@ app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
 async def get_logo():
     return FileResponse("logo 1.png")
 
+@app.get("/logo 1.png")
+async def get_logo_exact():
+    return FileResponse("logo 1.png")
+
+@app.get("/Backgorund.png")
+async def get_background():
+    return FileResponse("Backgorund.png")
+
+@app.get("/loading.mp4")
+async def get_loading_video():
+    return FileResponse("loading.mp4", media_type="video/mp4")
+
 @app.get("/favicon.ico")
 async def get_favicon():
     return FileResponse("logo 2.png")

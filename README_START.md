@@ -1,5 +1,8 @@
 # 🚀 HEMOSCAN - QUICK START GUIDE
 
+<img width="3840" height="3840" alt="image" src="https://github.com/user-attachments/assets/650e0941-d8bb-4ad3-8754-f010a91327aa" />
+
+
 ## Status Sistem ✅
 
 Model files sudah ready:

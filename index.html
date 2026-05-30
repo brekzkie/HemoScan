@@ -174,13 +174,130 @@
         /* Status badges */
         .badge-anemia { background-color: var(--error-container); color: var(--on-error-container); }
         .badge-normal { background-color: var(--primary-fixed); color: var(--primary); }
+
+        /* --- Premium HemoScan Loader Animations --- */
+        .hemoscan-loader-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            animation: hemoscan-pulse 3s ease-in-out infinite;
+        }
+
+        .hemoscan-loader-svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        .loader-ring-1 {
+            transform-origin: 720px 720px;
+            animation: rotate-clockwise 14s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
+        }
+
+        .loader-ring-2 {
+            transform-origin: 720px 720px;
+            animation: rotate-counter 18s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
+        }
+
+        @keyframes rotate-clockwise {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.05); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        @keyframes rotate-counter {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(-180deg) scale(0.95); }
+            100% { transform: rotate(-360deg) scale(1); }
+        }
+
+        @keyframes hemoscan-pulse {
+            0%, 100% { 
+                transform: scale(1); 
+                filter: drop-shadow(0 4px 20px rgba(149, 37, 40, 0.25)) drop-shadow(0 0 10px rgba(149, 37, 40, 0.15)); 
+            }
+            14% { 
+                transform: scale(1.04); 
+                filter: drop-shadow(0 8px 32px rgba(149, 37, 40, 0.45)) drop-shadow(0 0 20px rgba(149, 37, 40, 0.3)); 
+            }
+            28% { 
+                transform: scale(1.01); 
+                filter: drop-shadow(0 6px 24px rgba(149, 37, 40, 0.35)) drop-shadow(0 0 15px rgba(149, 37, 40, 0.2)); 
+            }
+            42% { 
+                transform: scale(1.06); 
+                filter: drop-shadow(0 10px 40px rgba(149, 37, 40, 0.5)) drop-shadow(0 0 25px rgba(149, 37, 40, 0.35)); 
+            }
+            70% { 
+                transform: scale(1); 
+                filter: drop-shadow(0 4px 20px rgba(149, 37, 40, 0.25)) drop-shadow(0 0 10px rgba(149, 37, 40, 0.15)); 
+            }
+        }
+
+        /* simulated dynamic progress styling */
+        .hemoscan-progress-container {
+            width: 20rem;
+            height: 4px;
+            background: rgba(149, 37, 40, 0.1);
+            border-radius: 99px;
+            margin: 2rem auto 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .hemoscan-progress-bar {
+            height: 100%;
+            background: var(--gradient-primary);
+            border-radius: 99px;
+            animation: hemoscan-progress 2.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes hemoscan-progress {
+            0% { width: 0%; }
+            20% { width: 15%; }
+            50% { width: 65%; }
+            80% { width: 90%; }
+            100% { width: 100%; }
+        }
+
+        /* scanning scanner beam line */
+        .scanner-beam {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(149, 37, 40, 0) 0%, rgba(149, 37, 40, 0.8) 50%, rgba(149, 37, 40, 0) 100%);
+            box-shadow: 0 0 8px rgba(149, 37, 40, 0.8);
+            animation: scan-vertical 2s ease-in-out infinite;
+            z-index: 10;
+        }
+
+        @keyframes scan-vertical {
+            0%, 100% { top: 10%; opacity: 0.1; }
+            50% { top: 90%; opacity: 1; }
+        }
     </style>
 <!-- Transpiled block removed; Babel handles JSX at runtime -->
+</head>
 <body>
-    <div id="root"><div style="min-height: 100vh; background-color: var(--background);"><nav class="animate-fade-up" style="position: fixed; top: 0px; left: 0px; right: 0px; z-index: 50; padding: 1.5rem 2rem; background-color: rgba(248, 250, 251, 0.75); backdrop-filter: blur(16px) saturate(140%);"><div style="max-width: 80rem; margin: 0px auto; display: flex; align-items: center; justify-content: space-between;"><button style="display: flex; align-items: center; gap: 0.75rem; background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer;"><span style="width: 2.75rem; height: 2.75rem; border-radius: 1rem; background-color: var(--surface-container); display: flex; align-items: center; justify-content: center; color: var(--primary); transition: transform 0.2s;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"></path></svg></span><span style="font-family: var(--font-display); font-weight: 700; font-size: 1.25rem; letter-spacing: -0.02em; color: var(--on-surface);">HemoScan</span></button><div style="display: flex; align-items: center; gap: 0.75rem;"><button class="text-title-sm" style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--secondary); background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer; transition: color 0.2s;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l4 2"></path></svg> Riwayat Klinis</button><button class="text-title-sm" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 9999px; background: var(--gradient-primary); color: rgb(255, 255, 255); border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer; box-shadow: var(--shadow-ambient-sm); transition: opacity 0.2s;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg> Masuk</button></div></div></nav><section style="min-height: 100vh; padding: 8rem 2rem 6rem;"><div class="landing-grid" style="max-width: 80rem; margin: 0px auto; display: grid; grid-template-columns: 1fr; gap: 3rem; align-items: center;"><div class="animate-fade-up" style="display: flex; flex-direction: column; gap: 1.5rem;"><div class="glass-panel" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 9999px; width: fit-content;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path><path d="M20 3v4"></path><path d="M22 5h-4"></path></svg><span class="text-label-md" style="color: var(--on-surface);">HemoScan</span></div><h1 style="font-family: var(--font-display); font-weight: 700; color: var(--primary); line-height: 0.95; letter-spacing: -0.03em; font-size: clamp(3.5rem, 8vw, 6.5rem);">HEMOSCAN</h1><h2 style="font-family: var(--font-display); font-weight: 600; color: var(--on-surface); font-size: clamp(1.25rem, 2vw, 1.75rem); line-height: 1.3;">Skrining Anemia Non-Invasif Melalui Konjungtiva Mata Menggunakan Deep Learning</h2><p style="color: var(--secondary); font-size: 1rem; line-height: 1.7;">Solusi berbasis kecerdasan buatan yang mengotomatisasi ekstraksi fitur warna dan tekstur dari citra konjungtiva mata untuk mengklasifikasikan status anemia pasien secara non-invasif.</p></div><div class="animate-fade-up delay-200" style="justify-self: end; width: 100%; max-width: 36rem;"><div class="clinical-accent shadow-ambient" style="padding: 2.5rem; border-radius: 2rem; position: relative; overflow: hidden; background-color: var(--surface-container-lowest);"><div style="display: flex; flex-direction: column; gap: 1.5rem;"><div><div class="text-label-md" style="color: var(--secondary);">Langkah 01 · Profil Pasien</div><h2 class="text-headline-md" style="color: var(--on-surface); margin-top: 0.25rem;">Skrining Baru</h2></div><div style="display: flex; flex-direction: column; gap: 1rem;"><div><label class="text-label-md" style="color: var(--secondary); display: block; margin-bottom: 0.5rem;">Nama Lengkap</label><input class="input-ghost" placeholder="cth. Amelia Hartwell" value=""></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;"><div><label class="text-label-md" style="color: var(--secondary); display: block; margin-bottom: 0.5rem;">Usia</label><input type="number" class="input-ghost" placeholder="34" value=""></div><div><label class="text-label-md" style="color: var(--secondary); display: block; margin-bottom: 0.5rem;">Jenis Kelamin</label><div style="display: flex; gap: 0.5rem;"><button type="button" style="flex: 1 1 0%; padding: 0.625rem 0.75rem; border-radius: 1rem; font-size: 0.875rem; font-weight: 500; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer; background-color: var(--primary-fixed); color: var(--primary); transition: 0.2s;">Perempuan</button><button type="button" style="flex: 1 1 0%; padding: 0.625rem 0.75rem; border-radius: 1rem; font-size: 0.875rem; font-weight: 500; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer; background-color: var(--surface-container-low); color: var(--secondary); transition: 0.2s;">Laki-laki</button></div></div></div><div><label class="text-label-md" style="color: var(--secondary); display: block; margin-bottom: 0.75rem;">Gejala yang Dialami</label><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;"><button type="button" style="padding: 0.625rem 0.875rem; border-radius: 1rem; font-size: 0.875rem; font-weight: 500; text-align: left; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer; transition: 0.2s; background-color: var(--surface-container-low); color: var(--secondary);">Mudah lelah</button><button type="button" style="padding: 0.625rem 0.875rem; border-radius: 1rem; font-size: 0.875rem; font-weight: 500; text-align: left; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer; transition: 0.2s; background-color: var(--surface-container-low); color: var(--secondary);">Kulit pucat</button><button type="button" style="padding: 0.625rem 0.875rem; border-radius: 1rem; font-size: 0.875rem; font-weight: 500; text-align: left; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer; transition: 0.2s; background-color: var(--surface-container-low); color: var(--secondary);">Pusing</button><button type="button" style="padding: 0.625rem 0.875rem; border-radius: 1rem; font-size: 0.875rem; font-weight: 500; text-align: left; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer; transition: 0.2s; background-color: var(--surface-container-low); color: var(--secondary);">Tangan dingin</button><button type="button" style="padding: 0.625rem 0.875rem; border-radius: 1rem; font-size: 0.875rem; font-weight: 500; text-align: left; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer; transition: 0.2s; background-color: var(--surface-container-low); color: var(--secondary);">Sakit kepala</button><button type="button" style="padding: 0.625rem 0.875rem; border-radius: 1rem; font-size: 0.875rem; font-weight: 500; text-align: left; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer; transition: 0.2s; background-color: var(--surface-container-low); color: var(--secondary);">Sesak napas</button><button type="button" style="padding: 0.625rem 0.875rem; border-radius: 1rem; font-size: 0.875rem; font-weight: 500; text-align: left; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer; transition: 0.2s; background-color: var(--surface-container-low); color: var(--secondary);">Kuku rapuh</button><button type="button" style="padding: 0.625rem 0.875rem; border-radius: 1rem; font-size: 0.875rem; font-weight: 500; text-align: left; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer; transition: 0.2s; background-color: var(--surface-container-low); color: var(--secondary);">Jantung berdebar</button></div></div></div><div style="display: flex; justify-content: flex-end; padding-top: 1rem;"><button disabled="" class="btn-primary">Lanjutkan ke Pemindaian <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div></div></div></div></div><div class="animate-fade-up delay-400" style="max-width: 80rem; margin: 8rem auto 0px; border-radius: 2.5rem; padding: clamp(2rem, 4vw, 4rem); background-color: var(--surface-container-low);"><div class="text-label-md" style="color: var(--secondary);">Kesenjangan Diagnostik Kritis</div><h2 class="text-display-md" style="color: var(--on-surface); margin-top: 0.75rem; max-width: 48rem;">Paradoks Antara Presisi Mahal dan <span style="color: var(--primary);">Subjektivitas Murah.</span></h2><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 3rem;"><div class="shadow-ambient-sm" style="border-radius: 2rem; padding: 2.25rem; background-color: var(--surface-container-lowest);"><div style="width: 3.5rem; height: 3.5rem; border-radius: 1rem; display: flex; align-items: center; justify-content: center; position: relative; background-color: var(--error-container); color: var(--on-error-container);"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m18 2 4 4"></path><path d="m17 7 3-3"></path><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"></path><path d="m9 11 4 4"></path><path d="m5 19-3 3"></path><path d="m14 4 6 6"></path></svg><span style="position: absolute; inset: 0px; display: flex; align-items: center; justify-content: center;"><span style="display: block; width: 2.25rem; height: 3px; transform: rotate(45deg); border-radius: 9999px; background-color: var(--on-error-container);"></span></span></div><h3 class="text-headline-md" style="color: var(--on-surface); margin-top: 1.5rem;">Metode Uji Darah Invasif</h3><p style="color: var(--secondary); margin-top: 0.75rem; font-size: 1rem; line-height: 1.7;"><span style="color: var(--on-surface); font-weight: 500;">Karakteristik Utama: </span>Membutuhkan pengambilan darah, biaya tinggi, infrastruktur laboratorium, dan melukai pasien.</p></div><div class="shadow-ambient-sm" style="border-radius: 2rem; padding: 2.25rem; background-color: var(--surface-container-lowest);"><div style="width: 3.5rem; height: 3.5rem; border-radius: 1rem; display: flex; align-items: center; justify-content: center; background-color: var(--primary-fixed); color: var(--primary);"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"></path><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"></path><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"></path><path d="m2 2 20 20"></path></svg></div><h3 class="text-headline-md" style="color: var(--on-surface); margin-top: 1.5rem;">Inspeksi Visual Manual</h3><p style="color: var(--secondary); margin-top: 0.75rem; font-size: 1rem; line-height: 1.7;"><span style="color: var(--on-surface); font-weight: 500;">Tantangan Klinis: </span>Pengamatan pucat pada konjungtiva palpebra sangat subjektif, dan memiliki variabilitas antar-dokter yang tinggi.</p></div></div></div><div class="animate-fade-up delay-500" style="max-width: 80rem; margin: 6rem auto 0px;"><div style="max-width: 48rem;"><div class="text-label-md" style="color: var(--secondary);">Memperkenalkan HemoScan</div><h2 class="text-display-md" style="color: var(--on-surface); margin-top: 0.75rem;">Mengotomatisasi ekstraksi fitur warna dan tekstur dari konjungtiva mata <span style="color: var(--primary);">tanpa perlu melukai pasien.</span></h2></div><div class="shadow-ambient" style="margin-top: 3rem; border-radius: 2rem; overflow: hidden; background-color: var(--surface-container-lowest);"><div style="display: grid; grid-template-columns: 1.3fr 1fr 1fr 1.05fr; min-width: 600px;"><div class="text-label-md" style="padding: 1.5rem; color: var(--secondary); background-color: var(--surface-container);">Aspek</div><div class="text-title-sm" style="padding: 1.5rem; color: var(--on-surface); background-color: var(--surface-container);">Tes Lab Darah</div><div class="text-title-sm" style="padding: 1.5rem; color: var(--on-surface); background-color: var(--surface-container);">Inspeksi Mata Visual</div><div class="text-title-sm" style="padding: 1.5rem; display: flex; align-items: center; gap: 0.5rem; background-color: var(--primary-fixed); color: var(--primary);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><circle cx="12" cy="12" r="1"></circle><path d="M18.944 12.33a1 1 0 0 0 0-.66 7.5 7.5 0 0 0-13.888 0 1 1 0 0 0 0 .66 7.5 7.5 0 0 0 13.888 0"></path></svg> HemoScan</div><div class="text-title-sm" style="padding: 1.5rem; color: var(--on-surface); background-color: var(--surface-container-lowest);">Invasivitas</div><div style="padding: 1.5rem; color: var(--secondary); font-size: 0.9375rem; background-color: var(--surface-container-lowest);">Ya ✕</div><div style="padding: 1.5rem; color: var(--secondary); font-size: 0.9375rem; background-color: var(--surface-container-lowest);">Tidak ✓</div><div style="padding: 1.5rem; color: var(--primary); font-size: 0.9375rem; font-weight: 500; background-color: rgba(245, 223, 223, 0.65);">Tidak ✓</div><div class="text-title-sm" style="padding: 1.5rem; color: var(--on-surface); background-color: var(--surface-container-low);">Kebutuhan Biaya</div><div style="padding: 1.5rem; color: var(--secondary); font-size: 0.9375rem; background-color: var(--surface-container-low);">Tinggi 📈</div><div style="padding: 1.5rem; color: var(--secondary); font-size: 0.9375rem; background-color: var(--surface-container-low);">Rendah 📉</div><div style="padding: 1.5rem; color: var(--primary); font-size: 0.9375rem; font-weight: 500; background-color: rgba(245, 223, 223, 0.8);">Rendah 📉</div><div class="text-title-sm" style="padding: 1.5rem; color: var(--on-surface); background-color: var(--surface-container-lowest);">Kecepatan Diagnostik</div><div style="padding: 1.5rem; color: var(--secondary); font-size: 0.9375rem; background-color: var(--surface-container-lowest);">Lambat 🕒</div><div style="padding: 1.5rem; color: var(--secondary); font-size: 0.9375rem; background-color: var(--surface-container-lowest);">Cepat ⚡</div><div style="padding: 1.5rem; color: var(--primary); font-size: 0.9375rem; font-weight: 500; background-color: rgba(245, 223, 223, 0.65);">Real-time 🎯</div><div class="text-title-sm" style="padding: 1.5rem; color: var(--on-surface); background-color: var(--surface-container-low);">Tingkat Objektivitas</div><div style="padding: 1.5rem; color: var(--secondary); font-size: 0.9375rem; background-color: var(--surface-container-low);">Tinggi 📊</div><div style="padding: 1.5rem; color: var(--secondary); font-size: 0.9375rem; background-color: var(--surface-container-low);">Sangat Rendah ❓</div><div style="padding: 1.5rem; color: var(--primary); font-size: 0.9375rem; font-weight: 500; background-color: rgba(245, 223, 223, 0.8);">Tinggi · AI 🤖</div></div></div><div style="display: flex; align-items: center; gap: 0.75rem; margin-top: 2rem; color: var(--secondary); font-size: 0.875rem;"><span style="color: var(--primary);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg></span>Pemindaian non-invasif yang berfokus pada empati pasien.</div></div></section><footer style="width: 100%; margin-top: 6rem; background-color: var(--surface-container-low);"><div style="max-width: 80rem; margin: 0px auto; padding: 3.5rem 2rem;"><div style="display: flex; align-items: center; justify-content: space-between; gap: 2rem; flex-wrap: wrap;"><div style="display: flex; align-items: center; gap: 0.75rem;"><span style="width: 2.75rem; height: 2.75rem; border-radius: 1rem; background-color: var(--surface-container-lowest); display: flex; align-items: center; justify-content: center; color: var(--primary);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"></path></svg></span><span style="font-family: var(--font-display); font-weight: 700; font-size: 1.25rem; letter-spacing: -0.02em; color: var(--on-surface);">HemoScan</span></div></div><div style="margin: 2rem 0px; height: 1px; width: 100%; background-color: rgba(149, 37, 40, 0.25);"></div><div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;"><div class="text-body-md" style="color: var(--secondary);"><p>© 2026 HemoScan Project ITS.</p><p style="opacity: 0.7;">Karya Cipta Inovasi Sains Data.</p></div><nav style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;"><a href="#" class="text-title-sm" style="padding: 0.5rem 1rem; border-radius: 9999px; color: var(--secondary); text-decoration: none; transition: 0.2s; background-color: transparent;">Terms of Use</a><a href="#" class="text-title-sm" style="padding: 0.5rem 1rem; border-radius: 9999px; color: var(--secondary); text-decoration: none; transition: 0.2s; background-color: transparent;">Help &amp; Support</a></nav></div></div></footer></div></div>
+    <div id="root"><div style="min-height: 100vh; background-color: var(--background);"><nav class="animate-fade-up" style="position: fixed; top: 0px; left: 0px; right: 0px; z-index: 50; padding: 1.5rem 2rem; background-color: rgba(248, 250, 251, 0.75); backdrop-filter: blur(16px) saturate(140%);"><div style="max-width: 80rem; margin: 0px auto; display: flex; align-items: center; justify-content: space-between;"><button style="display: flex; align-items: center; gap: 0.75rem; background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer;"><span style="width: 2.75rem; height: 2.75rem; border-radius: 1rem; background-color: transparent; display: flex; align-items: center; justify-content: center; transition: transform 0.2s;"><img src="logo 1.png" style="width: 100%; height: 100%; object-fit: contain;" alt="Logo"></span><span style="font-family: var(--font-display); font-weight: 700; font-size: 1.25rem; letter-spacing: -0.02em; color: var(--on-surface);">HemoScan</span></button><div style="display: flex; align-items: center; gap: 0.75rem;"><button class="text-title-sm" style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--secondary); background: none; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer; transition: color 0.2s;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l4 2"></path></svg> Riwaat Klinis</button></div></div></nav><section style="min-height: 100vh; padding: 8rem 2rem 6rem;"><div class="landing-grid" style="max-width: 80rem; margin: 0px auto; display: grid; grid-template-columns: 1fr; gap: 3rem; align-items: center;"><div class="animate-fade-up" style="display: flex; flex-direction: column; gap: 1.5rem;"><h1 style="font-family: var(--font-display); font-weight: 700; color: var(--primary); line-height: 0.95; letter-spacing: -0.03em; font-size: clamp(3.5rem, 8vw, 6.5rem);">HEMOSCAN</h1><h2 style="font-family: var(--font-display); font-weight: 600; color: var(--on-surface); font-size: clamp(1.25rem, 2vw, 1.75rem); line-height: 1.3;">Skrining Anemia Non-Invasif Melalui Konjungtiva Mata Menggunakan Deep Learning</h2><p style="color: var(--secondary); font-size: 1rem; line-height: 1.7;">Solusi berbasis kecerdasan buatan yang mengotomatisasi ekstraksi fitur warna dan tekstur dari citra konjungtiva mata untuk mengklasifikasikan status anemia pasien secara non-invasif.</p></div><div class="animate-fade-up delay-200" style="justify-self: end; width: 100%; max-width: 36rem;"><div style="padding: 2.5rem; border-radius: 2rem; position: relative; overflow: hidden; background-color: var(--surface-container-lowest);"><div style="display: flex; flex-direction: column; gap: 1.5rem;"><div><div class="text-label-md" style="color: var(--secondary);">Langkah 01 · Profil Pasien</div><h2 class="text-headline-md" style="color: var(--on-surface); margin-top: 0.25rem;">Skrining Baru</h2></div><div style="display: flex; flex-direction: column; gap: 1rem;"><div><label class="text-label-md" style="color: var(--secondary); display: block; margin-bottom: 0.5rem;">Nama Lengkap</label><input class="input-ghost" placeholder="cth. Amelia Hartwell" value=""></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;"><div><label class="text-label-md" style="color: var(--secondary); display: block; margin-bottom: 0.5rem;">Usia</label><input type="number" class="input-ghost" placeholder="34" value=""></div><div><label class="text-label-md" style="color: var(--secondary); display: block; margin-bottom: 0.5rem;">Jenis Kelamin</label><div style="display: flex; gap: 0.5rem;"><button type="button" style="flex: 1 1 0%; padding: 0.625rem 0.75rem; border-radius: 1rem; font-size: 0.875rem; font-weight: 500; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer; background-color: var(--primary-fixed); color: var(--primary); transition: 0.2s;">Perempuan</button><button type="button" style="flex: 1 1 0%; padding: 0.625rem 0.75rem; border-radius: 1rem; font-size: 0.875rem; font-weight: 500; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer; background-color: var(--surface-container-low); color: var(--secondary); transition: 0.2s;">Laki-laki</button></div></div></div><div><label class="text-label-md" style="color: var(--secondary); display: block; margin-bottom: 0.75rem;">Gejala yang Dialami</label><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;"><button type="button" style="padding: 0.625rem 0.875rem; border-radius: 1rem; font-size: 0.875rem; font-weight: 500; text-align: left; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer; transition: 0.2s; background-color: var(--surface-container-low); color: var(--secondary);">Mudah lelah</button><button type="button" style="padding: 0.625rem 0.875rem; border-radius: 1rem; font-size: 0.875rem; font-weight: 500; text-align: left; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer; transition: 0.2s; background-color: var(--surface-container-low); color: var(--secondary);">Kulit pucat</button><button type="button" style="padding: 0.625rem 0.875rem; border-radius: 1rem; font-size: 0.875rem; font-weight: 500; text-align: left; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer; transition: 0.2s; background-color: var(--surface-container-low); color: var(--secondary);">Pusing</button><button type="button" style="padding: 0.625rem 0.875rem; border-radius: 1rem; font-size: 0.875rem; font-weight: 500; text-align: left; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer; transition: 0.2s; background-color: var(--surface-container-low); color: var(--secondary);">Tangan dingin</button><button type="button" style="padding: 0.625rem 0.875rem; border-radius: 1rem; font-size: 0.875rem; font-weight: 500; text-align: left; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer; transition: 0.2s; background-color: var(--surface-container-low); color: var(--secondary);">Sakit kepala</button><button type="button" style="padding: 0.625rem 0.875rem; border-radius: 1rem; font-size: 0.875rem; font-weight: 500; text-align: left; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer; transition: 0.2s; background-color: var(--surface-container-low); color: var(--secondary);">Sesak napas</button><button type="button" style="padding: 0.625rem 0.875rem; border-radius: 1rem; font-size: 0.875rem; font-weight: 500; text-align: left; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer; transition: 0.2s; background-color: var(--surface-container-low); color: var(--secondary);">Kuku rapuh</button><button type="button" style="padding: 0.625rem 0.875rem; border-radius: 1rem; font-size: 0.875rem; font-weight: 500; text-align: left; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; cursor: pointer; transition: 0.2s; background-color: var(--surface-container-low); color: var(--secondary);">Jantung berdebar</button></div></div></div><div style="display: flex; justify-content: flex-end; padding-top: 1rem;"><button disabled="" class="btn-primary">Lanjutkan ke Pemindaian <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button></div></div></div></div></div><div class="animate-fade-up delay-400" style="max-width: 80rem; margin: 8rem auto 0px; border-radius: 2.5rem; padding: clamp(2rem, 4vw, 4rem); background-color: var(--surface-container-low);"><div class="text-label-md" style="color: var(--secondary);">Kesenjangan Diagnostik Kritis</div><h2 class="text-display-md" style="color: var(--on-surface); margin-top: 0.75rem; max-width: 48rem;">Paradoks Antara Presisi Mahal dan <span style="color: var(--primary);">Subjektivitas Murah.</span></h2><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 3rem;"><div class="shadow-ambient-sm" style="border-radius: 2rem; padding: 2.25rem; background-color: var(--surface-container-lowest);"><div style="width: 3.5rem; height: 3.5rem; border-radius: 1rem; display: flex; align-items: center; justify-content: center; position: relative; background-color: var(--error-container); color: var(--on-error-container);"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m18 2 4 4"></path><path d="m17 7 3-3"></path><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"></path><path d="m9 11 4 4"></path><path d="m5 19-3 3"></path><path d="m14 4 6 6"></path></svg><span style="position: absolute; inset: 0px; display: flex; align-items: center; justify-content: center;"><span style="display: block; width: 2.25rem; height: 3px; transform: rotate(45deg); border-radius: 9999px; background-color: var(--on-error-container);"></span></span></div><h3 class="text-headline-md" style="color: var(--on-surface); margin-top: 1.5rem;">Metode Uji Darah Invasif</h3><p style="color: var(--secondary); margin-top: 0.75rem; font-size: 1rem; line-height: 1.7;"><span style="color: var(--on-surface); font-weight: 500;">Karakteristik Utama: </span>Membutuhkan pengambilan darah, biaya tinggi, infrastruktur laboratorium, dan melukai pasien.</p></div><div class="shadow-ambient-sm" style="border-radius: 2rem; padding: 2.25rem; background-color: var(--surface-container-lowest);"><div style="width: 3.5rem; height: 3.5rem; border-radius: 1rem; display: flex; align-items: center; justify-content: center; background-color: var(--primary-fixed); color: var(--primary);"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"></path><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"></path><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"></path><path d="m2 2 20 20"></path></svg></div><h3 class="text-headline-md" style="color: var(--on-surface); margin-top: 1.5rem;">Inspeksi Visual Manual</h3><p style="color: var(--secondary); margin-top: 0.75rem; font-size: 1rem; line-height: 1.7;"><span style="color: var(--on-surface); font-weight: 500;">Tantangan Klinis: </span>Pengamatan pucat pada konjungtiva palpebra sangat subjektif, dan memiliki variabilitas antar-dokter yang tinggi.</p></div></div></div><div class="animate-fade-up delay-500" style="max-width: 80rem; margin: 6rem auto 0px;"><div style="max-width: 48rem;"><div class="text-label-md" style="color: var(--secondary);">Memperkenalkan HemoScan</div><h2 class="text-display-md" style="color: var(--on-surface); margin-top: 0.75rem;">Mengotomatisasi ekstraksi fitur warna dan tekstur dari konjungtiva mata <span style="color: var(--primary);">tanpa perlu melukai pasien.</span></h2></div><div class="shadow-ambient" style="margin-top: 3rem; border-radius: 2rem; overflow: hidden; background-color: var(--surface-container-lowest);"><div style="display: grid; grid-template-columns: 1.3fr 1fr 1fr 1.05fr; min-width: 600px;"><div class="text-label-md" style="padding: 1.5rem; color: var(--secondary); background-color: var(--surface-container);">Aspek</div><div class="text-title-sm" style="padding: 1.5rem; color: var(--on-surface); background-color: var(--surface-container);">Tes Lab Darah</div><div class="text-title-sm" style="padding: 1.5rem; color: var(--on-surface); background-color: var(--surface-container);">Inspeksi Mata Visual</div><div class="text-title-sm" style="padding: 1.5rem; display: flex; align-items: center; gap: 0.5rem; background-color: var(--primary-fixed); color: var(--primary);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><circle cx="12" cy="12" r="1"></circle><path d="M18.944 12.33a1 1 0 0 0 0-.66 7.5 7.5 0 0 0-13.888 0 1 1 0 0 0 0 .66 7.5 7.5 0 0 0 13.888 0"></path></svg> HemoScan</div><div class="text-title-sm" style="padding: 1.5rem; color: var(--on-surface); background-color: var(--surface-container-lowest);">Invasivitas</div><div style="padding: 1.5rem; color: var(--secondary); font-size: 0.9375rem; background-color: var(--surface-container-lowest);">Ya ✕</div><div style="padding: 1.5rem; color: var(--secondary); font-size: 0.9375rem; background-color: var(--surface-container-lowest);">Tidak ✓</div><div style="padding: 1.5rem; color: var(--primary); font-size: 0.9375rem; font-weight: 500; background-color: rgba(245, 223, 223, 0.65);">Tidak ✓</div><div class="text-title-sm" style="padding: 1.5rem; color: var(--on-surface); background-color: var(--surface-container-low);">Kebutuhan Biaya</div><div style="padding: 1.5rem; color: var(--secondary); font-size: 0.9375rem; background-color: var(--surface-container-low);">Tinggi 📈</div><div style="padding: 1.5rem; color: var(--secondary); font-size: 0.9375rem; background-color: var(--surface-container-low);">Rendah 📉</div><div style="padding: 1.5rem; color: var(--primary); font-size: 0.9375rem; font-weight: 500; background-color: rgba(245, 223, 223, 0.8);">Rendah 📉</div><div class="text-title-sm" style="padding: 1.5rem; color: var(--on-surface); background-color: var(--surface-container-lowest);">Kecepatan Diagnostik</div><div style="padding: 1.5rem; color: var(--secondary); font-size: 0.9375rem; background-color: var(--surface-container-lowest);">Lambat 🕒</div><div style="padding: 1.5rem; color: var(--secondary); font-size: 0.9375rem; background-color: var(--surface-container-lowest);">Cepat ⚡</div><div style="padding: 1.5rem; color: var(--primary); font-size: 0.9375rem; font-weight: 500; background-color: rgba(245, 223, 223, 0.65);">Real-time 🎯</div><div class="text-title-sm" style="padding: 1.5rem; color: var(--on-surface); background-color: var(--surface-container-low);">Tingkat Objektivitas</div><div style="padding: 1.5rem; color: var(--secondary); font-size: 0.9375rem; background-color: var(--surface-container-low);">Tinggi 📊</div><div style="padding: 1.5rem; color: var(--secondary); font-size: 0.9375rem; background-color: var(--surface-container-low);">Sangat Rendah ❓</div><div style="padding: 1.5rem; color: var(--primary); font-size: 0.9375rem; font-weight: 500; background-color: rgba(245, 223, 223, 0.8);">Tinggi · AI 🤖</div></div></div><div style="display: flex; align-items: center; gap: 0.75rem; margin-top: 2rem; color: var(--secondary); font-size: 0.875rem;"><span style="color: var(--primary);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg></span>Pemindaian non-invasif yang berfokus pada empati pasien.</div></div></section><footer style="width: 100%; margin-top: 6rem; background-color: var(--surface-container-low);"><div style="max-width: 80rem; margin: 0px auto; padding: 3.5rem 2rem;"><div style="display: flex; align-items: center; justify-content: space-between; gap: 2rem; flex-wrap: wrap;"><div style="display: flex; align-items: center; gap: 0.75rem;"><span style="width: 2.75rem; height: 2.75rem; border-radius: 1rem; background-color: transparent; display: flex; align-items: center; justify-content: center;"><img src="logo 1.png" style="width: 100%; height: 100%; object-fit: contain;" alt="Logo"></span><span style="font-family: var(--font-display); font-weight: 700; font-size: 1.25rem; letter-spacing: -0.02em; color: var(--on-surface);">HemoScan</span></div></div><div style="margin: 2rem 0px; height: 1px; width: 100%; background-color: rgba(149, 37, 40, 0.25);"></div><div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;"><div class="text-body-md" style="color: var(--secondary);"><p>© 2026 HemoScan Project ITS.</p><p style="opacity: 0.7;">Karya Cipta Inovasi Sains Data.</p></div><nav style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;"><a href="#" class="text-title-sm" style="padding: 0.5rem 1rem; border-radius: 9999px; color: var(--secondary); text-decoration: none; transition: 0.2s; background-color: transparent;">Terms of Use</a><a href="#" class="text-title-sm" style="padding: 0.5rem 1rem; border-radius: 9999px; color: var(--secondary); text-decoration: none; transition: 0.2s; background-color: transparent;">Help &amp; Support</a></nav></div></div></footer></div></div>
 
     <script type="text/babel">
         const { useState, useEffect, useRef, useCallback } = React;
+
+        // ─── Beautiful Animated HemoScan Loader Component ────────
+        const HemoScanLoader = ({ size = '11rem' }) => (
+            <div className="hemoscan-loader-container" style={{ width: size, height: size }}>
+                <video 
+                    src="loading.mp4" 
+                    autoPlay 
+                    loop 
+                    muted 
+                    playsInline 
+                />
+            </div>
+        );
 
         const API_URL = "http://localhost:8000";
 
@@ -329,11 +446,11 @@
                     <button onClick={onHome} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'none', border: 'none', cursor: 'pointer' }}>
                         <span style={{
                             width: '2.75rem', height: '2.75rem', borderRadius: '1rem',
-                            backgroundColor: 'var(--surface-container)',
+                            backgroundColor: 'transparent',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            color: 'var(--primary)', transition: 'transform 0.2s',
+                            transition: 'transform 0.2s',
                         }}>
-                            <IconHeartPulse />
+                            <img src="logo 1.png" style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="Logo" />
                         </span>
                         <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.25rem', letterSpacing: '-0.02em', color: 'var(--on-surface)' }}>
                             HemoScan
@@ -347,33 +464,24 @@
                         }}>
                             <IconHistory /> Riwayat Klinis
                         </button>
-                        <button onClick={onLogin} className="text-title-sm" style={{
-                            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                            padding: '0.5rem 1rem', borderRadius: '9999px',
-                            background: 'var(--gradient-primary)', color: '#fff',
-                            border: 'none', cursor: 'pointer', boxShadow: 'var(--shadow-ambient-sm)',
-                            transition: 'opacity 0.2s',
-                        }}>
-                            {isLoggedIn ? <><IconLogOut /> Keluar</> : <><IconLogIn /> Masuk</>}
-                        </button>
+
                     </div>
                 </div>
             </nav>
         );
 
         // ─── Footer ─────────────────────────────────────────────
-        const Footer = () => (
+        const Footer = ({ onTermsClick, onHelpClick }) => (
             <footer style={{ width: '100%', marginTop: '6rem', backgroundColor: 'var(--surface-container-low)' }}>
                 <div style={{ maxWidth: '80rem', margin: '0 auto', padding: '3.5rem 2rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '2rem', flexWrap: 'wrap' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                             <span style={{
                                 width: '2.75rem', height: '2.75rem', borderRadius: '1rem',
-                                backgroundColor: 'var(--surface-container-lowest)',
+                                backgroundColor: 'transparent',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                color: 'var(--primary)',
                             }}>
-                                <IconHeartPulse />
+                                <img src="logo 1.png" style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="Logo" />
                             </span>
                             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.25rem', letterSpacing: '-0.02em', color: 'var(--on-surface)' }}>
                                 HemoScan
@@ -387,15 +495,24 @@
                             <p style={{ opacity: 0.7 }}>Karya Cipta Inovasi Sains Data.</p>
                         </div>
                         <nav style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.5rem' }}>
-                            {["Terms of Use", "Help & Support"].map(label => (
-                                <a key={label} href="#" className="text-title-sm" style={{
-                                    padding: '0.5rem 1rem', borderRadius: '9999px',
-                                    color: 'var(--secondary)', textDecoration: 'none', transition: 'all 0.2s',
-                                }}
-                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--surface-container)'; e.currentTarget.style.color = 'var(--on-surface)'; }}
-                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--secondary)'; }}
-                                >{label}</a>
-                            ))}
+                            <button onClick={onTermsClick} className="text-title-sm" style={{
+                                padding: '0.5rem 1rem', borderRadius: '9999px',
+                                color: 'var(--secondary)', textDecoration: 'none', transition: 'all 0.2s',
+                                background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-sans)',
+                                fontWeight: 600,
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--surface-container)'; e.currentTarget.style.color = 'var(--on-surface)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--secondary)'; }}
+                            >Terms of Use</button>
+                            <button onClick={onHelpClick} className="text-title-sm" style={{
+                                padding: '0.5rem 1rem', borderRadius: '9999px',
+                                color: 'var(--secondary)', textDecoration: 'none', transition: 'all 0.2s',
+                                background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-sans)',
+                                fontWeight: 600,
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--surface-container)'; e.currentTarget.style.color = 'var(--on-surface)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--secondary)'; }}
+                            >Help &amp; Support</button>
                         </nav>
                     </div>
                 </div>
@@ -465,7 +582,7 @@
                         width: '100%', maxWidth: '28rem', borderRadius: '2rem', overflow: 'hidden',
                         backgroundColor: 'var(--surface-container-lowest)', position: 'relative',
                     }}>
-                        <div style={{ height: '6px', width: '100%', background: 'var(--gradient-primary)' }} />
+
                         <button onClick={onCancel} aria-label="Tutup" style={{
                             position: 'absolute', top: '1.25rem', right: '1.25rem',
                             width: '2.25rem', height: '2.25rem', borderRadius: '9999px',
@@ -478,13 +595,9 @@
 
                         <div style={{ padding: '2.25rem 2.25rem 2rem' }}>
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-                                <span style={{
-                                    width: '3.5rem', height: '3.5rem', borderRadius: '1rem',
-                                    backgroundColor: 'var(--primary-fixed)', color: 'var(--primary)',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                }}>
-                                    <IconHeartPulse />
-                                </span>
+                                <img src="logo 1.png" alt="HemoScan Logo" style={{
+                                    width: '3.5rem', height: '3.5rem', objectFit: 'contain',
+                                }} />
                                 <h2 className="text-headline-md" style={{ color: 'var(--on-surface)', marginTop: '1.25rem' }}>
                                     {isRegister ? 'Daftar Akun Baru' : 'Masuk ke HemoScan'}
                                 </h2>
@@ -546,6 +659,80 @@
             );
         };
 
+        const TermsModal = ({ onClose }) => (
+            <div className="animate-fade-in" onClick={onClose} style={{
+                position: 'fixed', inset: 0, zIndex: 100,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem',
+                backgroundColor: 'rgba(248, 250, 251, 0.75)',
+                backdropFilter: 'blur(18px) saturate(140%)',
+                WebkitBackdropFilter: 'blur(18px) saturate(140%)',
+            }}>
+                <div onClick={e => e.stopPropagation()} className="animate-fade-up shadow-ambient" style={{
+                    width: '100%', maxWidth: '36rem', borderRadius: '2rem', overflow: 'hidden',
+                    backgroundColor: 'var(--surface-container-lowest)', position: 'relative',
+                }}>
+
+                    <button onClick={onClose} aria-label="Tutup" style={{
+                        position: 'absolute', top: '1.25rem', right: '1.25rem',
+                        width: '2.25rem', height: '2.25rem', borderRadius: '9999px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        backgroundColor: 'var(--surface-container-low)',
+                        color: 'var(--secondary)', border: 'none', cursor: 'pointer',
+                    }}>
+                        <IconX />
+                    </button>
+                    <div style={{ padding: '2.25rem 2.25rem 2rem' }}>
+                        <h2 className="text-headline-md" style={{ color: 'var(--on-surface)', marginBottom: '1rem' }}>Terms of Use</h2>
+                        <div className="no-scrollbar" style={{ maxHeight: '24rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', color: 'var(--secondary)', fontSize: '0.9375rem', lineHeight: '1.6' }}>
+                            <p><strong>1. Layanan Skrining Edukatif</strong><br />HemoScan adalah aplikasi skrining anemia non-invasif berbasis kecerdasan buatan (deep learning) yang menganalisis citra konjungtiva mata. Aplikasi ini ditujukan untuk tujuan edukasi dan skrining awal, bukan diagnosis medis final.</p>
+                            <p><strong>2. Bukan Pengganti Uji Medis</strong><br />Hasil prediksi dari HemoScan (probabilitas anemia) tidak boleh digunakan sebagai satu-satunya dasar tindakan medis. Pengguna sangat disarankan untuk melakukan uji darah laboratorium formal (seperti pemeriksaan hemoglobin/Hb) dan berkonsultasi dengan dokter atau tenaga medis profesional.</p>
+                            <p><strong>3. Kebijakan Privasi Data</strong><br />Kami menghargai privasi Anda. Foto konjungtiva mata palpebra inferior serta informasi profil pasien yang Anda unggah hanya akan digunakan untuk proses komputasi prediksi AI HemoScan dan riwayat klinik lokal Anda.</p>
+                            <p><strong>4. Batasan Tanggung Jawab</strong><br />Tim pengembang HemoScan ITS tidak bertanggung jawab atas keputusan kesehatan mandiri yang diambil oleh pengguna berdasarkan hasil prediksi aplikasi ini.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const HelpModal = ({ onClose }) => (
+            <div className="animate-fade-in" onClick={onClose} style={{
+                position: 'fixed', inset: 0, zIndex: 100,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem',
+                backgroundColor: 'rgba(248, 250, 251, 0.75)',
+                backdropFilter: 'blur(18px) saturate(140%)',
+                WebkitBackdropFilter: 'blur(18px) saturate(140%)',
+            }}>
+                <div onClick={e => e.stopPropagation()} className="animate-fade-up shadow-ambient" style={{
+                    width: '100%', maxWidth: '36rem', borderRadius: '2rem', overflow: 'hidden',
+                    backgroundColor: 'var(--surface-container-lowest)', position: 'relative',
+                }}>
+
+                    <button onClick={onClose} aria-label="Tutup" style={{
+                        position: 'absolute', top: '1.25rem', right: '1.25rem',
+                        width: '2.25rem', height: '2.25rem', borderRadius: '9999px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        backgroundColor: 'var(--surface-container-low)',
+                        color: 'var(--secondary)', border: 'none', cursor: 'pointer',
+                    }}>
+                        <IconX />
+                    </button>
+                    <div style={{ padding: '2.25rem 2.25rem 2rem' }}>
+                        <h2 className="text-headline-md" style={{ color: 'var(--on-surface)', marginBottom: '1rem' }}>Help &amp; Support</h2>
+                        <div className="no-scrollbar" style={{ maxHeight: '24rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', color: 'var(--secondary)', fontSize: '0.9375rem', lineHeight: '1.6' }}>
+                            <p><strong>Cara Penggunaan Aplikasi HemoScan:</strong></p>
+                            <ol style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                <li><strong>Isi Profil:</strong> Masukkan Nama, Usia, Jenis Kelamin, serta pilih gejala-gejala klinis yang Anda rasakan pada halaman utama, lalu klik tombol "Lanjutkan".</li>
+                                <li><strong>Pengambilan Gambar:</strong> Posisikan mata Anda menghadap kamera. Tarik kelopak mata bawah Anda hingga area berwarna merah muda/merah (konjungtiva palpebra inferior) terlihat sepenuhnya.</li>
+                                <li><strong>Kriteria Foto yang Baik:</strong> Pastikan pencahayaan cukup terang, kamera fokus, gambar tidak buram, dan konjungtiva mata terlihat jelas bebas dari bayangan. Anda juga dapat mengunggah file foto dari galeri.</li>
+                                <li><strong>Prediksi:</strong> Ambil foto atau konfirmasi unggahan. Server AI HemoScan akan menganalisis fitur warna dan tekstur konjungtiva Anda secara real-time dan menyajikan hasil diagnosis tingkat anemia beserta tingkat akurasinya.</li>
+                            </ol>
+                            <p style={{ marginTop: '0.5rem' }}><strong>Hubungi Kami:</strong><br />Jika Anda memiliki kendala teknis atau pertanyaan, silakan kirim email ke <a href="mailto:support@hemoscan.com" style={{ color: 'var(--primary)', fontWeight: '600' }}>support@hemoscan.com</a> atau kunjungi Laboratorium Inovasi ITS, Surabaya.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
 
         // ─── Landing View (Home + Form) ─────────────────────────
         const LandingView = ({ onContinue }) => {
@@ -558,15 +745,23 @@
             const canSubmit = name.trim().length > 1 && age && Number(age) > 0;
 
             return (
-                <section style={{ minHeight: '100vh', paddingTop: '8rem', paddingBottom: '6rem', padding: '8rem 2rem 6rem' }}>
+                <section style={{
+                    minHeight: '100vh',
+                    paddingTop: '8rem',
+                    paddingBottom: '6rem',
+                    padding: '8rem 2rem 6rem',
+                    position: 'relative',
+                    overflow: 'hidden'
+                }}>
+                    {/* Empathetic Background Image Layer with Dynamic bottom Masking */}
+                    <div className="landing-bg-container">
+                        <img src="Backgorund.png" className="landing-bg-img" alt="" />
+                    </div>
+
                     {/* Hero + Form Grid */}
-                    <div style={{ maxWidth: '80rem', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr', gap: '3rem', alignItems: 'center' }} className="landing-grid">
+                    <div style={{ maxWidth: '80rem', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr', gap: '3rem', alignItems: 'center', position: 'relative', zIndex: 1 }} className="landing-grid">
                         {/* Left — Intro */}
                         <div className="animate-fade-up" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            <div className="glass-panel" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '9999px', width: 'fit-content' }}>
-                                <IconSparkles />
-                                <span className="text-label-md" style={{ color: 'var(--on-surface)' }}>HemoScan</span>
-                            </div>
                             <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, color: 'var(--primary)', lineHeight: 0.95, letterSpacing: '-0.03em', fontSize: 'clamp(3.5rem, 8vw, 6.5rem)' }}>
                                 HEMOSCAN
                             </h1>
@@ -582,7 +777,7 @@
 
                         {/* Right — Form Card */}
                         <div className="animate-fade-up delay-200" style={{ justifySelf: 'end', width: '100%', maxWidth: '36rem' }}>
-                            <div className="clinical-accent shadow-ambient" style={{
+                            <div style={{
                                 padding: '2.5rem', borderRadius: '2rem', position: 'relative', overflow: 'hidden',
                                 backgroundColor: 'var(--surface-container-lowest)',
                             }}>
@@ -723,9 +918,9 @@
                                 {/* Rows */}
                                 {[
                                     { label: "Invasivitas", lab: "Ya ✕", vis: "Tidak ✓", hemo: "Tidak ✓" },
-                                    { label: "Kebutuhan Biaya", lab: "Tinggi 📈", vis: "Rendah 📉", hemo: "Rendah 📉" },
-                                    { label: "Kecepatan Diagnostik", lab: "Lambat 🕒", vis: "Cepat ⚡", hemo: "Real-time 🎯" },
-                                    { label: "Tingkat Objektivitas", lab: "Tinggi 📊", vis: "Sangat Rendah ❓", hemo: "Tinggi · AI 🤖" },
+                                    { label: "Kebutuhan Biaya", lab: "Tinggi", vis: "Rendah", hemo: "Rendah" },
+                                    { label: "Kecepatan Diagnostik", lab: "Lambat", vis: "Cepat", hemo: "Real-time" },
+                                    { label: "Tingkat Objektivitas", lab: "Tinggi", vis: "Sangat Rendah", hemo: "Tinggi · AI" },
                                 ].map((row, idx) => (
                                     <React.Fragment key={row.label}>
                                         <div className="text-title-sm" style={{ padding: '1.5rem', color: 'var(--on-surface)', backgroundColor: idx % 2 === 0 ? 'var(--surface-container-lowest)' : 'var(--surface-container-low)' }}>{row.label}</div>
@@ -851,11 +1046,13 @@
                                     <video ref={videoRef} autoPlay playsInline className="mirror" style={{ width: '100%', display: 'block' }} />
                                     {loading && (
                                         <div style={{
-                                            position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)',
+                                            position: 'absolute', inset: 0, backgroundColor: 'rgba(25, 28, 29, 0.65)',
+                                            backdropFilter: 'blur(8px)',
                                             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#fff', zIndex: 20,
+                                            transition: 'all 0.3s ease'
                                         }}>
-                                            <div style={{ width: '3rem', height: '3rem', border: '4px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '9999px' }} className="animate-spin" />
-                                            <p style={{ fontWeight: 700, marginTop: '1rem' }}>Menganalisis Spesimen...</p>
+                                            <HemoScanLoader size="5.5rem" />
+                                            <p style={{ fontWeight: 700, marginTop: '1.5rem', letterSpacing: '0.02em', color: '#ffffff' }}>Menganalisis Spesimen...</p>
                                         </div>
                                     )}
                                     <div style={{ position: 'absolute', left: '1.5rem', right: '1.5rem', bottom: '1.5rem' }}>
@@ -883,42 +1080,171 @@
 
         // ─── Processing View ────────────────────────────────────
         const ProcessingView = ({ onDone }) => {
+            const [step, setStep] = useState(0);
+
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    setStep(prev => Math.min(prev + 1, 2));
+                }, 850);
+                return () => clearInterval(interval);
+            }, []);
+
             useEffect(() => {
                 const t = setTimeout(onDone, 2600);
                 return () => clearTimeout(t);
             }, [onDone]);
+
+            const stepMessages = [
+                {
+                    title: "Mengekstrak wilayah konjungtiva...",
+                    desc: "Sistem mendeteksi dan melakukan segmentasi area konjungtiva palpebra mata pasien secara otomatis."
+                },
+                {
+                    title: "Menganalisis kromatisitas & tekstur...",
+                    desc: "Mengekstrak distribusi warna hemoglobin dan fitur tekstur mikro menggunakan jaringan saraf dalam."
+                },
+                {
+                    title: "Mengklasifikasikan status anemia...",
+                    desc: "Menghitung probabilitas risiko anemia berdasarkan model deep learning terkalibrasi."
+                }
+            ];
 
             return (
                 <section className="animate-fade-in" style={{
                     minHeight: '100vh', paddingTop: '8rem', paddingBottom: '5rem',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8rem 2rem 5rem',
                 }}>
-                    <div style={{ textAlign: 'center' }}>
-                        <div className="animate-pulse-glow" style={{
-                            margin: '0 auto', width: '11rem', height: '11rem', borderRadius: '9999px',
+                    <div style={{ textAlign: 'center', maxWidth: '32rem', margin: '0 auto' }}>
+                        <div className="glass-panel animate-pulse-glow" style={{
+                            margin: '0 auto', width: '15rem', height: '15rem', borderRadius: '2.5rem',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }} className="glass-panel animate-pulse-glow" style={{
-                            margin: '0 auto', width: '11rem', height: '11rem', borderRadius: '9999px',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            backgroundColor: 'rgba(234, 236, 238, 0.6)',
-                            backdropFilter: 'blur(20px) saturate(140%)',
+                            backgroundColor: 'rgba(255, 255, 255, 0.45)',
+                            backdropFilter: 'blur(24px) saturate(160%)',
+                            boxShadow: 'var(--shadow-ambient)',
+                            border: '1px solid rgba(255, 255, 255, 0.5)',
+                            position: 'relative',
+                            overflow: 'hidden'
                         }}>
-                            <div className="animate-pulse-inner" style={{
-                                width: '6rem', height: '6rem', borderRadius: '9999px',
-                                background: 'var(--gradient-primary)',
-                            }} />
+                            {/* Scanning beam overlay */}
+                            <div className="scanner-beam" />
+                            
+                            <HemoScanLoader size="10.5rem" />
                         </div>
-                        <h2 className="text-headline-lg" style={{ color: 'var(--on-surface)', marginTop: '2.5rem' }}>
-                            Menganalisis tonality konjungtiva…
-                        </h2>
-                        <p className="text-body-md" style={{ color: 'var(--secondary)', marginTop: '0.75rem', maxWidth: '24rem', margin: '0.75rem auto 0' }}>
-                            Model kami sedang membandingkan distribusi kromatik dengan referensi terkalibrasi.
-                        </p>
+                        
+                        <div style={{ minHeight: '6.5rem', marginTop: '2.5rem' }}>
+                            <h2 className="text-headline-md animate-fade-in" key={`title-${step}`} style={{ color: 'var(--on-surface)' }}>
+                                {stepMessages[step].title}
+                            </h2>
+                            <p className="text-body-md animate-fade-in" key={`desc-${step}`} style={{ color: 'var(--secondary)', marginTop: '0.75rem', maxWidth: '26rem', margin: '0.75rem auto 0' }}>
+                                {stepMessages[step].desc}
+                            </p>
+                        </div>
+
+                        {/* Custom beautiful progress bar */}
+                        <div className="hemoscan-progress-container">
+                            <div className="hemoscan-progress-bar" />
+                        </div>
                     </div>
                 </section>
             );
         };
 
+
+        // ─── Preprocessing Pipeline Panel ───────────────────────
+        const PreprocessingPanel = ({ preprocessing, prediction }) => {
+            if (!preprocessing) return null;
+            const steps = preprocessing.steps || [];
+            const summary = preprocessing.pipeline_summary || {};
+
+            const stepIcons = [
+                // 0: Resize
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>,
+                // 1: EfficientNet
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+                // 2: PCA
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
+                // 3: Tabular
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+                // 4: Concat
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>,
+                // 5: XGBoost
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>,
+            ];
+
+            return (
+                <div style={{ marginTop: '2.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
+                        <div className="text-label-md" style={{ color: 'var(--secondary)' }}>Pipeline Preprocessing & Inferensi</div>
+                        <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(149,37,40,0.12)' }} />
+                    </div>
+
+                    {/* Summary chips */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.25rem' }}>
+                        {[
+                            { label: 'Backbone', value: summary.backbone || 'EfficientNetB0' },
+                            { label: 'Fitur Gambar', value: `${summary.img_feat_dim || 1280}D` },
+                            { label: 'PCA', value: `${summary.pca_components || 0} PC` },
+                            { label: 'Total Fitur', value: `${summary.total_features || 0}D` },
+                            { label: 'Threshold', value: `${(summary.threshold || 0.5).toFixed(2)}` },
+                        ].map(chip => (
+                            <span key={chip.label} style={{
+                                display: 'inline-flex', alignItems: 'center', gap: '0.375rem',
+                                padding: '0.25rem 0.75rem', borderRadius: '9999px',
+                                backgroundColor: 'var(--surface-container-low)',
+                                fontSize: '0.75rem', fontWeight: 600,
+                            }}>
+                                <span style={{ color: 'var(--secondary)' }}>{chip.label}</span>
+                                <span style={{ color: 'var(--on-surface)' }}>{chip.value}</span>
+                            </span>
+                        ))}
+                    </div>
+
+                    {/* Steps */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {steps.map((step, idx) => (
+                            <div key={idx} className="animate-fade-up" style={{
+                                animationDelay: `${idx * 70}ms`,
+                                display: 'grid', gridTemplateColumns: '2rem 1fr auto',
+                                gap: '0.875rem', alignItems: 'center',
+                                padding: '0.75rem 1rem', borderRadius: '0.875rem',
+                                backgroundColor: idx === steps.length - 1
+                                    ? (prediction.prediksi === 'Anemia' ? 'rgba(255,218,214,0.5)' : 'rgba(245,223,223,0.5)')
+                                    : 'var(--surface-container-low)',
+                                transition: 'background-color 0.2s',
+                            }}>
+                                <div style={{
+                                    width: '2rem', height: '2rem', borderRadius: '0.625rem',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    backgroundColor: idx === steps.length - 1
+                                        ? (prediction.prediksi === 'Anemia' ? 'var(--error-container)' : 'var(--primary-fixed)')
+                                        : 'var(--surface-container)',
+                                    color: idx === steps.length - 1
+                                        ? (prediction.prediksi === 'Anemia' ? 'var(--on-error-container)' : 'var(--primary)')
+                                        : 'var(--secondary)',
+                                    flexShrink: 0,
+                                }}>
+                                    {stepIcons[idx] || <span style={{ fontSize: '0.75rem', fontWeight: 700 }}>{idx + 1}</span>}
+                                </div>
+                                <div>
+                                    <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--on-surface)', lineHeight: 1.3 }}>{step.name}</div>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--secondary)', marginTop: '0.125rem' }}>{step.detail}</div>
+                                </div>
+                                <div style={{
+                                    fontSize: '0.6875rem', fontWeight: 600, color: 'var(--secondary)',
+                                    fontFamily: 'var(--font-sans)', letterSpacing: '0.01em',
+                                    backgroundColor: 'var(--surface-container-lowest)',
+                                    padding: '0.2rem 0.5rem', borderRadius: '0.375rem',
+                                    whiteSpace: 'nowrap', textAlign: 'right',
+                                    maxWidth: '12rem', overflow: 'hidden', textOverflow: 'ellipsis',
+                                }}>
+                                    {step.value}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
 
         // ─── Result View ────────────────────────────────────────
         const ResultView = ({ prediction, imageUrl, onNewScan, onHistory }) => {
@@ -926,17 +1252,19 @@
             const isAnemia = prediction.prediksi === 'Anemia';
             const confidence = prediction.probabilitas;
             const confPct = (confidence * 100).toFixed(1);
+            const preprocessing = prediction.preprocessing || null;
 
             return (
                 <section className="animate-fade-up" style={{
                     minHeight: '100vh', paddingTop: '8rem', paddingBottom: '5rem', padding: '8rem 2rem 5rem',
                     backgroundColor: 'var(--surface-container)',
                 }}>
-                    <div style={{ maxWidth: '56rem', margin: '0 auto' }}>
+                    <div style={{ maxWidth: '64rem', margin: '0 auto' }}>
                         <div className="text-label-md" style={{ color: 'var(--secondary)', marginBottom: '1rem' }}>
                             Langkah 03 · Hasil
                         </div>
 
+                        {/* Main result card */}
                         <div className="shadow-ambient" style={{
                             borderRadius: '2rem', padding: 'clamp(2rem, 4vw, 3.5rem)',
                             backgroundColor: 'var(--surface-container-lowest)',
@@ -960,17 +1288,23 @@
                                         {prediction.prediksi}
                                     </h2>
 
-                                    <div style={{ marginTop: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', maxWidth: '28rem' }}>
+                                    <div style={{ marginTop: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', maxWidth: '32rem' }}>
                                         <div>
                                             <div className="text-label-md" style={{ color: 'var(--secondary)' }}>Tingkat Risiko</div>
-                                            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.5rem', color: 'var(--on-surface)', marginTop: '0.25rem' }}>
+                                            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.25rem', color: 'var(--on-surface)', marginTop: '0.25rem' }}>
                                                 {prediction.risk_level === 'high' ? 'Tinggi' : prediction.risk_level === 'medium' ? 'Sedang' : 'Rendah'}
                                             </div>
                                         </div>
                                         <div>
                                             <div className="text-label-md" style={{ color: 'var(--secondary)' }}>Probabilitas</div>
-                                            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.5rem', color: 'var(--on-surface)', marginTop: '0.25rem' }}>
+                                            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.25rem', color: 'var(--on-surface)', marginTop: '0.25rem' }}>
                                                 {confPct}%
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div className="text-label-md" style={{ color: 'var(--secondary)' }}>Threshold</div>
+                                            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.25rem', color: 'var(--on-surface)', marginTop: '0.25rem' }}>
+                                                {prediction.threshold ? (prediction.threshold * 100).toFixed(0) + '%' : '—'}
                                             </div>
                                         </div>
                                     </div>
@@ -990,7 +1324,7 @@
                                     )}
 
                                     <p className="text-label-md" style={{ color: 'var(--secondary)', marginTop: '2rem', maxWidth: '28rem', lineHeight: 1.6 }}>
-                                        Disklaimer: HemoScan adalah alat skrining awal, bukan diagnosis final.
+                                        Peringatan: HemoScan adalah alat skrining awal, bukan diagnosis final.
                                     </p>
 
                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginTop: '2.5rem' }}>
@@ -1005,19 +1339,55 @@
 
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                     {imageUrl && (
-                                        <div style={{ borderRadius: '1rem', overflow: 'hidden', backgroundColor: 'var(--surface-container)' }}>
+                                        <div style={{ borderRadius: '1rem', overflow: 'hidden', backgroundColor: 'var(--surface-container)', position: 'relative' }}>
                                             <img src={`${API_URL}${imageUrl}`} alt="Konjungtiva yang dipindai" style={{ width: '100%', display: 'block' }} />
+                                            <div style={{
+                                                position: 'absolute', bottom: 0, left: 0, right: 0,
+                                                padding: '0.5rem 0.75rem',
+                                                background: 'linear-gradient(to top, rgba(25,28,29,0.7), transparent)',
+                                                fontSize: '0.6875rem', color: '#fff', fontWeight: 600,
+                                                letterSpacing: '0.04em', textTransform: 'uppercase',
+                                            }}>Konjungtiva Palpebra · Dipindai AI</div>
                                         </div>
                                     )}
                                     <div style={{ borderRadius: '1rem', padding: '1.25rem', backgroundColor: 'var(--surface-container-low)' }}>
                                         <div className="text-label-md" style={{ color: 'var(--secondary)' }}>Pasien</div>
                                         <div className="text-title-lg" style={{ color: 'var(--on-surface)', marginTop: '0.25rem' }}>{prediction.nama}</div>
-                                        <div className="text-body-md" style={{ color: 'var(--secondary)', marginTop: '0.25rem' }}>
-                                            {prediction.umur} tahun · {prediction.symptoms?.length || 0} gejala
+                                        <div className="text-body-md" style={{ color: 'var(--secondary)', marginTop: '0.125rem' }}>
+                                            {prediction.umur} tahun · {prediction.gender}
                                         </div>
+                                        <div className="text-body-md" style={{ color: 'var(--secondary)', marginTop: '0.125rem' }}>
+                                            {prediction.age_group}
+                                        </div>
+                                        {prediction.symptoms && prediction.symptoms.length > 0 && (
+                                            <div style={{ marginTop: '0.75rem', display: 'flex', flexWrap: 'wrap', gap: '0.375rem' }}>
+                                                {prediction.symptoms.map(s => (
+                                                    <span key={s} style={{
+                                                        fontSize: '0.6875rem', fontWeight: 600,
+                                                        padding: '0.2rem 0.5rem', borderRadius: '9999px',
+                                                        backgroundColor: 'var(--surface-container)',
+                                                        color: 'var(--secondary)',
+                                                    }}>{s}</span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* DB Badge */}
+                                    <div style={{
+                                        display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                        padding: '0.625rem 0.875rem', borderRadius: '0.875rem',
+                                        backgroundColor: 'rgba(149,37,40,0.06)',
+                                        border: '1px solid rgba(149,37,40,0.1)',
+                                    }}>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
+                                        <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--primary)' }}>Tersimpan di Database</span>
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Preprocessing Pipeline */}
+                            {preprocessing && <PreprocessingPanel preprocessing={preprocessing} prediction={prediction} />}
                         </div>
                     </div>
                 </section>
@@ -1140,6 +1510,8 @@
             // User state: null = not logged in, { email, role, display_name } = logged in
             const [user, setUser] = useState(null);
             const [authModal, setAuthModal] = useState({ isOpen: false, onSuccess: () => {} });
+            const [termsOpen, setTermsOpen] = useState(false);
+            const [helpOpen, setHelpOpen] = useState(false);
 
             const isLoggedIn = !!user;
 
@@ -1241,7 +1613,10 @@
                         />
                     )}
 
-                    <Footer />
+                    {termsOpen && <TermsModal onClose={() => setTermsOpen(false)} />}
+                    {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
+
+                    <Footer onTermsClick={() => setTermsOpen(true)} onHelpClick={() => setHelpOpen(true)} />
                 </div>
             );
         }
@@ -1264,6 +1639,44 @@
         }
         @media (max-width: 640px) {
             nav > div { flex-wrap: wrap; gap: 0.5rem; }
+        }
+
+        /* Landing background responsive styling */
+        .landing-bg-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 0;
+            pointer-events: none;
+            display: flex;
+            justify-content: center;
+            overflow: hidden;
+            height: 100%;
+        }
+        .landing-bg-img {
+            width: 100%;
+            height: auto;
+            max-height: 100vh;
+            object-fit: contain;
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+        }
+
+        /* Mobile specific background adjustments */
+        @media (max-width: 1023px) {
+            .landing-bg-container {
+                bottom: 0;
+                height: 100%;
+            }
+            .landing-bg-img {
+                width: auto;
+                height: 100%;
+                max-height: 80vh;
+                object-fit: cover;
+                -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%);
+                mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%);
+            }
         }
     </style>
 

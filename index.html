@@ -299,7 +299,7 @@
             </div>
         );
 
-        const API_URL = "http://localhost:8000";
+        const API_URL = window.location.origin;
 
         const SYMPTOMS = [
             "Mudah lelah", "Kulit pucat", "Pusing", "Tangan dingin",
@@ -942,7 +942,7 @@
 
 
         // ─── Capture View ───────────────────────────────────────
-        const CaptureView = ({ onCaptured, onBack, loading }) => {
+        const CaptureView = ({ patient, userEmail, onCaptured, onBack, loading }) => {
             const [stage, setStage] = useState('prep');
             const videoRef = useRef(null);
             const fileRef = useRef(null);
@@ -972,6 +972,15 @@
             const handleFile = (e) => {
                 const f = e.target.files?.[0];
                 if (f) onCaptured(f);
+            };
+
+            const handleCameraClick = () => {
+                try {
+                    // Open camera natively
+                    setStage('capture');
+                } catch (err) {
+                    alert("Gagal membuka kamera: " + err.message);
+                }
             };
 
             return (
@@ -1014,7 +1023,7 @@
                                         ))}
                                     </ul>
                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginTop: '2.5rem' }}>
-                                        <button onClick={() => setStage('capture')} className="btn-primary">
+                                        <button onClick={handleCameraClick} className="btn-primary">
                                             <IconCamera /> Buka Kamera
                                         </button>
                                         <button onClick={() => fileRef.current?.click()} className="btn-secondary">
@@ -1528,6 +1537,17 @@
 
             useEffect(() => { if (user) fetchHistory(); }, [user]);
 
+            useEffect(() => {
+                window._hemoscanShowResult = (result) => {
+                    setPrediction(result);
+                    setView('processing');
+                    if (user) fetchHistory();
+                };
+                return () => {
+                    window._hemoscanShowResult = null;
+                };
+            }, [user]);
+
             const handleNewScan = () => {
                 setPatient(null);
                 setPrediction(null);
@@ -1552,13 +1572,19 @@
                 formData.append('user_email', user ? user.email : '');
 
                 fetch(`${API_URL}/api/predict`, { method: 'POST', body: formData })
-                    .then(res => res.json())
+                    .then(async (res) => {
+                        const data = await res.json();
+                        if (!res.ok) {
+                            throw new Error(data.detail || 'Gagal menganalisis gambar');
+                        }
+                        return data;
+                    })
                     .then(data => {
                         setPrediction(data);
                         setView('processing');
                         if (user) fetchHistory();
                     })
-                    .catch(e => alert("Prediction failed. Make sure server.py is running."))
+                    .catch(e => alert("Prediction failed: " + e.message))
                     .finally(() => setLoading(false));
             };
 
@@ -1599,7 +1625,7 @@
                     <Navbar onHistory={handleHistory} onHome={handleNewScan} onLogin={handleLogin} isLoggedIn={isLoggedIn} />
 
                     {view === 'landing' && <LandingView onContinue={handleContinue} />}
-                    {view === 'capture' && <CaptureView onCaptured={handleCaptured} onBack={() => setView('landing')} loading={loading} />}
+                    {view === 'capture' && <CaptureView patient={patient} userEmail={user?.email || ''} onCaptured={handleCaptured} onBack={() => setView('landing')} loading={loading} />}
                     {view === 'processing' && <ProcessingView onDone={handleProcessingDone} />}
                     {view === 'result' && <ResultView prediction={prediction} imageUrl={prediction?.image_url} onNewScan={handleNewScan} onHistory={handleHistory} />}
                     {view === 'history' && <HistoryView history={history} onNewScan={handleNewScan} onViewResult={(r) => { setPrediction(r); setView('result'); }} user={user} />}
@@ -1695,4 +1721,6 @@
                         <div data-range="61-80" class="segment"><span></span></div>
                         <div data-range="81-100" class="segment"><span></span></div>
                     </div>
-                </div></body></html>
+                </div>
+
+</body></html>

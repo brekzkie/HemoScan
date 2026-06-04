@@ -1,8 +1,9 @@
 
 import os
-import json
+from dotenv import load_dotenv
+load_dotenv(override=True)
+
 import uuid
-import sqlite3
 import datetime
 from typing import Optional
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Query
@@ -14,81 +15,57 @@ from PIL import Image
 import io
 import bcrypt
 import joblib
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 # Import logic from inference.py
 from inference import load_model_components, predict_from_pil
 
-# ─── Database Setup ──────────────────────────────────────────────
-DB_FILE = "hemoscan.db"
+# ─── PostgreSQL Database Connection ──────────────────────────────
+def get_db_connection():
+    # 1. Coba baca dari file secrets.toml Streamlit jika ada
+    try:
+        import tomllib
+        secrets_path = os.path.join(".streamlit", "secrets.toml")
+        if os.path.exists(secrets_path):
+            with open(secrets_path, "rb") as f:
+                sec = tomllib.load(f)
+                if "postgres" in sec:
+                    p = sec["postgres"]
+                    if "url" in p:
+                        return psycopg2.connect(p["url"])
+                    return psycopg2.connect(
+                        host=p.get("host", "127.0.0.1"),
+                        port=p.get("port", "5432"),
+                        database=p.get("database", "hemoscan"),
+                        user=p.get("user", "postgres"),
+                        password=p.get("password", "Sweethome123")
+                    )
+    except Exception:
+        pass
 
-def get_db():
-    """Get a database connection."""
-    conn = sqlite3.connect(DB_FILE)
-    conn.row_factory = sqlite3.Row
-    return conn
+    # 2. Coba dari environment variable POSTGRES_URL
+    postgres_url = os.environ.get("POSTGRES_URL")
+    if postgres_url:
+        print(f"[DB Connection] Attempting PostgreSQL connection via URL.")
+        return psycopg2.connect(postgres_url)
 
-def init_db():
-    """Initialize the database with users and scans tables."""
-    conn = get_db()
-    cursor = conn.cursor()
+    # 3. Fallback ke parameter individual dengan default password 'Sweethome123'
+    host = os.environ.get("POSTGRES_HOST", "127.0.0.1")
+    port = os.environ.get("POSTGRES_PORT", "5432")
+    db = os.environ.get("POSTGRES_DB", "hemoscan")
+    user = os.environ.get("POSTGRES_USER", "postgres")
+    pwd = os.environ.get("POSTGRES_PASSWORD", "Sweethome123")
+    
+    print(f"[DB Connection] Attempting PostgreSQL connection: host={host}, port={port}, database={db}, user={user}, password={'*' * len(pwd)}")
 
-    # Users table
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            email TEXT UNIQUE NOT NULL,
-            password_hash TEXT NOT NULL,
-            display_name TEXT NOT NULL,
-            role TEXT NOT NULL DEFAULT 'user',
-            created_at TEXT NOT NULL DEFAULT (datetime('now'))
-        )
-    """)
-
-    # Scans table — stores all prediction results
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS scans (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            scan_id TEXT UNIQUE NOT NULL,
-            user_email TEXT NOT NULL DEFAULT '',
-            nama TEXT NOT NULL,
-            umur INTEGER NOT NULL,
-            gender TEXT NOT NULL,
-            age_group TEXT NOT NULL,
-            symptoms TEXT NOT NULL DEFAULT '',
-            prediksi TEXT NOT NULL,
-            probabilitas REAL NOT NULL,
-            threshold REAL NOT NULL,
-            risk_level TEXT NOT NULL,
-            keterangan TEXT NOT NULL,
-            image_url TEXT NOT NULL DEFAULT '',
-            timestamp TEXT NOT NULL,
-            -- preprocessing pipeline info
-            img_feat_dim INTEGER NOT NULL DEFAULT 1280,
-            pca_components INTEGER NOT NULL DEFAULT 0,
-            age_enc INTEGER NOT NULL DEFAULT 0,
-            gender_enc INTEGER NOT NULL DEFAULT 0,
-            age_map_val INTEGER NOT NULL DEFAULT 1,
-            created_at TEXT NOT NULL DEFAULT (datetime('now'))
-        )
-    """)
-    conn.commit()
-
-    # Seed default admin account if no users exist
-    cursor.execute("SELECT COUNT(*) as cnt FROM users")
-    count = cursor.fetchone()["cnt"]
-    if count == 0:
-        admin_hash = bcrypt.hashpw("admin123".encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-        cursor.execute(
-            "INSERT INTO users (email, password_hash, display_name, role) VALUES (?, ?, ?, ?)",
-            ("admin@hemoscan.com", admin_hash, "Administrator", "admin")
-        )
-        conn.commit()
-        print("[DB] Default admin account created: admin@hemoscan.com / admin123")
-
-    conn.close()
-
-# Initialize database on startup
-init_db()
+    return psycopg2.connect(
+        host=host,
+        port=port,
+        database=db,
+        user=user,
+        password=pwd
+    )
 
 # ─── Pydantic Models ─────────────────────────────────────────────
 class LoginRequest(BaseModel):
@@ -158,20 +135,32 @@ async def register(req: RegisterRequest):
     if len(req.display_name.strip()) < 2:
         raise HTTPException(status_code=400, detail="Nama lengkap minimal 2 karakter")
 
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id FROM users WHERE email = ?", (req.email,))
-    if cursor.fetchone():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute("SELECT id FROM public.users WHERE email = %s", (req.email,))
+        if cursor.fetchone():
+            cursor.close()
+            conn.close()
+            raise HTTPException(status_code=409, detail="Email sudah terdaftar")
+        
+        password_hash = bcrypt.hashpw(req.password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+        cursor.execute(
+            """
+            INSERT INTO public.users (email, password_hash, display_name, role)
+            VALUES (%s, %s, %s, 'user')
+            """,
+            (req.email, password_hash, req.display_name.strip())
+        )
+        conn.commit()
+        cursor.close()
         conn.close()
-        raise HTTPException(status_code=409, detail="Email sudah terdaftar")
-
-    password_hash = bcrypt.hashpw(req.password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-    cursor.execute(
-        "INSERT INTO users (email, password_hash, display_name, role) VALUES (?, ?, ?, ?)",
-        (req.email, password_hash, req.display_name.strip(), "user")
-    )
-    conn.commit()
-    conn.close()
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
     return {
         "status": "success",
@@ -183,13 +172,22 @@ async def register(req: RegisterRequest):
 # ─── Login Endpoint ───────────────────────────────────────────────
 @app.post("/api/login")
 async def login(req: LoginRequest):
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE email = ?", (req.email,))
-    user = cursor.fetchone()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute("SELECT * FROM public.users WHERE email = %s", (req.email,))
+        user = cursor.fetchone()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
-    if user and bcrypt.checkpw(req.password.encode("utf-8"), user["password_hash"].encode("utf-8")):
+    if not user:
+        raise HTTPException(status_code=401, detail="Email atau password salah")
+
+    if bcrypt.checkpw(req.password.encode("utf-8"), user["password_hash"].encode("utf-8")):
         return {
             "status": "success",
             "message": "Login successful",
@@ -205,6 +203,7 @@ async def preprocessing_info():
     """Return the full ML pipeline configuration for UI display."""
     return get_preprocessing_info()
 
+
 # ─── Predict Endpoint ─────────────────────────────────────────────
 @app.post("/api/predict")
 async def predict(
@@ -213,7 +212,7 @@ async def predict(
     age: int = Form(...),
     gender: str = Form(...),
     symptoms: str = Form(""),
-    user_email: str = Form("")
+    user_email: str = Form(""),
 ):
     if COMPONENTS is None:
         raise HTTPException(status_code=500, detail="Model components not loaded")
@@ -302,77 +301,88 @@ async def predict(
             **result
         }
 
-        # ── Save to SQLite DB ──────────────────────────────────────
-        conn = get_db()
-        cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO scans (
-                scan_id, user_email, nama, umur, gender, age_group,
-                symptoms, prediksi, probabilitas, threshold, risk_level,
-                keterangan, image_url, timestamp,
-                img_feat_dim, pca_components, age_enc, gender_enc, age_map_val
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            scan_id,
-            user_email if user_email else "",
-            name, age,
-            result["gender"],
-            result["age_group"],
-            symptoms,
-            result["prediksi"],
-            result["probabilitas"],
-            result["threshold"],
-            result["risk_level"],
-            result["keterangan"],
-            f"/uploads/{image_id}",
-            timestamp,
-            1280,
-            n_pca,
-            age_enc,
-            gender_enc,
-            age_enc,
-        ))
-        conn.commit()
-        conn.close()
+        # ── Save to PostgreSQL ─────────────────────────────────────
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            cursor.execute(
+                """
+                INSERT INTO public.scans (
+                    scan_id, user_email, nama, umur, gender, age_group, symptoms,
+                    prediksi, probabilitas, threshold, risk_level, keterangan,
+                    image_url, timestamp, img_feat_dim, pca_components, age_enc,
+                    gender_enc, age_map_val
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """,
+                (
+                    scan_id,
+                    user_email if user_email else "",
+                    name,
+                    age,
+                    result["gender"],
+                    result["age_group"],
+                    symptoms,
+                    result["prediksi"],
+                    float(result["probabilitas"]),
+                    float(result["threshold"]),
+                    result["risk_level"],
+                    result["keterangan"],
+                    f"/uploads/{image_id}",
+                    timestamp,
+                    1280,
+                    n_pca,
+                    int(age_enc),
+                    int(gender_enc),
+                    int(age_enc)
+                )
+            )
+            conn.commit()
+            cursor.close()
+            conn.close()
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            raise HTTPException(status_code=500, detail=f"Gagal menyimpan hasil scan ke PostgreSQL: {str(e)}")
 
         return full_result
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# ─── History Endpoint (from DB, role-aware) ──────────────────────
+# ─── History Endpoint (from Supabase, role-aware) ────────────────
 @app.get("/api/history")
 async def get_history(
     role: str = Query("user"),
     email: str = Query("")
 ):
-    conn = get_db()
-    cursor = conn.cursor()
-
-    if role == "admin":
-        cursor.execute("""
-            SELECT * FROM scans ORDER BY created_at DESC
-        """)
-    elif email:
-        cursor.execute("""
-            SELECT * FROM scans WHERE user_email = ? ORDER BY created_at DESC
-        """, (email,))
-    else:
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        if role == "admin":
+            cursor.execute("SELECT * FROM public.scans ORDER BY created_at DESC")
+        elif email:
+            cursor.execute("SELECT * FROM public.scans WHERE user_email = %s ORDER BY created_at DESC", (email,))
+        else:
+            cursor.close()
+            conn.close()
+            return []
+        rows = cursor.fetchall()
+        cursor.close()
         conn.close()
-        return []
-
-    rows = cursor.fetchall()
-    conn.close()
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
     result = []
     for row in rows:
-        symptoms_list = [s.strip() for s in row["symptoms"].split(",") if s.strip()]
+        symptoms_list = [s.strip() for s in row.get("symptoms", "").split(",") if s.strip()]
         result.append({
             "id": row["scan_id"],
             "timestamp": row["timestamp"],
-            "image_url": row["image_url"],
+            "image_url": row.get("image_url", ""),
             "symptoms": symptoms_list,
-            "user_email": row["user_email"],
+            "user_email": row.get("user_email", ""),
             "nama": row["nama"],
             "umur": row["umur"],
             "gender": row["gender"],
@@ -385,9 +395,9 @@ async def get_history(
             "preprocessing": {
                 "pipeline_summary": {
                     "backbone": "EfficientNetB0 (ImageNet)",
-                    "img_feat_dim": row["img_feat_dim"],
-                    "pca_components": row["pca_components"],
-                    "total_features": 3 + row["pca_components"],
+                    "img_feat_dim": row.get("img_feat_dim", 1280),
+                    "pca_components": row.get("pca_components", 0),
+                    "total_features": 3 + row.get("pca_components", 0),
                     "classifier": "XGBoost",
                     "threshold": row["threshold"],
                 }
@@ -399,20 +409,27 @@ async def get_history(
 # ─── Stats Endpoint (admin summary) ──────────────────────────────
 @app.get("/api/stats")
 async def get_stats():
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT COUNT(*) as total FROM scans")
-    total = cursor.fetchone()["total"]
-    cursor.execute("SELECT COUNT(*) as anemia FROM scans WHERE prediksi='Anemia'")
-    anemia = cursor.fetchone()["anemia"]
-    cursor.execute("SELECT COUNT(*) as total_users FROM users")
-    total_users = cursor.fetchone()["total_users"]
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute("SELECT prediksi FROM public.scans")
+        scans = cursor.fetchall()
+        cursor.execute("SELECT id FROM public.users")
+        users = cursor.fetchall()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+    total = len(scans)
+    anemia = sum(1 for s in scans if s["prediksi"] == "Anemia")
     return {
         "total_scans": total,
         "anemia_count": anemia,
         "normal_count": total - anemia,
-        "total_users": total_users
+        "total_users": len(users)
     }
 
 # ─── Static Files & Routes ────────────────────────────────────────

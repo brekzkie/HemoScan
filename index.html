@@ -1524,6 +1524,7 @@
             const [authModal, setAuthModal] = useState({ isOpen: false, onSuccess: () => {} });
             const [termsOpen, setTermsOpen] = useState(false);
             const [helpOpen, setHelpOpen] = useState(false);
+            const [guestScanIds, setGuestScanIds] = useState([]);
 
             const isLoggedIn = !!user;
 
@@ -1536,6 +1537,22 @@
                     const data = await res.json();
                     setHistory(data);
                 } catch (e) { console.error("History fetch failed", e); }
+            };
+
+            const linkGuestScans = async (email, ids) => {
+                if (!ids || ids.length === 0) return;
+                try {
+                    const res = await fetch(`${API_URL}/api/link-scans`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, scan_ids: ids })
+                    });
+                    if (res.ok) {
+                        setGuestScanIds([]);
+                    }
+                } catch (e) {
+                    console.error("Gagal menautkan hasil screening sebelum login:", e);
+                }
             };
 
             useEffect(() => { if (user) fetchHistory(); }, [user]);
@@ -1585,7 +1602,11 @@
                     })
                     .then(data => {
                         setPrediction(data);
-                        if (user) fetchHistory();
+                        if (user) {
+                            fetchHistory();
+                        } else {
+                            setGuestScanIds(prev => [...prev, data.id]);
+                        }
                     })
                     .catch(e => {
                         alert("Prediction failed: " + e.message);
@@ -1607,8 +1628,9 @@
                         onSuccess: (userData) => {
                             setUser(userData);
                             setAuthModal({ isOpen: false, onSuccess: () => {} });
-                            // Fetch filtered history then navigate
-                            fetchHistory(userData).then(() => setView('history'));
+                            linkGuestScans(userData.email, guestScanIds).then(() => {
+                                fetchHistory(userData).then(() => setView('history'));
+                            });
                         }
                     });
                 }
@@ -1622,6 +1644,9 @@
                     setAuthModal({ isOpen: true, onSuccess: (userData) => {
                         setUser(userData);
                         setAuthModal({ isOpen: false, onSuccess: () => {} });
+                        linkGuestScans(userData.email, guestScanIds).then(() => {
+                            fetchHistory(userData);
+                        });
                     }});
                 }
             };

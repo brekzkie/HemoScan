@@ -77,6 +77,10 @@ class RegisterRequest(BaseModel):
     password: str
     display_name: str
 
+class LinkScansRequest(BaseModel):
+    email: str
+    scan_ids: list[str]
+
 # ─── FastAPI App ──────────────────────────────────────────────────
 app = FastAPI(title="HemoScan API")
 
@@ -196,6 +200,34 @@ async def login(req: LoginRequest):
             "display_name": user["display_name"]
         }
     raise HTTPException(status_code=401, detail="Email atau password salah")
+
+# ─── Link Scans Endpoint ──────────────────────────────────────────
+@app.post("/api/link-scans")
+async def link_scans(req: LinkScansRequest):
+    if not req.email or not req.scan_ids:
+        return {"status": "success", "message": "No scans to link"}
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        for scan_id in req.scan_ids:
+            cursor.execute(
+                """
+                UPDATE public.scans
+                SET user_email = %s
+                WHERE scan_id = %s AND (user_email = '' OR user_email IS NULL)
+                """,
+                (req.email, scan_id)
+            )
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Database error while linking scans: {str(e)}")
+
+    return {"status": "success", "message": f"Linked {len(req.scan_ids)} scans to {req.email}"}
 
 # ─── Preprocessing Info Endpoint ─────────────────────────────────
 @app.get("/api/preprocessing-info")

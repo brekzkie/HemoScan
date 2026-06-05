@@ -1683,6 +1683,18 @@
                                             }}>Konjungtiva Palpebra · Dipindai AI</div>
                                         </div>
                                     )}
+                                    {prediction.cropped_image_url && (
+                                        <div style={{ borderRadius: '1rem', overflow: 'hidden', backgroundColor: 'var(--surface-container)', position: 'relative', border: '1.5px solid rgba(149, 37, 40, 0.15)' }}>
+                                            <img src={`${API_URL}${prediction.cropped_image_url}`} alt="Konjungtiva tersegmentasi" style={{ width: '100%', display: 'block' }} />
+                                            <div style={{
+                                                position: 'absolute', bottom: 0, left: 0, right: 0,
+                                                padding: '0.5rem 0.75rem',
+                                                background: 'linear-gradient(to top, rgba(25,28,29,0.8), transparent)',
+                                                fontSize: '0.6875rem', color: '#fff', fontWeight: 600,
+                                                letterSpacing: '0.04em', textTransform: 'uppercase',
+                                            }}>Konjungtiva Tersegmentasi (Cropped)</div>
+                                        </div>
+                                    )}
                                     <div style={{ borderRadius: '1rem', padding: '1.25rem', backgroundColor: 'var(--surface-container-low)' }}>
                                         <div className="text-label-md" style={{ color: 'var(--secondary)' }}>Pasien</div>
                                         <div className="text-title-lg" style={{ color: 'var(--on-surface)', marginTop: '0.25rem' }}>{prediction.nama}</div>
@@ -2075,6 +2087,7 @@
                 formData.append('age', patient.age);
                 formData.append('gender', patient.gender);
                 formData.append('symptoms', patient.symptoms.join(','));
+                formData.append('eye_side', patient.eye_side || 'right');
                 // Track which user performed the scan (empty if guest)
                 formData.append('user_email', user ? user.email : '');
 

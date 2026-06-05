@@ -34,6 +34,8 @@ CREATE TABLE IF NOT EXISTS public.scans (
     age_enc         INTEGER NOT NULL DEFAULT 0,
     gender_enc      INTEGER NOT NULL DEFAULT 0,
     age_map_val     INTEGER NOT NULL DEFAULT 1,
+    eye_side        TEXT NOT NULL DEFAULT 'right',
+    cropped_image_url TEXT NOT NULL DEFAULT '',
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

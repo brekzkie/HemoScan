@@ -31,6 +31,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY server.py ./
 COPY inference.py ./
 COPY database/ ./database/
+COPY augmentation/ ./augmentation/
 COPY index.html ./
 
 # ── Copy static assets ──────────────────────────────────────────

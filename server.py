@@ -20,6 +20,8 @@ from psycopg2.extras import RealDictCursor
 
 # Import logic from inference.py
 from inference import load_model_components, predict_from_pil
+from augmentation import flip_left_to_right
+import numpy as np
 
 # ─── PostgreSQL Database Connection ──────────────────────────────
 def get_db_connection():
@@ -285,6 +287,48 @@ def validate_conjunctiva_image(pil_image: Image.Image) -> tuple[bool, str]:
     return True, "OK"
 
 
+def crop_conjunctiva(pil_image: Image.Image) -> Image.Image:
+    """
+    Locates and crops the conjunctiva palpebra inferior (pinkish/reddish area)
+    using color thresholding and bounding box detection.
+    """
+    process_img = pil_image.convert('RGB').resize((224, 224))
+    arr = np.array(process_img, dtype=np.float32)
+    
+    r, g, b = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
+    
+    # Conjunctiva mask (pinkish-red color)
+    pinkish_mask = (r > 80) & (r > g) & (g > b * 0.5) & (r - b > 15)
+    
+    # Find bounding box
+    y_indices, x_indices = np.where(pinkish_mask)
+    if len(y_indices) > 0 and len(x_indices) > 0:
+        ymin, ymax = y_indices.min(), y_indices.max()
+        xmin, xmax = x_indices.min(), x_indices.max()
+        
+        # Scale bounding box back to original image size
+        orig_w, orig_h = pil_image.size
+        
+        # Add padding (15%)
+        h_box = ymax - ymin
+        w_box = xmax - xmin
+        
+        ymin_scaled = int(max(0, (ymin - h_box * 0.15) / 224 * orig_h))
+        ymax_scaled = int(min(orig_h, (ymax + h_box * 0.15) / 224 * orig_h))
+        xmin_scaled = int(max(0, (xmin - w_box * 0.15) / 224 * orig_w))
+        xmax_scaled = int(min(orig_w, (xmax + w_box * 0.15) / 224 * orig_w))
+        
+        # Return cropped region of original image
+        return pil_image.crop((xmin_scaled, ymin_scaled, xmax_scaled, ymax_scaled))
+        
+    # Fallback to center crop if no pinkish region found
+    orig_w, orig_h = pil_image.size
+    crop_size = min(orig_w, orig_h)
+    left = (orig_w - crop_size) // 2
+    top = (orig_h - crop_size) // 2
+    return pil_image.crop((left, top, left + crop_size, top + crop_size))
+
+
 # ─── Predict Endpoint ─────────────────────────────────────────────
 @app.post("/api/predict")
 async def predict(
@@ -294,6 +338,7 @@ async def predict(
     gender: str = Form(...),
     symptoms: str = Form(""),
     user_email: str = Form(""),
+    eye_side: str = Form("right"),
 ):
     if COMPONENTS is None:
         raise HTTPException(status_code=500, detail="Model components not loaded")
@@ -308,10 +353,26 @@ async def predict(
         if not is_valid:
             raise HTTPException(status_code=400, detail=validation_msg)
 
+        # Always apply horizontal flip (augmentation) to change left/webcam layout to right eye
+        img_np = np.array(pil_image)
+        flipped_np = flip_left_to_right(img_np)
+        pil_image = Image.fromarray(flipped_np)
+
         # Save image for history
         image_id = f"{uuid.uuid4()}.png"
         image_path = os.path.join(UPLOADS_DIR, image_id)
         pil_image.save(image_path)
+
+        # Crop conjunctiva palpebra inferior
+        try:
+            cropped_image = crop_conjunctiva(pil_image)
+            cropped_image_id = f"cropped_{image_id}"
+            cropped_image_path = os.path.join(UPLOADS_DIR, cropped_image_id)
+            cropped_image.save(cropped_image_path)
+            cropped_image_url = f"/uploads/{cropped_image_id}"
+        except Exception as e:
+            print(f"Error cropping conjunctiva: {e}")
+            cropped_image_url = f"/uploads/{image_id}"
 
         # Run prediction
         result = predict_from_pil(pil_image, name, age, gender, COMPONENTS)
@@ -334,39 +395,51 @@ async def predict(
         gender_enc = gender_map.get(gender, 0)
 
         # Preprocessing pipeline details to store and return
+        steps_list = [
+            {
+                "name": "Augmentasi Gambar",
+                "detail": "Kiri → Kanan",
+                "value": "Horizontal Flip (flip_left_to_right)"
+            },
+            {
+                "name": "Lokalisasi & Crop Konjungtiva",
+                "detail": "Deteksi area kemerahan",
+                "value": "BBox cropping (padding 15%)"
+            },
+            {
+                "name": "Resize & Konversi RGB",
+                "detail": "224×224 px",
+                "value": "PIL → RGB → resize(224,224)"
+            },
+            {
+                "name": "EfficientNetB0 Feature Extraction",
+                "detail": f"{1280} dimensi",
+                "value": "ImageNet weights · Global Avg Pool"
+            },
+            {
+                "name": "PCA Dimensionality Reduction",
+                "detail": f"1280 → {n_pca} komponen",
+                "value": f"{n_pca} principal components"
+            },
+            {
+                "name": "Tabular Encoding",
+                "detail": "Umur + Gender + Kelompok Usia",
+                "value": f"umur={age}, gender_enc={gender_enc}, age_enc={age_enc}"
+            },
+            {
+                "name": "Feature Concatenation",
+                "detail": f"3 tabular + {n_pca} PCA = {3+n_pca} total fitur",
+                "value": f"X_input shape: (1, {3+n_pca})"
+            },
+            {
+                "name": "XGBoost Classifier",
+                "detail": f"Threshold: {result['threshold']:.2f}",
+                "value": f"P(anemia)={result['probabilitas']:.4f}"
+            },
+        ]
+
         preprocessing = {
-            "steps": [
-                {
-                    "name": "Resize & Konversi RGB",
-                    "detail": "224×224 px",
-                    "value": "PIL → RGB → resize(224,224)"
-                },
-                {
-                    "name": "EfficientNetB0 Feature Extraction",
-                    "detail": f"{1280} dimensi",
-                    "value": "ImageNet weights · Global Avg Pool"
-                },
-                {
-                    "name": "PCA Dimensionality Reduction",
-                    "detail": f"1280 → {n_pca} komponen",
-                    "value": f"{n_pca} principal components"
-                },
-                {
-                    "name": "Tabular Encoding",
-                    "detail": "Umur + Gender + Kelompok Usia",
-                    "value": f"umur={age}, gender_enc={gender_enc}, age_enc={age_enc}"
-                },
-                {
-                    "name": "Feature Concatenation",
-                    "detail": f"3 tabular + {n_pca} PCA = {3+n_pca} total fitur",
-                    "value": f"X_input shape: (1, {3+n_pca})"
-                },
-                {
-                    "name": "XGBoost Classifier",
-                    "detail": f"Threshold: {result['threshold']:.2f}",
-                    "value": f"P(anemia)={result['probabilitas']:.4f}"
-                },
-            ],
+            "steps": steps_list,
             "pipeline_summary": {
                 "backbone": "EfficientNetB0 (ImageNet)",
                 "img_feat_dim": 1280,
@@ -381,9 +454,11 @@ async def predict(
             "id": scan_id,
             "timestamp": timestamp,
             "image_url": f"/uploads/{image_id}",
+            "cropped_image_url": cropped_image_url,
             "symptoms": symptoms_list,
             "user_email": user_email if user_email else "",
             "preprocessing": preprocessing,
+            "eye_side": eye_side,
             **result
         }
 
@@ -397,8 +472,8 @@ async def predict(
                     scan_id, user_email, nama, umur, gender, age_group, symptoms,
                     prediksi, probabilitas, threshold, risk_level, keterangan,
                     image_url, timestamp, img_feat_dim, pca_components, age_enc,
-                    gender_enc, age_map_val
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    gender_enc, age_map_val, eye_side, cropped_image_url
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """,
                 (
                     scan_id,
@@ -419,7 +494,9 @@ async def predict(
                     n_pca,
                     int(age_enc),
                     int(gender_enc),
-                    int(age_enc)
+                    int(age_enc),
+                    eye_side,
+                    cropped_image_url
                 )
             )
             conn.commit()

@@ -1,0 +1,24 @@
+# requirements.docker.txt
+# Versi untuk Docker: tanpa Streamlit (yang dipakai hanya FastAPI server)
+
+# ── AI / ML ───────────────────────────────────────────────────────
+tensorflow>=2.13.0
+xgboost>=2.0.0
+scikit-learn>=1.3.0
+pandas>=2.0.0
+numpy>=1.24.0
+opencv-python-headless>=4.8.0
+Pillow>=10.0.0
+joblib>=1.3.0
+
+# ── PostgreSQL Database ───────────────────────────────────────────
+psycopg2-binary>=2.9.0
+python-dotenv>=1.0.0
+
+# ── Auth ──────────────────────────────────────────────────────────
+bcrypt>=4.0.0
+
+# ── FastAPI ───────────────────────────────────────────────────────
+fastapi>=0.100.0
+uvicorn>=0.23.0
+python-multipart>=0.0.6

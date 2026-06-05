@@ -441,11 +441,11 @@ app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
 
 @app.get("/logo.png")
 async def get_logo():
-    return FileResponse("logo 1.png")
+    return FileResponse("logo1.png")
 
-@app.get("/logo 1.png")
+@app.get("/logo1.png")
 async def get_logo_exact():
-    return FileResponse("logo 1.png")
+    return FileResponse("logo1.png")
 
 @app.get("/Backgorund.png")
 async def get_background():
@@ -457,7 +457,7 @@ async def get_loading_video():
 
 @app.get("/favicon.ico")
 async def get_favicon():
-    return FileResponse("logo 2.png")
+    return FileResponse("logo2.png")
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,0 +1,52 @@
+# ── Python ────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+
+# ── Virtual Environment ───────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── Sensitive / Environment ───────────────────────────────────────
+.env
+.env.*
+
+# ── Git ───────────────────────────────────────────────────────────
+.git/
+.gitignore
+
+# ── Local database ────────────────────────────────────────────────
+hemoscan.db
+scan_history.json
+scan_history_local.json
+
+# ── Uploads (user scan images — dipersist via Docker volume) ──────
+uploads/
+
+# ── Streamlit (tidak dipakai di Docker) ──────────────────────────
+.streamlit/
+app_streamlit.py
+
+# ── Development / Logs ────────────────────────────────────────────
+*.log
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# ── R ────────────────────────────────────────────────────────────
+.Rhistory
+
+# ── Windows ───────────────────────────────────────────────────────
+Thumbs.db
+desktop.ini
+
+# ── macOS ────────────────────────────────────────────────────────
+.DS_Store
+
+# ── Fix/dev scripts ──────────────────────────────────────────────
+fix_index.py

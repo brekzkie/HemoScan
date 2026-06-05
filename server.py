@@ -236,6 +236,55 @@ async def preprocessing_info():
     return get_preprocessing_info()
 
 
+# ─── Image Validation Helper ──────────────────────────────────────
+def validate_conjunctiva_image(pil_image: Image.Image) -> tuple[bool, str]:
+    """
+    Validate whether the uploaded image looks like a conjunctiva (eye) photo.
+    Uses color histogram heuristics to detect pinkish/reddish tissue.
+
+    Returns (is_valid, reason).
+    """
+    import numpy as np
+
+    img = pil_image.convert('RGB').resize((224, 224))
+    arr = np.array(img, dtype=np.float32)
+
+    r, g, b = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
+
+    # --- Check 1: Image should not be too dark or too bright overall ---
+    mean_brightness = arr.mean()
+    if mean_brightness < 30:
+        return False, "Gambar terlalu gelap. Pastikan pencahayaan cukup saat mengambil foto konjungtiva."
+    if mean_brightness > 245:
+        return False, "Gambar terlalu terang/putih. Pastikan kamera fokus pada area konjungtiva."
+
+    # --- Check 2: Red channel should generally dominate for skin/conjunctiva ---
+    # For conjunctiva images, the red channel is typically higher than blue
+    red_dominant_pixels = np.sum((r > b + 5) & (r > 60)) / (224 * 224)
+    if red_dominant_pixels < 0.15:
+        return False, "Foto yang dikirim bukan merupakan gambar konjungtiva mata. Silakan ambil ulang foto bagian dalam kelopak mata bawah."
+
+    # --- Check 3: There should be some pinkish/reddish tissue pixels ---
+    # Conjunctiva has pinkish-red color: R > G > B typically, with R being prominent
+    pinkish_mask = (r > 80) & (r > g) & (g > b * 0.5) & (r - b > 15)
+    pinkish_ratio = np.sum(pinkish_mask) / (224 * 224)
+    if pinkish_ratio < 0.08:
+        return False, "Foto yang dikirim bukan merupakan gambar konjungtiva mata. Silakan ambil ulang foto bagian dalam kelopak mata bawah."
+
+    # --- Check 4: Image shouldn't be too uniform (solid color / blank) ---
+    std_r, std_g, std_b = r.std(), g.std(), b.std()
+    avg_std = (std_r + std_g + std_b) / 3
+    if avg_std < 8:
+        return False, "Gambar terdeteksi sebagai warna solid. Silakan ambil foto konjungtiva yang jelas."
+
+    # --- Check 5: Not pure grayscale (e.g., text documents, B&W photos) ---
+    channel_diff = np.abs(r - g).mean() + np.abs(r - b).mean() + np.abs(g - b).mean()
+    if channel_diff < 5:
+        return False, "Gambar terdeteksi sebagai hitam-putih. Silakan kirim foto berwarna dari konjungtiva mata."
+
+    return True, "OK"
+
+
 # ─── Predict Endpoint ─────────────────────────────────────────────
 @app.post("/api/predict")
 async def predict(
@@ -253,6 +302,11 @@ async def predict(
         # Read image
         contents = await file.read()
         pil_image = Image.open(io.BytesIO(contents))
+
+        # ── Validate image is a conjunctiva photo ──────────────
+        is_valid, validation_msg = validate_conjunctiva_image(pil_image)
+        if not is_valid:
+            raise HTTPException(status_code=400, detail=validation_msg)
 
         # Save image for history
         image_id = f"{uuid.uuid4()}.png"

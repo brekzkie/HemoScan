@@ -287,7 +287,7 @@ def validate_conjunctiva_image(pil_image: Image.Image) -> tuple[bool, str]:
 def crop_conjunctiva(pil_image: Image.Image) -> Image.Image:
     """
     Locates and crops the conjunctiva palpebra inferior (pinkish/reddish area)
-    using hierarchical color thresholding, morphological closing, and contour bounding boxes.
+    using hierarchical color thresholding, vertical eye-region filtering, and contour union.
     """
     orig_w, orig_h = pil_image.size
     process_img = pil_image.convert('RGB').resize((224, 224))
@@ -309,34 +309,47 @@ def crop_conjunctiva(pil_image: Image.Image) -> Image.Image:
     for mask_name, mask_expr in masks:
         mask_uint8 = (mask_expr.astype(np.uint8)) * 255
         
-        # Apply morphological closing to bridge gaps between adjacent conjunctiva segments
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (21, 21))
-        closed_mask = cv2.morphologyEx(mask_uint8, cv2.MORPH_CLOSE, kernel)
+        # Apply a small morphological close to smooth contours and remove noise
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+        smoothed = cv2.morphologyEx(mask_uint8, cv2.MORPH_CLOSE, kernel)
         
-        contours, _ = cv2.findContours(closed_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        if contours:
-            contours = sorted(contours, key=cv2.contourArea, reverse=True)
-            lc = contours[0]
-            # Ignore tiny noise contours (area < 5 on a 224x224 image)
-            if cv2.contourArea(lc) >= 5:
-                x, y, w, h = cv2.boundingRect(lc)
-                
-                # Scale bounding box back to original image size and add 15% padding
-                ymin_scaled = int(max(0, (y - h * 0.15) / 224 * orig_h))
-                ymax_scaled = int(min(orig_h, (y + h + h * 0.15) / 224 * orig_h))
-                xmin_scaled = int(max(0, (x - w * 0.15) / 224 * orig_w))
-                xmax_scaled = int(min(orig_w, (x + w + w * 0.15) / 224 * orig_w))
-                
-                print(f"[Crop] Matched mask: {mask_name} (Contour Area={cv2.contourArea(lc):.1f})")
-                print(f"[Crop] Bounding box: {xmin_scaled}:{xmax_scaled}, {ymin_scaled}:{ymax_scaled}")
-                return pil_image.crop((xmin_scaled, ymin_scaled, xmax_scaled, ymax_scaled))
+        contours, _ = cv2.findContours(smoothed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        if not contours:
+            continue
+            
+        # Filter contours by vertical position (keeping only those in the eye region: 30 < cy < 135)
+        # to filter out hands/fingers pulling the eyelid (cy >= 135) and hair/headbands (cy <= 30)
+        valid_contours = []
+        for c in contours:
+            area = cv2.contourArea(c)
+            if area >= 3:
+                x, y, w, h = cv2.boundingRect(c)
+                cy = y + h / 2.0
+                if 30 < cy < 135:
+                    valid_contours.append(c)
+                    
+        if valid_contours:
+            # Combine all valid eye contours to get the union bounding box
+            all_pts = np.vstack(valid_contours)
+            ux, uy, uw, uh = cv2.boundingRect(all_pts)
+            
+            # Scale bounding box back to original image size and add 15% padding
+            ymin_scaled = int(max(0, (uy - uh * 0.15) / 224 * orig_h))
+            ymax_scaled = int(min(orig_h, (uy + uh + uh * 0.15) / 224 * orig_h))
+            xmin_scaled = int(max(0, (ux - uw * 0.15) / 224 * orig_w))
+            xmax_scaled = int(min(orig_w, (ux + uw + uw * 0.15) / 224 * orig_w))
+            
+            print(f"[Crop] Matched mask: {mask_name} (Contours={len(valid_contours)})")
+            print(f"[Crop] Bounding box: {xmin_scaled}:{xmax_scaled}, {ymin_scaled}:{ymax_scaled}")
+            return pil_image.crop((xmin_scaled, ymin_scaled, xmax_scaled, ymax_scaled))
                 
     # Fallback to center crop if no suitable region is found
-    print("[Crop] No suitable contours found. Using center crop fallback.")
+    print("[Crop] No suitable eye contours found. Using center crop fallback.")
     crop_size = min(orig_w, orig_h)
     left = (orig_w - crop_size) // 2
     top = (orig_h - crop_size) // 2
     return pil_image.crop((left, top, left + crop_size, top + crop_size))
+
 
 
 # ─── Predict Endpoint ─────────────────────────────────────────────

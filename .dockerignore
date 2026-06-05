@@ -50,3 +50,7 @@ desktop.ini
 
 # ── Fix/dev scripts ──────────────────────────────────────────────
 fix_index.py
+
+# ── Organised Folder Exclusions ──────────────────────────────────
+backup/
+notebooks/

@@ -37,7 +37,7 @@ done
 
 # ── 2. Inisialisasi database ────────────────────────────────────
 echo "[2/3] Initializing database schema..."
-python init_db.py
+python database/init_db.py
 
 # ── 3. Jalankan server ──────────────────────────────────────────
 echo "[3/3] Starting FastAPI server on port 8000..."

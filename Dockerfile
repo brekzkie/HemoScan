@@ -30,17 +30,11 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # ── Copy source code ────────────────────────────────────────────
 COPY server.py ./
 COPY inference.py ./
-COPY init_db.py ./
-COPY postgres_schema.sql ./
-COPY database.py ./
+COPY database/ ./database/
 COPY index.html ./
 
 # ── Copy static assets ──────────────────────────────────────────
-COPY logo1.png ./logo1.png
-COPY logo2.png ./logo2.png
-COPY Backgorund.png ./
-COPY loading.mp4 ./
-COPY loading.svg ./
+COPY assets/ ./assets/
 
 # ── Copy model files ────────────────────────────────────────────
 COPY model_output/ ./model_output/

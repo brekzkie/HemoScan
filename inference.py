@@ -1,20 +1,17 @@
 # ================================================================
 #  inference.py
-#  Engine prediksi anemia — dipakai oleh app.py (Streamlit)
-#  Pastikan file model sudah ada di MODEL_DIR sebelum menjalankan app
+#  Engine prediksi anemia — menggunakan ONNX Runtime & OpenCV
 # ================================================================
 
 import os
 import numpy as np
 import joblib
-import xgboost as xgb
-import tensorflow as tf
-from tensorflow.keras.applications import EfficientNetB0
-from tensorflow.keras.applications.efficientnet import preprocess_input
-from tensorflow.keras.preprocessing import image as keras_image
+import cv2
+import onnxruntime as ort
+import random
 from PIL import Image
 
-# ── Path default model (sesuaikan jika berbeda) ────────────────
+# ── Path default model ────────────────
 MODEL_DIR = os.path.join(os.path.dirname(__file__), 'model_output')
 
 
@@ -30,45 +27,100 @@ def hitung_age_group(age: int) -> str:
 
 
 # ================================================================
-# Load semua komponen model (dipanggil sekali, di-cache Streamlit)
+# Image Preprocessing & Augmentasi (OpenCV / NumPy)
+# ================================================================
+
+def preprocess_image_eval(img_rgb: np.ndarray) -> np.ndarray:
+    """
+    Ekuivalen dengan aug_eval di notebook:
+    - Resize mempertahankan rasio aspek sehingga sisi terpanjang = 224.
+    - Pad dengan border hitam (value 0) hingga ukuran 224x224.
+    """
+    h, w = img_rgb.shape[:2]
+    scale = 224.0 / max(h, w)
+    new_h, new_w = int(h * scale), int(w * scale)
+    img_resized = cv2.resize(img_rgb, (new_w, new_h), interpolation=cv2.INTER_AREA)
+    
+    pad_y = 224 - new_h
+    pad_x = 224 - new_w
+    top = pad_y // 2
+    bottom = pad_y - top
+    left = pad_x // 2
+    right = pad_x - left
+    
+    img_padded = cv2.copyMakeBorder(img_resized, top, bottom, left, right, cv2.BORDER_CONSTANT, value=0)
+    return img_padded
+
+
+def apply_aug_tta(img_rgb: np.ndarray) -> np.ndarray:
+    """
+    Ekuivalen dengan aug_tta di notebook:
+    - Melakukan flip horizontal (p=0.5).
+    - Melakukan ShiftScaleRotate (p=0.5) dengan limit kecil.
+    - Mengatur Brightness & Contrast secara random (p=0.5).
+    - Menghasilkan gambar ukuran 224x224.
+    """
+    # Awali dengan preprocessing eval agar ukuran pas 224x224
+    img = preprocess_image_eval(img_rgb)
+    
+    # 1. Horizontal Flip (p=0.5)
+    if random.random() < 0.5:
+        img = cv2.flip(img, 1)
+        
+    # 2. ShiftScaleRotate (p=0.5)
+    if random.random() < 0.5:
+        h, w = img.shape[:2]
+        angle = random.uniform(-5, 5)
+        scale = random.uniform(0.95, 1.05)
+        tx = random.uniform(-0.03 * w, 0.03 * w)
+        ty = random.uniform(-0.03 * h, 0.03 * h)
+        
+        M = cv2.getRotationMatrix2D((w / 2, h / 2), angle, scale)
+        M[0, 2] += tx
+        M[1, 2] += ty
+        img = cv2.warpAffine(img, M, (w, h), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
+        
+    # 3. RandomBrightnessContrast (p=0.5)
+    if random.random() < 0.5:
+        alpha = random.uniform(0.90, 1.10) # Kontras
+        beta = random.uniform(-25.5, 25.5) # Kecerahan (0.10 * 255)
+        img = cv2.convertScaleAbs(img, alpha=alpha, beta=beta)
+        
+    return img
+
+
+# ================================================================
+# Load semua komponen model
 # ================================================================
 def load_model_components(model_dir: str = MODEL_DIR):
     """
-    Load EfficientNetB0, PCA, XGBoost, dan config dari folder model.
-
-    Returns
-    -------
-    dict dengan kunci: base_model, pca, xgb_model, config
+    Load model ONNX dan konfigurasinya.
     """
-    # 1. Validasi folder
-    required = ['pca.pkl', 'config.pkl', 'xgb_anemia.json']
-    missing  = [f for f in required if not os.path.exists(os.path.join(model_dir, f))]
-    if missing:
-        raise FileNotFoundError(
-            f"File model tidak ditemukan di '{model_dir}': {missing}\n"
-            "Jalankan dulu pipeline training (anemia_detection_final.py) di Kaggle."
-        )
+    onnx_path = os.path.join(model_dir, 'anemia_model_final.onnx')
+    if not os.path.exists(onnx_path):
+        raise FileNotFoundError(f"Model ONNX tidak ditemukan di '{onnx_path}'")
 
-    # 2. Load komponen
-    config    = joblib.load(os.path.join(model_dir, 'config.pkl'))
-    pca       = joblib.load(os.path.join(model_dir, 'pca.pkl'))
-    xgb_model = xgb.XGBClassifier()
-    xgb_model.load_model(os.path.join(model_dir, 'xgb_anemia.json'))
+    session = ort.InferenceSession(onnx_path)
 
-    # 3. Rebuild EfficientNetB0 (weights hanya dari ImageNet, tidak perlu file tambahan)
-    base_model = EfficientNetB0(
-        weights='imagenet',
-        include_top=False,
-        pooling='avg',
-        input_shape=(224, 224, 3)
-    )
-    base_model.trainable = False  # inference mode — tidak perlu gradient
+    # Coba load config.pkl jika ada
+    config_path = os.path.join(model_dir, 'config.pkl')
+    if os.path.exists(config_path):
+        try:
+            config = joblib.load(config_path)
+        except Exception:
+            config = {}
+    else:
+        config = {}
+
+    # Override/set default parameter dari model baru
+    config['best_thresh'] = 0.50
+    config['n_tta'] = 8
+    config['anemia_idx'] = 0
+    config['classes'] = ['Anemia', 'Non-Anemia']
 
     return {
-        'base_model': base_model,
-        'pca'       : pca,
-        'xgb_model' : xgb_model,
-        'config'    : config,
+        'onnx_session': session,
+        'config': config,
     }
 
 
@@ -83,80 +135,66 @@ def predict_from_pil(
     components: dict,
 ) -> dict:
     """
-    Prediksi status anemia dari objek PIL Image + data pasien.
-
-    Parameters
-    ----------
-    pil_image  : PIL.Image  — gambar konjungtiva yang sudah diupload
-    nama       : str        — nama pasien (hanya untuk output)
-    umur       : int        — usia dalam tahun
-    gender     : str        — 'M' (Laki-laki) atau 'F' (Perempuan)
-    components : dict       — hasil load_model_components()
-
-    Returns
-    -------
-    dict:
-        nama, umur, gender, age_group,
-        prediksi ('Anemia' | 'Non-Anemia'),
-        probabilitas (float 0–1),
-        threshold (float),
-        keterangan (str),
-        risk_level ('high' | 'medium' | 'low')
+    Prediksi status anemia menggunakan model ONNX end-to-end + TTA.
     """
-    base_model    = components['base_model']
-    pca           = components['pca']
-    xgb_model     = components['xgb_model']
-    config        = components['config']
+    session = components['onnx_session']
+    config  = components['config']
 
-    age_map       = config['age_map']
-    gender_map    = config['gender_map']
-    best_thresh   = config['best_thresh']
-    anemia_class  = config['anemia_class']
-    age_group     = hitung_age_group(umur)
+    best_thresh = config.get('best_thresh', 0.50)
+    n_tta       = config.get('n_tta', 8)
+    age_group   = hitung_age_group(umur)
 
-    # ── 1. Preprocessing gambar ────────────────────────────────
-    img_rgb  = pil_image.convert('RGB').resize((224, 224))
-    arr      = keras_image.img_to_array(img_rgb)
-    arr      = preprocess_input(np.expand_dims(arr, axis=0))
+    # Konversi PIL Image ke numpy RGB
+    img_rgb = np.array(pil_image.convert('RGB'))
 
-    # ── 2. Ekstraksi fitur EfficientNetB0 ──────────────────────
-    img_feat = base_model.predict(arr, verbose=0).flatten()   # (1280,)
+    probas = []
+    for i in range(n_tta):
+        if i == 0:
+            aug_img = preprocess_image_eval(img_rgb)
+        else:
+            aug_img = apply_aug_tta(img_rgb)
 
-    # ── 3. PCA ─────────────────────────────────────────────────
-    img_pca  = pca.transform(img_feat.reshape(1, -1))          # (1, N_PCA)
+        arr = aug_img.astype(np.float32)
+        arr = np.expand_dims(arr, axis=0) # (1, 224, 224, 3)
 
-    # ── 4. Encode fitur tabular ────────────────────────────────
-    age_enc  = age_map.get(age_group, 1)
-    gen_enc  = gender_map.get(gender, 0)
-    tabular  = np.array([[umur, gen_enc, age_enc]], dtype='float32')  # (1, 3)
+        # Jalankan prediksi ONNX
+        outputs = session.run(["output"], {"input_layer": arr})
+        proba_raw = float(outputs[0][0, 0])
+        probas.append(proba_raw)
 
-    # ── 5. Gabungkan & prediksi ────────────────────────────────
-    X_input  = np.concatenate([tabular, img_pca], axis=1)
-    proba_arr = xgb_model.predict_proba(X_input)[0]
-    proba    = float(proba_arr[anemia_class])
-    prediksi = 'Anemia' if proba >= best_thresh else 'Non-Anemia'
+    # Rata-rata probabilitas TTA
+    mean_proba = float(np.mean(probas))
 
-    # ── 6. Risk level untuk UI ─────────────────────────────────
+    # Ground truth mapping:
+    # index 0: Anemia, index 1: Non-Anemia
+    # Output sigmoid Keras memprediksi probabilitas class 1 (Non-Anemia)
+    # Probabilitas Anemia = 1.0 - mean_proba
+    proba_anemia = 1.0 - mean_proba
+
+    # Klasifikasi
+    prediksi = 'Anemia' if proba_anemia >= best_thresh else 'Non-Anemia'
+
+    # Risk level untuk UI
     if prediksi == 'Anemia':
-        if proba >= 0.80:
+        if proba_anemia >= 0.80:
             risk_level = 'high'
         else:
             risk_level = 'medium'
     else:
         risk_level = 'low'
 
-    # ── 7. Keterangan kontekstual ──────────────────────────────
+    # Keterangan kontekstual
     if prediksi == 'Anemia':
         keterangan = (
             f"Berdasarkan analisis gambar konjungtiva dan data pasien, "
-            f"{nama} terindikasi mengalami anemia (probabilitas {proba:.1%}). "
+            f"{nama} terindikasi mengalami anemia (probabilitas {proba_anemia:.1%}). "
             f"Disarankan untuk segera melakukan pemeriksaan darah lengkap "
             f"dan berkonsultasi dengan dokter."
         )
     else:
         keterangan = (
             f"Berdasarkan analisis gambar konjungtiva dan data pasien, "
-            f"{nama} tidak terindikasi anemia (probabilitas anemia {proba:.1%}). "
+            f"{nama} tidak terindikasi anemia (probabilitas anemia {proba_anemia:.1%}). "
             f"Tetap jaga pola makan bergizi seimbang dan lakukan pemeriksaan "
             f"rutin jika ada keluhan."
         )
@@ -167,7 +205,7 @@ def predict_from_pil(
         'gender'      : 'Laki-laki' if gender == 'M' else 'Perempuan',
         'age_group'   : age_group,
         'prediksi'    : prediksi,
-        'probabilitas': round(proba, 4),
+        'probabilitas': round(proba_anemia, 4),
         'threshold'   : best_thresh,
         'keterangan'  : keterangan,
         'risk_level'  : risk_level,

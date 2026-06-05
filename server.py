@@ -22,6 +22,7 @@ from psycopg2.extras import RealDictCursor
 from inference import load_model_components, predict_from_pil
 from augmentation import flip_left_to_right
 import numpy as np
+import cv2
 
 # ─── PostgreSQL Database Connection ──────────────────────────────
 def get_db_connection():
@@ -114,20 +115,16 @@ def get_preprocessing_info():
     if COMPONENTS is None:
         return {}
     config = COMPONENTS.get("config", {})
-    pca = COMPONENTS.get("pca", None)
-    n_pca = int(pca.n_components_) if pca is not None and hasattr(pca, "n_components_") else 0
-    age_map = config.get("age_map", {})
-    gender_map = config.get("gender_map", {})
     best_thresh = config.get("best_thresh", 0.5)
     return {
         "img_input_size": [224, 224, 3],
-        "backbone": "EfficientNetB0",
+        "backbone": "EfficientNetB0 (ONNX)",
         "img_feat_dim": 1280,
-        "pca_components": n_pca,
-        "tabular_features": ["umur", "gender_enc", "age_group_enc"],
-        "age_map": age_map,
-        "gender_map": gender_map,
-        "classifier": "XGBoost",
+        "pca_components": 0,
+        "tabular_features": [],
+        "age_map": {},
+        "gender_map": {},
+        "classifier": "Dense Head (Sigmoid)",
         "best_threshold": best_thresh,
     }
 
@@ -290,39 +287,52 @@ def validate_conjunctiva_image(pil_image: Image.Image) -> tuple[bool, str]:
 def crop_conjunctiva(pil_image: Image.Image) -> Image.Image:
     """
     Locates and crops the conjunctiva palpebra inferior (pinkish/reddish area)
-    using color thresholding and bounding box detection.
+    using hierarchical color thresholding, morphological closing, and contour bounding boxes.
     """
+    orig_w, orig_h = pil_image.size
     process_img = pil_image.convert('RGB').resize((224, 224))
     arr = np.array(process_img, dtype=np.float32)
-    
     r, g, b = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
     
-    # Conjunctiva mask (pinkish-red color)
-    pinkish_mask = (r > 80) & (r > g) & (g > b * 0.5) & (r - b > 15)
+    # Define redness masks hierarchically from strictest to loosest
+    masks = [
+        # Very Strict Redness
+        ("Very Strict RGB", (r > 120) & (r > g + 30) & (r - b > 50)),
+        # Strict Redness
+        ("Strict RGB", (r > 105) & (r > g + 20) & (r - b > 30)),
+        # Medium Redness
+        ("Medium RGB", (r > 100) & (r > g + 15) & (r - b > 25)),
+        # Original Loose Redness
+        ("Original Loose RGB", (r > 80) & (r > g) & (g > b * 0.5) & (r - b > 15))
+    ]
     
-    # Find bounding box
-    y_indices, x_indices = np.where(pinkish_mask)
-    if len(y_indices) > 0 and len(x_indices) > 0:
-        ymin, ymax = y_indices.min(), y_indices.max()
-        xmin, xmax = x_indices.min(), x_indices.max()
+    for mask_name, mask_expr in masks:
+        mask_uint8 = (mask_expr.astype(np.uint8)) * 255
         
-        # Scale bounding box back to original image size
-        orig_w, orig_h = pil_image.size
+        # Apply morphological closing to bridge gaps between adjacent conjunctiva segments
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (21, 21))
+        closed_mask = cv2.morphologyEx(mask_uint8, cv2.MORPH_CLOSE, kernel)
         
-        # Add padding (15%)
-        h_box = ymax - ymin
-        w_box = xmax - xmin
-        
-        ymin_scaled = int(max(0, (ymin - h_box * 0.15) / 224 * orig_h))
-        ymax_scaled = int(min(orig_h, (ymax + h_box * 0.15) / 224 * orig_h))
-        xmin_scaled = int(max(0, (xmin - w_box * 0.15) / 224 * orig_w))
-        xmax_scaled = int(min(orig_w, (xmax + w_box * 0.15) / 224 * orig_w))
-        
-        # Return cropped region of original image
-        return pil_image.crop((xmin_scaled, ymin_scaled, xmax_scaled, ymax_scaled))
-        
-    # Fallback to center crop if no pinkish region found
-    orig_w, orig_h = pil_image.size
+        contours, _ = cv2.findContours(closed_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        if contours:
+            contours = sorted(contours, key=cv2.contourArea, reverse=True)
+            lc = contours[0]
+            # Ignore tiny noise contours (area < 5 on a 224x224 image)
+            if cv2.contourArea(lc) >= 5:
+                x, y, w, h = cv2.boundingRect(lc)
+                
+                # Scale bounding box back to original image size and add 15% padding
+                ymin_scaled = int(max(0, (y - h * 0.15) / 224 * orig_h))
+                ymax_scaled = int(min(orig_h, (y + h + h * 0.15) / 224 * orig_h))
+                xmin_scaled = int(max(0, (x - w * 0.15) / 224 * orig_w))
+                xmax_scaled = int(min(orig_w, (x + w + w * 0.15) / 224 * orig_w))
+                
+                print(f"[Crop] Matched mask: {mask_name} (Contour Area={cv2.contourArea(lc):.1f})")
+                print(f"[Crop] Bounding box: {xmin_scaled}:{xmax_scaled}, {ymin_scaled}:{ymax_scaled}")
+                return pil_image.crop((xmin_scaled, ymin_scaled, xmax_scaled, ymax_scaled))
+                
+    # Fallback to center crop if no suitable region is found
+    print("[Crop] No suitable contours found. Using center crop fallback.")
     crop_size = min(orig_w, orig_h)
     left = (orig_w - crop_size) // 2
     top = (orig_h - crop_size) // 2
@@ -353,10 +363,11 @@ async def predict(
         if not is_valid:
             raise HTTPException(status_code=400, detail=validation_msg)
 
-        # Always apply horizontal flip (augmentation) to change left/webcam layout to right eye
-        img_np = np.array(pil_image)
-        flipped_np = flip_left_to_right(img_np)
-        pil_image = Image.fromarray(flipped_np)
+        # Apply horizontal flip (augmentation) only if eye_side is left
+        if eye_side == "left":
+            img_np = np.array(pil_image)
+            flipped_np = flip_left_to_right(img_np)
+            pil_image = Image.fromarray(flipped_np)
 
         # Save image for history
         image_id = f"{uuid.uuid4()}.png"
@@ -373,33 +384,26 @@ async def predict(
         except Exception as e:
             print(f"Error cropping conjunctiva: {e}")
             cropped_image_url = f"/uploads/{image_id}"
+            cropped_image = pil_image
 
-        # Run prediction
-        result = predict_from_pil(pil_image, name, age, gender, COMPONENTS)
+        # Run prediction on cropped image
+        result = predict_from_pil(cropped_image, name, age, gender, COMPONENTS)
 
         # Build metadata
         scan_id = f"#SCN-{uuid.uuid4().hex[:4].upper()}"
         timestamp = datetime.datetime.now().strftime("%b %d, %Y • %H:%M")
         symptoms_list = symptoms.split(",") if symptoms else []
 
-        # Get PCA info
-        pca = COMPONENTS.get("pca", None)
-        n_pca = int(pca.n_components_) if pca is not None and hasattr(pca, "n_components_") else 0
-        config = COMPONENTS.get("config", {})
-        age_map = config.get("age_map", {})
-        gender_map = config.get("gender_map", {})
-
-        from inference import hitung_age_group
-        age_group = hitung_age_group(age)
-        age_enc = age_map.get(age_group, 1)
-        gender_enc = gender_map.get(gender, 0)
+        n_pca = 0
+        age_enc = 0
+        gender_enc = 0
 
         # Preprocessing pipeline details to store and return
         steps_list = [
             {
                 "name": "Augmentasi Gambar",
-                "detail": "Kiri → Kanan",
-                "value": "Horizontal Flip (flip_left_to_right)"
+                "detail": "Kiri → Kanan" if eye_side == "left" else "Tidak di-flip (Sisi Kanan)",
+                "value": "Horizontal Flip (flip_left_to_right)" if eye_side == "left" else "Bypass"
             },
             {
                 "name": "Lokalisasi & Crop Konjungtiva",
@@ -407,45 +411,35 @@ async def predict(
                 "value": "BBox cropping (padding 15%)"
             },
             {
-                "name": "Resize & Konversi RGB",
-                "detail": "224×224 px",
-                "value": "PIL → RGB → resize(224,224)"
+                "name": "Resize & Padding",
+                "detail": "224×224 px dengan padding",
+                "value": "Aspek rasio dipertahankan + pad border hitam"
             },
             {
-                "name": "EfficientNetB0 Feature Extraction",
-                "detail": f"{1280} dimensi",
-                "value": "ImageNet weights · Global Avg Pool"
+                "name": "Test-Time Augmentation (TTA)",
+                "detail": "8x forward passes",
+                "value": "Rotasi, flip, translasi, dan brightness random"
             },
             {
-                "name": "PCA Dimensionality Reduction",
-                "detail": f"1280 → {n_pca} komponen",
-                "value": f"{n_pca} principal components"
+                "name": "EfficientNetB0 end-to-end",
+                "detail": "ImageNet backbone + GeM Pooling",
+                "value": "Ekstraksi fitur langsung ke classifier head"
             },
             {
-                "name": "Tabular Encoding",
-                "detail": "Umur + Gender + Kelompok Usia",
-                "value": f"umur={age}, gender_enc={gender_enc}, age_enc={age_enc}"
-            },
-            {
-                "name": "Feature Concatenation",
-                "detail": f"3 tabular + {n_pca} PCA = {3+n_pca} total fitur",
-                "value": f"X_input shape: (1, {3+n_pca})"
-            },
-            {
-                "name": "XGBoost Classifier",
+                "name": "ONNX Runtime Inference",
                 "detail": f"Threshold: {result['threshold']:.2f}",
-                "value": f"P(anemia)={result['probabilitas']:.4f}"
+                "value": f"Rata-rata P(anemia)={result['probabilitas']:.4f}"
             },
         ]
 
         preprocessing = {
             "steps": steps_list,
             "pipeline_summary": {
-                "backbone": "EfficientNetB0 (ImageNet)",
+                "backbone": "EfficientNetB0 (ONNX)",
                 "img_feat_dim": 1280,
-                "pca_components": n_pca,
-                "total_features": 3 + n_pca,
-                "classifier": "XGBoost",
+                "pca_components": 0,
+                "total_features": 1280,
+                "classifier": "Dense Head (Sigmoid)",
                 "threshold": result["threshold"],
             }
         }

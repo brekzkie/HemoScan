@@ -287,23 +287,29 @@ def validate_conjunctiva_image(pil_image: Image.Image) -> tuple[bool, str]:
 def crop_conjunctiva(pil_image: Image.Image) -> Image.Image:
     """
     Locates and crops the conjunctiva palpebra inferior (pinkish/reddish area)
-    using hierarchical color thresholding, vertical eye-region filtering, and contour union.
+    using hierarchical color thresholding, vertical eye-region filtering, contour bounding box,
+    and background masking (setting non-conjunctiva pixels to white).
     """
+    pil_image = pil_image.convert('RGB')
+
     orig_w, orig_h = pil_image.size
-    process_img = pil_image.convert('RGB').resize((224, 224))
+    process_img = pil_image.resize((224, 224))
     arr = np.array(process_img, dtype=np.float32)
     r, g, b = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
     
-    # Define redness masks hierarchically from strictest to loosest
+    hsv = cv2.cvtColor(np.array(process_img), cv2.COLOR_RGB2HSV)
+    h, s, v = hsv[:, :, 0], hsv[:, :, 1], hsv[:, :, 2]
+    
+    # Define redness masks with corresponding Saturation (S) thresholds
     masks = [
-        # Very Strict Redness
-        ("Very Strict RGB", (r > 120) & (r > g + 30) & (r - b > 50)),
+        # Very Strict Redness (designed for warm/red-lit images)
+        ("Very Strict RGB + S>115", (r > 120) & (r > g + 30) & (r - b > 50) & (s > 115)),
         # Strict Redness
-        ("Strict RGB", (r > 105) & (r > g + 20) & (r - b > 30)),
+        ("Strict RGB + S>95", (r > 105) & (r > g + 20) & (r - b > 30) & (s > 95)),
         # Medium Redness
-        ("Medium RGB", (r > 100) & (r > g + 15) & (r - b > 25)),
-        # Original Loose Redness
-        ("Original Loose RGB", (r > 80) & (r > g) & (g > b * 0.5) & (r - b > 15))
+        ("Medium RGB + S>80", (r > 100) & (r > g + 15) & (r - b > 25) & (s > 80)),
+        # Original Loose Redness (for pale/anemic conjunctiva)
+        ("Original Loose RGB + S>60", (r > 80) & (r > g) & (g > b * 0.5) & (r - b > 15) & (s > 60))
     ]
     
     for mask_name, mask_expr in masks:
@@ -323,34 +329,56 @@ def crop_conjunctiva(pil_image: Image.Image) -> Image.Image:
         for c in contours:
             area = cv2.contourArea(c)
             if area >= 3:
-                x, y, w, h = cv2.boundingRect(c)
-                cy = y + h / 2.0
+                x, y, w, h_box = cv2.boundingRect(c)
+                cy = y + h_box / 2.0
                 if 30 < cy < 135:
-                    valid_contours.append(c)
+                    valid_contours.append((c, area))
                     
         if valid_contours:
-            # Combine all valid eye contours to get the union bounding box
-            all_pts = np.vstack(valid_contours)
-            ux, uy, uw, uh = cv2.boundingRect(all_pts)
+            # Sort by area descending and pick the largest one (the main conjunctiva anchor)
+            valid_contours = sorted(valid_contours, key=lambda x: x[1], reverse=True)
+            largest_c = valid_contours[0][0]
+            
+            x, y, w, h_box = cv2.boundingRect(largest_c)
             
             # Scale bounding box back to original image size and add 15% padding
-            ymin_scaled = int(max(0, (uy - uh * 0.15) / 224 * orig_h))
-            ymax_scaled = int(min(orig_h, (uy + uh + uh * 0.15) / 224 * orig_h))
-            xmin_scaled = int(max(0, (ux - uw * 0.15) / 224 * orig_w))
-            xmax_scaled = int(min(orig_w, (ux + uw + uw * 0.15) / 224 * orig_w))
+            ymin_scaled = int(max(0, (y - h_box * 0.15) / 224 * orig_h))
+            ymax_scaled = int(min(orig_h, (y + h_box + h_box * 0.15) / 224 * orig_h))
+            xmin_scaled = int(max(0, (x - w * 0.15) / 224 * orig_w))
+            xmax_scaled = int(min(orig_w, (x + w + w * 0.15) / 224 * orig_w))
             
-            print(f"[Crop] Matched mask: {mask_name} (Contours={len(valid_contours)})")
-            print(f"[Crop] Bounding box: {xmin_scaled}:{xmax_scaled}, {ymin_scaled}:{ymax_scaled}")
-            return pil_image.crop((xmin_scaled, ymin_scaled, xmax_scaled, ymax_scaled))
+            crop_w = xmax_scaled - xmin_scaled
+            crop_h = ymax_scaled - ymin_scaled
+            
+            # Crop the original image
+            cropped_pil = pil_image.crop((xmin_scaled, ymin_scaled, xmax_scaled, ymax_scaled))
+            
+            # Create a blank crop mask
+            crop_mask = np.zeros((crop_h, crop_w), dtype=np.uint8)
+            
+            # Scale and draw all valid eye contours on the crop mask
+            for c, area in valid_contours:
+                sc = c.copy()
+                sc[:, 0, 0] = np.round(sc[:, 0, 0] / 224.0 * orig_w - xmin_scaled)
+                sc[:, 0, 1] = np.round(sc[:, 0, 1] / 224.0 * orig_h - ymin_scaled)
+                sc[:, 0, 0] = np.clip(sc[:, 0, 0], 0, crop_w - 1)
+                sc[:, 0, 1] = np.clip(sc[:, 0, 1], 0, crop_h - 1)
+                cv2.drawContours(crop_mask, [sc], -1, 255, -1)
                 
+            # Apply mask: set pixels outside valid contours to white
+            crop_np = np.array(cropped_pil)
+            crop_np[crop_mask == 0] = [255, 255, 255]
+            
+            print(f"[Crop] Matched mask: {mask_name} (Picked largest eye contour, area={valid_contours[0][1]:.1f})")
+            print(f"[Crop] Bounding box: {xmin_scaled}:{xmax_scaled}, {ymin_scaled}:{ymax_scaled}")
+            
+            return Image.fromarray(crop_np)
     # Fallback to center crop if no suitable region is found
     print("[Crop] No suitable eye contours found. Using center crop fallback.")
     crop_size = min(orig_w, orig_h)
     left = (orig_w - crop_size) // 2
     top = (orig_h - crop_size) // 2
     return pil_image.crop((left, top, left + crop_size, top + crop_size))
-
-
 
 # ─── Predict Endpoint ─────────────────────────────────────────────
 @app.post("/api/predict")

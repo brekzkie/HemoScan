@@ -636,6 +636,7 @@ async def read_index():
     return FileResponse("index.html")
 
 app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
+app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 
 @app.get("/logo.png")
 async def get_logo():

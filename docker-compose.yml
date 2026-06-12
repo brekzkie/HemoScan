@@ -39,7 +39,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      platform: linux/amd64
+    platform: linux/amd64
     container_name: hemoscan_app
     restart: unless-stopped
     ports:

@@ -240,10 +240,8 @@ Akun administrator default dikonfigurasi secara dinamis melalui file `.env`. Nil
 
 | Role | Email | Password |
 |---|---|---|
-| **Admin** | Diatur via `ADMIN_EMAIL` (Bawaan: `admin@hemoscan.com`) | Diatur via `ADMIN_PASSWORD` (Bawaan: `admin123`) |
+| **Admin** | Diatur via `ADMIN_EMAIL`  | Diatur via `ADMIN_PASSWORD`  |
 
-> [!IMPORTANT]
-> **Catatan Keamanan:** Untuk deployment publik, produksi, atau penilaian, sangat disarankan untuk mengubah nilai `ADMIN_EMAIL` dan `ADMIN_PASSWORD` di file `.env` Anda sebelum menjalankan script inisialisasi database (`python database/init_db.py` atau `docker compose up`).
 
 Pengguna biasa dapat mendaftar akun baru secara mandiri dengan hak akses `user` langsung dari halaman login.
 

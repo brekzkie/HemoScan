@@ -6,6 +6,8 @@
 #   docker compose up               ← selanjutnya
 #   docker compose down             ← matikan semua container
 #   docker compose down -v          ← matikan + hapus data database
+#
+# Kompatibel dengan: Windows (x64), macOS (Intel & Apple Silicon), Linux
 # ================================================================
 
 services:
@@ -13,6 +15,7 @@ services:
   # ── PostgreSQL Database ───────────────────────────────────────
   db:
     image: postgres:15-alpine
+    platform: linux/amd64
     container_name: hemoscan_db
     restart: unless-stopped
     environment:
@@ -36,6 +39,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      platform: linux/amd64
     container_name: hemoscan_app
     restart: unless-stopped
     ports:
@@ -46,8 +50,9 @@ services:
       POSTGRES_DB: hemoscan
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: hemoscan_pass
-      TF_ENABLE_ONEDNN_OPTS: 0
-      TF_CPP_MIN_LOG_LEVEL: 2
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@hemoscan.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      ADMIN_DISPLAY_NAME: ${ADMIN_DISPLAY_NAME:-Administrator}
     volumes:
       # Upload gambar hasil scan disimpan permanen di luar container
       - hemoscan_uploads:/app/uploads

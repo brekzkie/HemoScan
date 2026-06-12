@@ -1,162 +1,288 @@
-# 🚀 HEMOSCAN - ANEMIA DETECTION SYSTEM
+# 🚀 HEMOSCAN — Anemia Detection System
 
 <img width="3840" height="3840" alt="image" src="https://github.com/user-attachments/assets/650e0941-d8bb-4ad3-8754-f010a91327aa" />
 
-HemoScan adalah solusi berbasis kecerdasan buatan (AI) untuk skrining anemia secara non-invasif melalui analisis citra konjungtiva mata menggunakan teknik *Deep Learning* dan klasifikasi *Machine Learning*.
+HemoScan adalah solusi berbasis kecerdasan buatan (AI) untuk skrining anemia secara non-invasif melalui analisis citra konjungtiva mata menggunakan teknik *Deep Learning*.
 
 ---
 
 ## 🏗️ Arsitektur & Pipeline Prediksi
 
-Aplikasi berjalan dengan alur pipeline sebagai berikut:
+Aplikasi berjalan dengan pipeline end-to-end berikut:
 
 ```
-[Citra Konjungtiva Mata] ➔ [EfficientNetB0 (Feature Extractor)] ➔ [PCA (Dimensionality Reduction)] 
-                                                                          │
-                                                                   (Concatenation) ➔ [XGBoost Classifier] ➔ [Hasil Prediksi Anemia]
-                                                                          │
-                                                    [Data Tabular: Usia, Gender, Usia Kelompok]
+[Foto Konjungtiva Mata]
+        │
+        ▼
+[Flip Kiri→Kanan]  ← Jika foto sisi kiri, di-mirror agar konsisten
+        │
+        ▼
+[Lokalisasi & Crop Konjungtiva]  ← Color thresholding + contour detection
+        │
+        ▼
+[Resize & Pad 224×224]  ← Aspek rasio dipertahankan, pad border hitam
+        │
+        ▼
+[Test-Time Augmentation (TTA)]  ← 8x forward passes (rotasi, flip, brightness)
+        │
+        ▼
+[EfficientNetB0 + Dense Head (Sigmoid)]  ← Model ONNX end-to-end
+        │
+        ▼
+[Rata-rata P(anemia) → Threshold 0.50]  ← Klasifikasi: Anemia / Non-Anemia
 ```
 
-1. **Feature Extraction**: Mengekstraksi fitur warna dan tekstur dari citra konjungtiva menggunakan model **EfficientNetB0** (pre-trained ImageNet, 1280 dimensi).
-2. **Dimensionality Reduction**: Mereduksi dimensi fitur gambar dari 1280 ke komponen utama menggunakan **Principal Component Analysis (PCA)**.
-3. **Tabular Feature Integration**: Menggabungkan fitur gambar tereduksi dengan fitur tabular pasien (usia, jenis kelamin, kelompok usia).
-4. **Classification**: Melakukan klasifikasi akhir menggunakan **XGBoost Classifier** untuk memprediksi status Anemia / Non-Anemia beserta skor probabilitas dan tingkat risiko (*risk level*).
+1. **Image Augmentation**: Foto sisi kiri di-flip horizontal agar konsisten dengan sisi kanan.
+2. **Conjunctiva Localization**: Deteksi dan crop area konjungtiva menggunakan hierarchical color thresholding (RGB+HSV) dengan masking background.
+3. **Preprocessing**: Resize ke 224×224 dengan aspek rasio dipertahankan dan padding hitam.
+4. **TTA (Test-Time Augmentation)**: 8 forward passes dengan variasi augmentasi untuk prediksi yang lebih robust.
+5. **ONNX Inference**: Model EfficientNetB0 end-to-end (backbone + classifier head) dijalankan via ONNX Runtime. Output sigmoid menghasilkan probabilitas anemia.
 
 ---
 
 ## ⚙️ Spesifikasi & Stack Teknologi
 
-| Komponen | Spesifikasi / Library | Keterangan |
+| Komponen | Teknologi | Keterangan |
 |---|---|---|
-| **Backend API** | FastAPI (Python 3.10) | Cepat, asinkron, dan otomatis menghasilkan dokumentasi API |
-| **Frontend UI** | HTML5, CSS3 Vanilla, React (Babel runtime) | Tampilan antarmuka laboratorium empati yang responsif |
-| **Database** | PostgreSQL | Menyimpan histori pemindaian dan otentikasi pengguna |
-| **ML/DL Engine** | TensorFlow (≥2.13), XGBoost (≥2.0), Scikit-Learn | Library utama inferensi kecerdasan buatan |
+| **Backend API** | FastAPI (Python 3.10) | Asinkron, cepat, otomatis menghasilkan dokumentasi API |
+| **Frontend UI** | HTML5, CSS3, React (Babel runtime) | SPA responsif dalam satu file `index.html` |
+| **Database** | PostgreSQL 15 | Menyimpan histori scan dan autentikasi pengguna |
+| **ML Inference** | ONNX Runtime | EfficientNetB0 end-to-end, ringan dan cepat |
+| **Image Processing** | OpenCV, Pillow | Validasi, crop, dan preprocessing konjungtiva |
+| **Containerization** | Docker, Docker Compose | Deployment satu perintah |
 
 ---
 
 ## 📂 Struktur Repositori
 
-Repositori ini telah dirapikan ke dalam struktur berikut:
-
 ```
 HemoScan/
-├── assets/                     # Aset statis aplikasi (gambar, video loader, dll)
-│   ├── Backgorund.png
-│   ├── loading.mp4
-│   ├── loading.svg
-│   ├── logo1.png
-│   └── logo2.png
-├── database/                   # Skrip inisialisasi dan skema PostgreSQL
-│   ├── database.py
-│   ├── init_db.py
-│   └── postgres_schema.sql
-├── notebooks/                  # Jupyter notebook untuk training model
-│   └── model.ipynb
-├── backup/                     # Arsip berkas lokal lama / tidak terpakai
-│   ├── hemoscan.db             # DB SQLite lama
-│   ├── scan_history.json
-│   └── scan_history_local.json
-├── model_output/               # Komponen model latih (weights & pickle)
-│   ├── config.pkl
-│   ├── label_encoder_status.pkl
-│   ├── pca.pkl
-│   └── xgb_anemia.json
-├── uploads/                    # Gambar konjungtiva pasien yang diunggah
 ├── server.py                   # FastAPI backend server
-├── inference.py                # Pipeline logika prediksi
-├── index.html                  # Aplikasi web frontend
+├── inference.py                # Pipeline prediksi ONNX + TTA
+├── config.py                   # Konfigurasi terpusat (DB, paths, model)
+├── image_processing.py         # Validasi & crop citra konjungtiva
+├── index.html                  # Frontend SPA (React)
+│
+├── augmentation/               # Modul augmentasi gambar
+│   ├── __init__.py
+│   └── flip_to_right.py        # Flip foto kiri → kanan
+│
+├── database/                   # Schema & inisialisasi PostgreSQL
+│   ├── init_db.py              # Script buat database + tabel
+│   └── postgres_schema.sql     # DDL tabel users & scans
+│
+├── model_output/               # Model inferensi
+│   ├── anemia_model_final.onnx # EfficientNetB0 end-to-end (ONNX)
+│   └── config.pkl              # Konfigurasi threshold & parameter
+│
+├── assets/                     # Aset statis (logo, background, loader)
+├── notebooks/                  # Jupyter notebook training + artefak
+├── uploads/                    # Gambar pasien yang diunggah (gitignored)
+│
 ├── Dockerfile                  # Konfigurasi container
-├── docker-compose.yml          # Orkestrasi web app + database
-├── entrypoint.sh               # Skrip startup container
-├── requirements.txt            # Dependensi lokal
-├── requirements.docker.txt     # Dependensi Docker
-├── .env                        # Variabel lingkungan
-├── .dockerignore               # Pengecualian Docker build
-└── README.md                   # Panduan dokumentasi utama (ini)
+├── docker-compose.yml          # Orkestrasi app + PostgreSQL
+├── entrypoint.sh               # Startup script container
+│
+├── requirements.txt            # Dependensi runtime (server)
+├── requirements.docker.txt     # Dependensi Docker (headless)
+├── requirements.dev.txt        # Dependensi development/training
+│
+├── .env.example                # Template environment variables
+├── .gitignore
+├── .dockerignore
+└── README.md
 ```
 
 ---
 
 ## ✅ Status Sistem & Model
 
-Berkas model inferensi telah terpasang dengan lengkap di folder `model_output/`:
-* `model_output/pca.pkl` - PCA reducer
-* `model_output/xgb_anemia.json` - XGBoost classifier
-* `model_output/config.pkl` - Konfigurasi mapping usia & threshold
-* `model_output/label_encoder_status.pkl` - Label encoder status anemia
+Model inferensi yang digunakan:
+
+| File | Keterangan |
+|---|---|
+| `model_output/anemia_model_final.onnx` | EfficientNetB0 + Dense Head (Sigmoid), ONNX format |
+| `model_output/config.pkl` | Konfigurasi threshold (0.50), jumlah TTA (8), class mapping |
+
+---
+
+## 📋 Prasyarat (Prerequisites)
+
+Sebelum menjalankan aplikasi, pastikan salah satu dari prasyarat berikut terpenuhi:
+
+### Untuk Docker (Opsi 1 — Direkomendasikan)
+
+| Software | Versi Minimum | Link Download |
+|---|---|---|
+| **Docker Desktop** | 4.0+ | [docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop/) |
+
+> **Catatan untuk macOS Apple Silicon (M1/M2/M3/M4):**
+> Docker Compose sudah dikonfigurasi dengan `platform: linux/amd64`, sehingga otomatis kompatibel melalui Rosetta 2. Pastikan opsi **"Use Rosetta for x86_64/amd64 emulation on Apple Silicon"** dicentang di Docker Desktop → Settings → General.
+
+### Untuk Lokal (Opsi 2)
+
+| Software | Versi Minimum | Link Download |
+|---|---|---|
+| **Python** | 3.10+ | [python.org/downloads](https://www.python.org/downloads/) |
+| **PostgreSQL** | 13+ | [postgresql.org/download](https://www.postgresql.org/download/) |
+| **pip** | 21+ | Sudah termasuk dalam Python |
 
 ---
 
 ## ▶️ Cara Menjalankan Aplikasi
 
-### OPSI 1: Menggunakan Docker Compose (Sangat Direkomendasikan)
+### OPSI 1: Docker Compose ⭐ (Direkomendasikan — Semua OS)
 
-Pastikan **Docker Desktop** sudah aktif di komputer Anda.
+Cara ini **paling mudah** dan berjalan di **Windows, macOS (Intel & Apple Silicon), dan Linux** tanpa perlu install Python atau PostgreSQL secara manual.
 
-1. Buka terminal/PowerShell di folder proyek ini dan jalankan:
+1. **Install Docker Desktop** dari [docker.com](https://www.docker.com/products/docker-desktop/) dan pastikan sudah berjalan.
+
+2. **Buka terminal** di folder proyek ini:
+
+   | OS | Cara Buka Terminal |
+   |---|---|
+   | **Windows** | Klik kanan folder → *Open in Terminal*, atau buka PowerShell lalu `cd` ke folder proyek |
+   | **macOS** | Klik kanan folder → *New Terminal at Folder*, atau buka Terminal lalu `cd` ke folder proyek |
+   | **Linux** | Buka Terminal lalu `cd` ke folder proyek |
+
+3. **Jalankan satu perintah ini:**
    ```bash
    docker compose up --build
    ```
-   *Perintah ini akan menyalakan database PostgreSQL, melakukan inisialisasi tabel otomatis, menyalin aset proyek, dan menjalankan server FastAPI.*
+   > ⏳ Proses pertama kali membutuhkan waktu 3–5 menit untuk mengunduh image dan build container. Selanjutnya akan lebih cepat.
 
-2. Tunggu hingga muncul log sukses dari aplikasi, kemudian buka browser Anda dan akses:
-   **http://localhost:8000**
+4. **Tunggu** hingga muncul log:
+   ```
+   ================================================
+      App running at: http://localhost:8000
+   ================================================
+   ```
 
-3. **Cara Mematikan:**
-   Tekan `Ctrl+C` pada terminal, lalu jalankan:
+5. **Buka browser** dan akses: **http://localhost:8000**
+
+6. **Untuk mematikan**, tekan `Ctrl+C` pada terminal, lalu:
    ```bash
    docker compose down
-   # Gunakan 'docker compose down -v' jika ingin mereset total seluruh data database
    ```
+   > Gunakan `docker compose down -v` jika ingin **menghapus semua data database** dan mulai dari awal.
 
-### OPSI 2: Menjalankan Secara Lokal (Manual)
+---
 
-1. Pasang dependensi yang diperlukan:
-   ```bash
-   pip install -r requirements.txt
-   ```
-2. Pastikan database PostgreSQL lokal Anda menyala dan konfigurasikan koneksinya pada file `.env`.
-3. Inisialisasi skema database:
-   ```bash
-   python database/init_db.py
-   ```
-4. Jalankan server FastAPI:
-   ```bash
-   python server.py
-   ```
-5. Akses melalui browser di: **http://localhost:8000**
+### OPSI 2: Menjalankan Lokal (Manual)
+
+Gunakan opsi ini jika tidak ingin menggunakan Docker. Membutuhkan **Python 3.10+** dan **PostgreSQL** yang sudah terinstall.
+
+#### Langkah 1 — Install Python & PostgreSQL
+
+| OS | Python | PostgreSQL |
+|---|---|---|
+| **Windows** | Download dari [python.org](https://www.python.org/downloads/). Centang **"Add to PATH"** saat install. | Download dari [postgresql.org](https://www.postgresql.org/download/windows/). Catat password yang diset saat install. |
+| **macOS** | `brew install python@3.10` atau download dari [python.org](https://www.python.org/downloads/) | `brew install postgresql@15 && brew services start postgresql@15` |
+| **Linux (Ubuntu/Debian)** | `sudo apt install python3.10 python3.10-venv python3-pip` | `sudo apt install postgresql postgresql-contrib && sudo systemctl start postgresql` |
+
+#### Langkah 2 — Install Dependensi Python
+
+```bash
+# (Opsional tapi disarankan) Buat virtual environment
+python -m venv venv
+
+# Aktifkan virtual environment
+# Windows PowerShell:
+venv\Scripts\Activate.ps1
+# Windows CMD:
+venv\Scripts\activate.bat
+# macOS / Linux:
+source venv/bin/activate
+
+# Install dependensi
+pip install -r requirements.txt
+```
+
+#### Langkah 3 — Konfigurasi Database
+
+Salin template environment lalu isi password PostgreSQL Anda:
+
+```bash
+# Windows (PowerShell / CMD):
+copy .env.example .env
+
+# macOS / Linux:
+cp .env.example .env
+```
+
+Buka file `.env` dengan text editor dan ganti `your_password_here` dengan password PostgreSQL Anda:
+```env
+POSTGRES_PASSWORD=password_postgresql_anda
+```
+
+#### Langkah 4 — Inisialisasi Database
+
+```bash
+python database/init_db.py
+```
+> Script ini akan membuat database `hemoscan`, tabel yang diperlukan, dan akun admin default.
+
+#### Langkah 5 — Jalankan Server
+
+```bash
+python server.py
+```
+
+#### Langkah 6 — Buka Aplikasi
+
+Buka browser dan akses: **http://localhost:8000**
 
 ---
 
 ## 🔑 Akun Login Default (Admin)
 
+Akun administrator default dikonfigurasi secara dinamis melalui file `.env`. Nilai default (bawaan) yang digunakan saat inisialisasi adalah:
+
 | Role | Email | Password |
 |---|---|---|
-| **Admin** | `admin@hemoscan.com` | `admin123` |
+| **Admin** | Diatur via `ADMIN_EMAIL` (Bawaan: `admin@hemoscan.com`) | Diatur via `ADMIN_PASSWORD` (Bawaan: `admin123`) |
 
-*Pengguna juga dapat melakukan registrasi akun baru dengan tingkat hak akses `user` langsung dari halaman login.*
+> [!IMPORTANT]
+> **Catatan Keamanan:** Untuk deployment publik, produksi, atau penilaian, sangat disarankan untuk mengubah nilai `ADMIN_EMAIL` dan `ADMIN_PASSWORD` di file `.env` Anda sebelum menjalankan script inisialisasi database (`python database/init_db.py` atau `docker compose up`).
+
+Pengguna biasa dapat mendaftar akun baru secara mandiri dengan hak akses `user` langsung dari halaman login.
 
 ---
 
-## 🌐 Akses Publik dengan ngrok (Layanan Gratis 1 Job)
+## 🌐 Akses Publik dengan ngrok
 
-Jika Anda ingin mengekspos aplikasi HemoScan lokal Anda ke internet agar dapat diakses oleh orang lain (misalnya untuk demo/presentasi) menggunakan akun gratis **ngrok** yang membatasi 1 tunnel aktif:
+Untuk mengekspos aplikasi ke internet (demo/presentasi):
 
-1. Pastikan aplikasi Docker telah berjalan (`docker compose up --build`).
-2. Buka terminal baru di komputer Anda dan jalankan perintah tunnel ngrok ke port 8000:
+1. Pastikan Docker berjalan (`docker compose up --build`)
+2. Buka terminal baru:
    ```bash
    ngrok http 8000
    ```
-3. Salin URL publik yang dihasilkan oleh ngrok (contoh: `https://xxxx.ngrok-free.app`) dan bagikan URL tersebut.
-4. *Database PostgreSQL tetap berjalan dengan aman secara lokal di dalam internal network container dan tidak diekspos ke publik.*
+3. Bagikan URL publik yang dihasilkan (contoh: `https://xxxx.ngrok-free.app`)
+
+> Database PostgreSQL tetap aman di internal network container.
 
 ---
 
 ## 🔧 Troubleshooting
 
-* **Port 8000 sudah digunakan oleh aplikasi lain?**
-  Ganti baris ports di `docker-compose.yml` dari `"8000:8000"` menjadi `"8080:8000"`, lalu jalankan ulang dan akses `http://localhost:8080`.
-* **Koneksi Database Error?**
-  Pastikan kredensial di file `.env` (atau variabel lingkungan di `docker-compose.yml`) sudah sesuai dengan setelan server database PostgreSQL Anda.
+| Masalah | Solusi |
+|---|---|
+| **Port 8000 sudah digunakan** | Ganti `"8000:8000"` menjadi `"8080:8000"` di `docker-compose.yml`, lalu akses `http://localhost:8080` |
+| **Koneksi Database Error** | Pastikan kredensial di `.env` sesuai dengan PostgreSQL Anda. Untuk Docker, tidak perlu `.env` karena sudah diatur di `docker-compose.yml` |
+| **Model tidak ditemukan** | Pastikan `model_output/anemia_model_final.onnx` ada di folder proyek |
+| **Docker build gagal di MacBook** | Pastikan Rosetta diaktifkan: Docker Desktop → Settings → General → centang *"Use Rosetta for x86_64/amd64 emulation"* |
+| **`pip install` error `psycopg2`** | Gunakan `psycopg2-binary` (sudah di requirements.txt). Jika masih error di macOS: `brew install libpq` |
+| **Permission denied `entrypoint.sh`** | Jalankan `git update-index --chmod=+x entrypoint.sh` lalu rebuild |
+| **`python` command not found** | Coba gunakan `python3` sebagai pengganti `python` (umum di macOS/Linux) |
+
+---
+
+## 🛠️ Development
+
+Untuk training model atau development:
+
+```bash
+pip install -r requirements.txt -r requirements.dev.txt
+jupyter notebook notebooks/model.ipynb
+```

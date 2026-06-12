@@ -1,28 +1,25 @@
 # requirements.docker.txt
-# Versi untuk Docker: tanpa Streamlit (yang dipakai hanya FastAPI server)
+# HemoScan — Dependensi Docker (FastAPI server only, tanpa GUI)
 
-# ── AI / ML ───────────────────────────────────────────────────────
-tensorflow>=2.13.0
-xgboost>=2.0.0
-scikit-learn>=1.3.0
-pandas>=2.0.0
-numpy>=1.24.0
+# ── ONNX Runtime (inference engine) ──────────────────────────────
+onnxruntime>=1.16.0
+
+# ── Image Processing ─────────────────────────────────────────────
 opencv-python-headless>=4.8.0
 Pillow>=10.0.0
+numpy>=1.24.0
+
+# ── ML Utilities ─────────────────────────────────────────────────
 joblib>=1.3.0
 
-# ── PostgreSQL Database ───────────────────────────────────────────
-psycopg2-binary>=2.9.0
-python-dotenv>=1.0.0
-
-# ── Auth ──────────────────────────────────────────────────────────
-bcrypt>=4.0.0
-
-# ── FastAPI ───────────────────────────────────────────────────────
+# ── FastAPI Server ───────────────────────────────────────────────
 fastapi>=0.100.0
 uvicorn>=0.23.0
 python-multipart>=0.0.6
 
-# ── ONNX Runtime ──────────────────────────────────────────────────
-onnxruntime>=1.16.0
+# ── PostgreSQL Database ──────────────────────────────────────────
+psycopg2-binary>=2.9.0
+python-dotenv>=1.0.0
 
+# ── Authentication ───────────────────────────────────────────────
+bcrypt>=4.0.0

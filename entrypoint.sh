@@ -23,7 +23,7 @@ try:
         port=os.environ.get('POSTGRES_PORT', '5432'),
         database='postgres',
         user=os.environ.get('POSTGRES_USER', 'postgres'),
-        password=os.environ.get('POSTGRES_PASSWORD', 'hemoscan_pass')
+        password=os.environ.get('POSTGRES_PASSWORD', '')
     )
     conn.close()
     print('PostgreSQL is ready!')

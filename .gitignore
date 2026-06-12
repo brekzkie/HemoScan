@@ -6,6 +6,7 @@ __pycache__/
 # Environment Variables & Secrets (CRITICAL SECURITY)
 .env
 .env.*
+!.env.example
 .streamlit/secrets.toml
 
 # Virtual Environments
@@ -19,13 +20,33 @@ ENV/
 *.db-journal
 *.sqlite3
 
-# Patient Uploads
+# Patient Uploads (runtime data)
 uploads/
+
+# Model Files (too large for git — download separately)
+model_output/*.keras
+model_output/*.onnx
+*.onnx
 
 # Jupyter Notebook Checkpoints
 .ipynb_checkpoints/
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build Artifacts
+*.egg-info/
+dist/
+build/
 
 # OS Metadata
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# Backup / Temporary
+backup/
+model_fix

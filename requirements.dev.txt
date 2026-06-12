@@ -1,0 +1,24 @@
+# requirements.dev.txt
+# HemoScan — Dependensi tambahan untuk training model & development
+# Jalankan: pip install -r requirements.txt -r requirements.dev.txt
+
+# ── Deep Learning ────────────────────────────────────────────────
+tensorflow>=2.13.0
+
+# ── Machine Learning ─────────────────────────────────────────────
+xgboost>=2.0.0
+scikit-learn>=1.3.0
+
+# ── Data Processing ──────────────────────────────────────────────
+pandas>=2.0.0
+openpyxl>=3.1.0
+scipy>=1.11.0
+
+# ── Visualization ────────────────────────────────────────────────
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.18.0
+
+# ── Notebook ─────────────────────────────────────────────────────
+jupyter>=1.0.0
+ipykernel>=6.0.0

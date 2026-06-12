@@ -38,12 +38,3 @@ CREATE TABLE IF NOT EXISTS public.scans (
     cropped_image_url TEXT NOT NULL DEFAULT '',
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
--- Insert default admin (password: admin123)
-INSERT INTO public.users (email, password_hash, display_name, role)
-VALUES (
-    'admin@hemoscan.com',
-    '$2b$12$p26FcM4N/SKdIEOM7GZSc.blLGaSXOqmYjG3VycLXthwRrCNvNbny',
-    'Administrator',
-    'admin'
-) ON CONFLICT (email) DO NOTHING;

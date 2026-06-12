@@ -1,15 +1,13 @@
 # ================================================================
 # Dockerfile — HemoScan FastAPI Application
-# Base: Python 3.10-slim (ringan, cocok untuk TensorFlow + FastAPI)
+# Base: Python 3.10-slim (ringan, cocok untuk ONNX Runtime + FastAPI)
 # ================================================================
 
 FROM python:3.10-slim
 
 # ── Environment variables ────────────────────────────────────────
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    TF_ENABLE_ONEDNN_OPTS=0 \
-    TF_CPP_MIN_LOG_LEVEL=2
+    PYTHONUNBUFFERED=1
 
 # ── Install system dependencies ──────────────────────────────────
 # libgl1 & libglib2.0 dibutuhkan oleh OpenCV
@@ -30,8 +28,10 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # ── Copy source code ────────────────────────────────────────────
 COPY server.py ./
 COPY inference.py ./
-COPY database/ ./database/
+COPY config.py ./
+COPY image_processing.py ./
 COPY augmentation/ ./augmentation/
+COPY database/ ./database/
 COPY index.html ./
 
 # ── Copy static assets ──────────────────────────────────────────

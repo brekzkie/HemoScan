@@ -50,3 +50,11 @@ desktop.ini
 # Backup / Temporary
 backup/
 model_fix
+
+# Node.js
+node_modules/
+package-lock.json
+package.json
+
+# Scratch and debug files
+scratch/

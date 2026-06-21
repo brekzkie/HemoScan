@@ -4,9 +4,10 @@
     <title>HemoScan — Skrining Anemia Non-Invasif</title>
     <meta name="description" content="Solusi berbasis kecerdasan buatan untuk skrining anemia non-invasif melalui analisis konjungtiva mata.">
     <link rel="icon" type="image/png" href="/favicon.ico?v=1.1">
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="/assets/js/react.development.js"></script>
+    <script src="/assets/js/react-dom.development.js"></script>
+    <script src="/assets/js/babel.min.js"></script>
+    <script src="/assets/js/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
     <style>
         /* === Empathetic Laboratory Design System === */
@@ -1586,6 +1587,263 @@
             const insights = getInsights();
             const recommendations = getRecommendations();
 
+            // ─── PDF Report Generator ────────────────────────────
+            const generatePDF = async () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+                const PRIMARY  = [149, 37, 40];
+                const DARK     = [25, 28, 29];
+                const MID      = [72, 98, 110];
+                const LIGHT    = [236, 238, 239];
+                const WHITE    = [255, 255, 255];
+                const GREEN    = [46, 125, 50];
+                const W  = 210;   // A4 width mm
+                const M  = 18;    // left/right margin
+                const CW = W - M * 2; // content width
+                const LH = 5.2;   // line-height for body text (mm)
+
+                let y = 0;
+
+                // ── Helpers ──────────────────────────────────────────
+                // Strip emoji & non-latin chars so jsPDF doesn't garble them
+                const clean = (str) =>
+                    (str || '').replace(/[^\u0000-\u00FF\u0020-\u024F]/g, '').replace(/\s+/g, ' ').trim();
+
+                // Convert hex color string to [r,g,b]
+                const hexToRgb = (hex) => {
+                    const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                    return r ? [parseInt(r[1],16), parseInt(r[2],16), parseInt(r[3],16)] : DARK;
+                };
+
+                // Break to new page if less than `need` mm remains
+                const checkPage = (need) => {
+                    if (y + need > 275) { doc.addPage(); y = 20; }
+                };
+
+                // Draw a section-title divider
+                const sectionTitle = (title) => {
+                    checkPage(16);
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(...PRIMARY);
+                    doc.text(title, M, y);
+                    doc.setDrawColor(...PRIMARY);
+                    doc.setLineWidth(0.5);
+                    doc.line(M, y + 2.5, W - M, y + 2.5);
+                    doc.setLineWidth(0.2);
+                    y += 10;
+                };
+
+                // ── Header banner ─────────────────────────────────────
+                doc.setFillColor(...PRIMARY);
+                doc.rect(0, 0, W, 44, 'F');
+
+                doc.setFontSize(24);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(...WHITE);
+                doc.text('HemoScan', M, 18);
+
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(240, 200, 200);
+                doc.text('Laporan Hasil Skrining Anemia Non-Invasif', M, 26);
+
+                doc.setFontSize(8);
+                doc.setTextColor(200, 160, 160);
+                doc.text(`ID Scan  : ${prediction.id || '-'}`, M, 33);
+                doc.text(`Tanggal  : ${prediction.timestamp || '-'}`, M, 39);
+
+                // ── Patient card ──────────────────────────────────────
+                y = 52;
+                const symText = clean((prediction.symptoms || []).join(', ') || 'Tidak ada gejala dilaporkan');
+                doc.setFontSize(8.5);
+                const symLines = doc.splitTextToSize(`Gejala: ${symText}`, CW - 12);
+                const patH = 8 + 9 + 7 + symLines.length * LH + 6;
+
+                doc.setFillColor(...LIGHT);
+                doc.roundedRect(M, y, CW, patH, 3, 3, 'F');
+
+                doc.setFontSize(7.5);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(...MID);
+                doc.text('DATA PASIEN', M + 6, y + 8);
+
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(...DARK);
+                doc.text(clean(prediction.nama || '-'), M + 6, y + 17);
+
+                doc.setFontSize(8.5);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(...MID);
+                doc.text(
+                    `${prediction.umur} tahun  |  ${clean(prediction.gender || '')}  |  ${clean(prediction.age_group || '')}`,
+                    M + 6, y + 24
+                );
+                doc.text(symLines, M + 6, y + 30);
+
+                y += patH + 8;
+
+                // ── Diagnosis card ────────────────────────────────────
+                const isAn = prediction.prediksi === 'Anemia';
+                const accentColor = isAn ? PRIMARY : GREEN;
+                const diagBg = isAn ? [255, 235, 235] : [232, 245, 233];
+
+                doc.setFontSize(8.5);
+                const descLines = doc.splitTextToSize(clean(prediction.keterangan || ''), CW - 14);
+                const diagH = 10 + 14 + 8 + descLines.length * LH + 8;
+
+                checkPage(diagH + 8);
+                doc.setFillColor(...diagBg);
+                doc.roundedRect(M, y, CW, diagH, 3, 3, 'F');
+                doc.setDrawColor(...accentColor);
+                doc.setLineWidth(1);
+                doc.line(M + 0.5, y, M + 0.5, y + diagH);
+                doc.setLineWidth(0.2);
+
+                doc.setFontSize(7.5);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(...accentColor);
+                doc.text('DIAGNOSIS SKRINING', M + 7, y + 10);
+
+                doc.setFontSize(20);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(...DARK);
+                doc.text(clean(prediction.prediksi || '-'), M + 7, y + 22);
+
+                doc.setFontSize(8.5);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(...MID);
+                const confPctPDF = (prediction.probabilitas * 100).toFixed(1);
+                const riskLabel = prediction.risk_level === 'high' ? 'Tinggi'
+                    : prediction.risk_level === 'medium' ? 'Sedang' : 'Rendah';
+                doc.text(
+                    `Prob. Anemia : ${confPctPDF}%   |   Threshold : ${((prediction.threshold||0.5)*100).toFixed(0)}%   |   Tingkat Risiko : ${riskLabel}`,
+                    M + 7, y + 30
+                );
+                doc.setTextColor(...DARK);
+                doc.text(descLines, M + 7, y + 38);
+
+                y += diagH + 10;
+
+                // ── Insight Section ───────────────────────────────────
+                sectionTitle('INSIGHT HASIL SKRINING');
+
+                for (const ins of insights) {
+                    const sevColor = ins.severity === 'high' ? [198,40,40]
+                        : ins.severity === 'medium' ? [230,81,0] : [46,125,50];
+
+                    doc.setFontSize(8.5);
+                    const bodyLines = doc.splitTextToSize(clean(ins.text), CW - 14);
+                    const boxH = 8 + 6 + bodyLines.length * LH + 7;
+
+                    checkPage(boxH + 4);
+
+                    doc.setFillColor(250, 250, 250);
+                    doc.roundedRect(M, y, CW, boxH, 2, 2, 'F');
+                    doc.setDrawColor(...sevColor);
+                    doc.setLineWidth(0.7);
+                    doc.line(M + 0.35, y, M + 0.35, y + boxH);
+                    doc.setLineWidth(0.2);
+
+                    doc.setFontSize(9);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(...DARK);
+                    doc.text(clean(ins.title), M + 6, y + 8);
+
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(8.5);
+                    doc.setTextColor(...MID);
+                    doc.text(bodyLines, M + 6, y + 15);
+
+                    y += boxH + 4;
+                }
+
+                // ── Recommendation Section ────────────────────────────
+                checkPage(16);
+                y += 4;
+                sectionTitle('REKOMENDASI');
+
+                for (const rec of recommendations) {
+                    const recColor = rec.color ? hexToRgb(rec.color) : DARK;
+
+                    doc.setFontSize(8.5);
+                    let allRecLines = [];
+                    for (let idx = 0; idx < rec.items.length; idx++) {
+                        const wrapped = doc.splitTextToSize(
+                            `${idx + 1}. ${clean(rec.items[idx])}`,
+                            CW - 14
+                        );
+                        allRecLines.push(...wrapped);
+                    }
+                    const recBoxH = 8 + 6 + allRecLines.length * LH + 7;
+
+                    checkPage(recBoxH + 4);
+
+                    doc.setFillColor(252, 252, 252);
+                    doc.roundedRect(M, y, CW, recBoxH, 2, 2, 'F');
+                    doc.setDrawColor(...recColor);
+                    doc.setLineWidth(0.7);
+                    doc.line(M + 0.35, y, M + 0.35, y + recBoxH);
+                    doc.setLineWidth(0.2);
+
+                    doc.setFontSize(9);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(...recColor);
+                    doc.text(clean(rec.title), M + 6, y + 8);
+
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(8.5);
+                    doc.setTextColor(...DARK);
+                    doc.text(allRecLines, M + 6, y + 15);
+
+                    y += recBoxH + 4;
+                }
+
+                // ── Disclaimer ────────────────────────────────────────
+                y += 4;
+                const discText = 'Hasil skrining HemoScan bersifat prediktif berdasarkan analisis citra konjungtiva dan bukan merupakan diagnosis medis. Selalu konsultasikan dengan tenaga medis profesional untuk diagnosis dan penanganan yang tepat.';
+                doc.setFontSize(8);
+                const discLines = doc.splitTextToSize(discText, CW - 12);
+                const discH = 8 + discLines.length * LH + 8;
+                checkPage(discH + 4);
+
+                doc.setFillColor(255, 245, 245);
+                doc.roundedRect(M, y, CW, discH, 2, 2, 'F');
+                doc.setDrawColor(...PRIMARY);
+                doc.setLineWidth(0.5);
+                doc.line(M + 0.35, y, M + 0.35, y + discH);
+                doc.setLineWidth(0.2);
+
+                doc.setFontSize(7.5);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(...PRIMARY);
+                doc.text('DISCLAIMER', M + 6, y + 8);
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(8);
+                doc.setTextColor(...MID);
+                doc.text(discLines, M + 6, y + 14.5);
+
+                // ── Footer on every page ──────────────────────────────
+                const totalPages = doc.internal.getNumberOfPages();
+                for (let p = 1; p <= totalPages; p++) {
+                    doc.setPage(p);
+                    doc.setFillColor(...PRIMARY);
+                    doc.rect(0, 287, W, 10, 'F');
+                    doc.setFontSize(7);
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor(...WHITE);
+                    doc.text('HemoScan — Skrining Anemia Non-Invasif berbasis AI', M, 293);
+                    doc.text(`Halaman ${p} / ${totalPages}`, W - M, 293, { align: 'right' });
+                }
+
+                // ── Save ───────────────────────────────────────────
+                const safeNama = (prediction.nama || 'pasien').replace(/[^a-zA-Z0-9_]/g, '_');
+                const dateStr = new Date().toISOString().slice(0, 10);
+                doc.save(`HemoScan_Laporan_${safeNama}_${dateStr}.pdf`);
+            };
+
             return (
                 <section className="animate-fade-up" style={{
                     minHeight: '100vh', paddingTop: '8rem', paddingBottom: '5rem', padding: '8rem 2rem 5rem',
@@ -1662,6 +1920,31 @@
                                         </button>
                                         <button onClick={onHistory} className="btn-primary">
                                             <IconHistory /> Lihat Riwayat
+                                        </button>
+                                        <button
+                                            id="btn-download-pdf"
+                                            onClick={generatePDF}
+                                            className="btn-secondary"
+                                            style={{
+                                                background: 'linear-gradient(135deg, #952528 0%, #c0392b 100%)',
+                                                color: '#fff',
+                                                border: 'none',
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: '0.5rem',
+                                                fontWeight: 700,
+                                                boxShadow: '0 2px 12px rgba(149,37,40,0.25)',
+                                                transition: 'transform 0.15s, box-shadow 0.15s',
+                                            }}
+                                            onMouseEnter={e => { e.currentTarget.style.transform='scale(1.04)'; e.currentTarget.style.boxShadow='0 4px 18px rgba(149,37,40,0.35)'; }}
+                                            onMouseLeave={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='0 2px 12px rgba(149,37,40,0.25)'; }}
+                                        >
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                <polyline points="7 10 12 15 17 10"/>
+                                                <line x1="12" y1="15" x2="12" y2="3"/>
+                                            </svg>
+                                            Unduh Laporan PDF
                                         </button>
                                     </div>
                                 </div>
